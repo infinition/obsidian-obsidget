@@ -1,0 +1,18 @@
+{
+  "name": "obsidian-obsidget",
+  "version": "1.0.0",
+  "description": "Create, manage, and reuse interactive HTML/CSS/JS widgets in Obsidian.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "esbuild main.ts --bundle --external:obsidian --outfile=main.js --format=cjs --watch",
+    "build": "esbuild main.ts --bundle --external:obsidian --outfile=main.js --format=cjs"
+  },
+  "keywords": [],
+  "author": "infinition",
+  "license": "MIT",
+  "devDependencies": {
+    "esbuild": "^0.27.2",
+    "obsidian": "^1.11.0",
+    "typescript": "^5.9.3"
+  }
+}
