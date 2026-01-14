@@ -65,7 +65,8 @@ export default class WidgetPlugin extends Plugin {
                 menu.addItem((item) => {
                     item
                         .setTitle(this.t('insertWidgetMenu'))
-                        .setIcon("layout")
+                        .setIcon("zap")
+                        .setSection("insert")
                         .onClick(async () => {
                             new WidgetGalleryModal(this.app, this, editor).open();
                         });
