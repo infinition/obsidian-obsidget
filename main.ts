@@ -19,6 +19,7 @@ interface WidgetTemplate {
     html: string;
     css: string;
     js: string;
+    data?: any;
     tags?: string[];
 }
 
@@ -728,7 +729,8 @@ class WidgetGalleryModal extends Modal {
         }
 
         const uniqueId = `widget_${Date.now()}`;
-        const content = `\n\n\`\`\`widget\nID: ${uniqueId}\n${template.html}\n---\n${template.css}\n---\n${template.js}\n\`\`\``;
+        const dataStr = template.data ? JSON.stringify(template.data, null, 2) : '{}';
+        const content = `\n\n\`\`\`widget\nID: ${uniqueId}\n${template.html}\n---\n${template.css}\n---\n${template.js}\n---\n${dataStr}\n\`\`\``;
 
         if (editor) {
             const cursor = editor.getCursor();

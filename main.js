@@ -800,6 +800,7 @@ var WidgetGalleryModal = class extends import_obsidian.Modal {
       return;
     }
     const uniqueId = `widget_${Date.now()}`;
+    const dataStr = template.data ? JSON.stringify(template.data, null, 2) : "{}";
     const content = `
 
 \`\`\`widget
@@ -809,6 +810,8 @@ ${template.html}
 ${template.css}
 ---
 ${template.js}
+---
+${dataStr}
 \`\`\``;
     if (editor) {
       const cursor = editor.getCursor();
