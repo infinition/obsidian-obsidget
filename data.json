@@ -1,4 +1,5 @@
 {
-  "galleryPath": ".obsidian/plugins/obsidian-widget-css/gallery",
-  "language": "en"
+  "galleryPath": ".obsidian/plugins/obsidian-obsidget/gallery",
+  "language": "en",
+  "githubUrl": "https://github.com/infinition/obsidian-obsidget"
 }

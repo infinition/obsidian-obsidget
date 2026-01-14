@@ -113,6 +113,8 @@ Your widget could help others enhance their Obsidian experience!
 
 ## ⚙️ Settings
 
-- **Gallery Path**: Choose where your `.json` templates are stored (default: `.obsidian/plugins/obsidian-widget-css/gallery`).
+- **Gallery Path**: Choose where your `.json` templates are stored (default: `.obsidian/plugins/obsidian-obsidget/gallery`).
 - **Language**: Select your preferred language (English, French, Spanish, German, or Portuguese).
+- **GitHub Repository**: Direct link to the project for updates, bug reports, and contributions.
+- **Update Gallery**: A one-click button to download the latest community widgets from GitHub without overwriting your local modifications.
 

@@ -324,6 +324,12 @@ export default class WidgetPlugin extends Plugin {
 
     async loadSettings() {
         this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+
+        // Migration from old name
+        if (this.settings.galleryPath === '.obsidian/plugins/obsidian-widget-css/gallery') {
+            this.settings.galleryPath = '.obsidian/plugins/obsidian-obsidget/gallery';
+            await this.saveSettings();
+        }
     }
 
     async saveSettings() {
@@ -365,33 +371,48 @@ export default class WidgetPlugin extends Plugin {
     async syncGallery() {
         try {
             const apiUrl = "https://api.github.com/repos/infinition/obsidian-obsidget/contents/gallery";
+            console.log("ObsidGet: Syncing gallery from:", apiUrl);
             const response = await requestUrl({ url: apiUrl });
 
+            console.log("ObsidGet: GitHub Response Status:", response.status);
+
             if (response.status !== 200) {
-                throw new Error(`GitHub API returned ${response.status}`);
+                throw new Error(`GitHub API returned ${response.status}. Make sure the repository and 'gallery' folder exist.`);
             }
 
             const files = response.json;
+            if (!Array.isArray(files)) {
+                throw new Error("GitHub API did not return a list of files.");
+            }
+
+            console.log(`ObsidGet: ${files.length} items found on GitHub gallery.`);
             let addedCount = 0;
+
+            // Ensure gallery directory exists before writing
+            await this.ensureDirectory(this.settings.galleryPath);
 
             for (const file of files) {
                 if (file.name.endsWith('.json')) {
                     const localPath = normalizePath(`${this.settings.galleryPath}/${file.name}`);
+                    const existsLocally = await this.app.vault.adapter.exists(localPath);
 
-                    // Only download if it doesn't exist locally
-                    if (!(await this.app.vault.adapter.exists(localPath))) {
+                    if (!existsLocally) {
+                        console.log("ObsidGet: Downloading new widget:", file.name);
                         const fileResponse = await requestUrl({ url: file.download_url });
                         if (fileResponse.status === 200) {
                             await this.app.vault.adapter.write(localPath, fileResponse.text);
                             addedCount++;
+                        } else {
+                            console.error(`ObsidGet: Failed to download ${file.name}:`, fileResponse.status);
                         }
                     }
                 }
             }
 
+            console.log(`ObsidGet: Sync complete. ${addedCount} widgets added.`);
             new Notice(this.t('syncSuccess', addedCount));
         } catch (e) {
-            console.error('Gallery sync failed:', e);
+            console.error('ObsidGet: Gallery sync failed:', e);
             new Notice(this.t('syncError', e.message));
         }
     }
