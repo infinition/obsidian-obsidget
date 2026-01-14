@@ -88,6 +88,111 @@ Each widget has access to a powerful `api` object:
 - `getState()`: Retrieves the JSON object from the 4th section.
 - `instanceId`: A unique identifier for the widget instance.
 
+## 👨‍💻 Widget Development Guide
+
+### Event Handling in Shadow DOM
+
+Widgets run inside an isolated Shadow DOM. This affects how you should handle events. There are **two approaches** you can use:
+
+#### ✅ Recommended: Using `addEventListener` in JavaScript
+
+This is the most reliable approach. Attach event listeners programmatically in your `init()` function:
+
+```javascript
+async function init() {
+    var saved = await api.getState();
+    // ... restore state ...
+    
+    // Attach event listeners
+    api.root.getElementById('btn-add').onclick = addItem;
+    api.root.getElementById('btn-clear').onclick = clearAll;
+    api.root.getElementById('my-input').oninput = handleInput;
+}
+
+function addItem() {
+    // Your logic here
+}
+
+function clearAll() {
+    // Your logic here
+}
+
+init();
+```
+
+#### ✅ Alternative: Using `onclick` in HTML
+
+You can use inline `onclick` attributes in your HTML. The plugin automatically extracts all `function` declarations from your JavaScript and makes them available to event handlers:
+
+**HTML:**
+```html
+<button onclick="addWater(250)">+250ml</button>
+<button onclick="resetWater()">Reset</button>
+```
+
+**JavaScript:**
+```javascript
+function addWater(amount) {
+    currentWater += amount;
+    update();
+}
+
+function resetWater() {
+    currentWater = 0;
+    update();
+}
+
+function init() {
+    // ...
+}
+init();
+```
+
+> **Important:** Functions must be declared using the `function` keyword syntax. Arrow functions assigned to variables (`const myFunc = () => {}`) will NOT work with `onclick` handlers.
+
+### Best Practices
+
+| Do ✅ | Don't ❌ |
+|-------|----------|
+| Use `api.root.getElementById()` | Use `document.getElementById()` |
+| Use `api.root.querySelector()` | Use `document.querySelector()` |
+| Use `function myFunc() {}` for onclick | Use `const myFunc = () => {}` for onclick |
+| Use `api.saveState()` and `api.getState()` | Use `localStorage` |
+| Use CSS variables like `var(--text-normal)` | Use hardcoded colors |
+
+### Complete Widget Template
+
+Here's a minimal working template:
+
+```javascript
+// State
+var counter = 0;
+
+// Functions
+function increment() {
+    counter++;
+    render();
+    api.saveState({ counter: counter });
+}
+
+function render() {
+    api.root.getElementById('display').innerText = counter;
+}
+
+// Initialization
+async function init() {
+    var saved = await api.getState();
+    if (saved) counter = saved.counter;
+    
+    // Option 1: Attach events in JS (recommended)
+    api.root.getElementById('btn').onclick = increment;
+    
+    render();
+}
+
+init();
+```
+
 ## 🎨 Widget Gallery
 
 Access the gallery via the **Ribbon Icon** (layout icon), the command **"Open Widget Gallery"**, or the **Right-click Context Menu**.

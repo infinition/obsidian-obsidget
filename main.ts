@@ -25,6 +25,7 @@ interface WidgetTemplate {
 
 export default class WidgetPlugin extends Plugin {
     settings: WidgetPluginSettings;
+    templateCache: Map<string, WidgetTemplate> = new Map();
 
     t(key: keyof typeof I18N_DICT['en'], ...args: any[]): string {
         const lang = this.settings.language || 'en';
@@ -59,6 +60,19 @@ export default class WidgetPlugin extends Plugin {
             }
         });
 
+        // Command to refresh all widgets
+        this.addCommand({
+            id: 'refresh-all-widgets',
+            name: 'Refresh All Widgets',
+            callback: () => {
+                const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+                if (view) {
+                    (view as any).previewMode?.rerender(true);
+                    new Notice('Refreshing all widgets...');
+                }
+            }
+        });
+
         // Context menu integration
         this.registerEvent(
             this.app.workspace.on("editor-menu", (menu: Menu, editor: Editor, view: MarkdownView) => {
@@ -71,6 +85,15 @@ export default class WidgetPlugin extends Plugin {
                             new WidgetGalleryModal(this.app, this, editor).open();
                         });
                 });
+            })
+        );
+
+        this.registerEvent(
+            this.app.workspace.on('active-leaf-change', (leaf) => {
+                if (leaf?.view instanceof MarkdownView) {
+                    // Force a re-render to help widgets load more proactively
+                    (leaf.view as any).previewMode?.rerender(true);
+                }
             })
         );
 
@@ -99,22 +122,34 @@ export default class WidgetPlugin extends Plugin {
             // If HTML is empty but we have an ID, try to load from gallery
             if (!htmlContent && widgetId) {
                 isLinked = true;
-                const galleryPath = normalizePath(`${this.settings.galleryPath}/${widgetId}.json`);
-                try {
-                    if (await this.app.vault.adapter.exists(galleryPath)) {
-                        const content = await this.app.vault.adapter.read(galleryPath);
-                        const template: WidgetTemplate = JSON.parse(content);
-                        htmlContent = template.html;
-                        // Only override if not provided in the block
-                        if (!cssContent) cssContent = template.css;
-                        if (!jsContent) jsContent = template.js;
-                    } else {
-                        htmlContent = `<div class="mod-warning">Widget "${widgetId}" not found in gallery.</div>`;
+                if (this.templateCache.has(widgetId)) {
+                    const template = this.templateCache.get(widgetId)!;
+                    htmlContent = template.html;
+                    if (!cssContent) cssContent = template.css;
+                    if (!jsContent) jsContent = template.js;
+                } else {
+                    const galleryPath = normalizePath(`${this.settings.galleryPath}/${widgetId}.json`);
+                    try {
+                        if (await this.app.vault.adapter.exists(galleryPath)) {
+                            const content = await this.app.vault.adapter.read(galleryPath);
+                            const template: WidgetTemplate = JSON.parse(content);
+                            this.templateCache.set(widgetId, template);
+                            htmlContent = template.html;
+                            if (!cssContent) cssContent = template.css;
+                            if (!jsContent) jsContent = template.js;
+                        } else {
+                            htmlContent = `<div class="mod-warning">Widget "${widgetId}" not found in gallery.</div>`;
+                        }
+                    } catch (e) {
+                        console.error(`Error loading widget "${widgetId}" from ${galleryPath}:`, e);
+                        htmlContent = `<div class="mod-warning">Error loading widget "${widgetId}": ${e.message}</div>`;
                     }
-                } catch (e) {
-                    console.error(`Error loading widget "${widgetId}" from ${galleryPath}:`, e);
-                    htmlContent = `<div class="mod-warning">Error loading widget "${widgetId}": ${e.message}</div>`;
                 }
+            }
+
+            // Show a placeholder while loading if it's a linked widget
+            if (isLinked && !htmlContent) {
+                el.innerHTML = '<div class="widget-loading">Loading widget...</div>';
             }
 
             const sectionInfo = ctx.getSectionInfo(el);
@@ -209,6 +244,22 @@ export default class WidgetPlugin extends Plugin {
                 });
             }
 
+            // Find focused element in shadow root before re-render
+            let focusedId: string | null = null;
+            let selectionStart: number | null = null;
+            let selectionEnd: number | null = null;
+
+            const activeEl = document.activeElement;
+            if (activeEl && el.contains(activeEl)) {
+                // Check if it's within our container's shadow root
+                const shadowActive = container.shadowRoot?.activeElement as HTMLInputElement | HTMLTextAreaElement;
+                if (shadowActive && shadowActive.id) {
+                    focusedId = shadowActive.id;
+                    selectionStart = shadowActive.selectionStart;
+                    selectionEnd = shadowActive.selectionEnd;
+                }
+            }
+
             const shadow = container.attachShadow({ mode: 'open' });
 
             // Add styles
@@ -232,35 +283,51 @@ export default class WidgetPlugin extends Plugin {
                         const file = this.app.vault.getAbstractFileByPath(ctx.sourcePath);
                         if (file instanceof TFile) {
                             const newDataStr = JSON.stringify(data, null, 2);
-                            try {
-                                await this.app.vault.process(file, (oldContent) => {
-                                    const lines = oldContent.split('\n');
-                                    if (section.lineStart + 1 >= lines.length || section.lineEnd > lines.length) return oldContent;
 
-                                    const blockLines = lines.slice(section.lineStart + 1, section.lineEnd);
-                                    const blockContent = blockLines.join('\n');
-                                    const blockSections = blockContent.split('---');
+                            // Debounce save to avoid too many file writes and re-renders
+                            if ((this as any)._saveTimeout) clearTimeout((this as any)._saveTimeout);
+                            (this as any)._saveTimeout = setTimeout(async () => {
+                                try {
+                                    await this.app.vault.process(file, (oldContent) => {
+                                        const lines = oldContent.split('\n');
+                                        if (section.lineStart + 1 >= lines.length || section.lineEnd > lines.length) return oldContent;
 
-                                    const currentDataStr = blockSections[3]?.trim() || "";
-                                    if (newDataStr === currentDataStr) return oldContent;
+                                        const blockLines = lines.slice(section.lineStart + 1, section.lineEnd);
+                                        const blockContent = blockLines.join('\n');
+                                        const blockSections = blockContent.split('---');
 
-                                    const newSections = [...blockSections];
-                                    while (newSections.length < 3) newSections.push('\n');
-                                    newSections[3] = `\n${newDataStr}\n`;
+                                        const currentDataStr = blockSections[3]?.trim() || "";
+                                        if (newDataStr === currentDataStr) return oldContent;
 
-                                    const newBlockContent = newSections.join('---');
-                                    lines.splice(section.lineStart + 1, section.lineEnd - section.lineStart - 1, newBlockContent);
-                                    return lines.join('\n');
-                                });
-                                return;
-                            } catch (e) {
-                                console.error('Inline save failed:', e);
-                            }
+                                        const newSections = [...blockSections];
+
+                                        // Ensure we have at least 4 sections (HTML, CSS, JS, DATA)
+                                        // For linked widgets, section[0] might just be "ID: xxx"
+                                        while (newSections.length < 4) {
+                                            // Add empty section with newline
+                                            newSections.push('\n');
+                                        }
+
+                                        // Ensure section[0] ends with newline (for linked widgets)
+                                        if (newSections[0] && !newSections[0].endsWith('\n')) {
+                                            newSections[0] = newSections[0] + '\n';
+                                        }
+
+                                        newSections[3] = `\n${newDataStr}\n`;
+
+                                        const newBlockContent = newSections.join('---');
+                                        lines.splice(section.lineStart + 1, section.lineEnd - section.lineStart - 1, newBlockContent);
+                                        return lines.join('\n');
+                                    });
+                                } catch (e) {
+                                    console.error('Inline save failed:', e);
+                                }
+                            }, 500);
                         }
                     }
                 },
                 getState: async () => {
-                    if (inlineDataStr) {
+                    if (inlineDataStr && inlineDataStr !== '{}') {
                         try {
                             return JSON.parse(inlineDataStr);
                         } catch (e) { }
@@ -272,20 +339,71 @@ export default class WidgetPlugin extends Plugin {
 
             // Execute JS
             try {
+                // Create a context object that will hold both api methods and widget-defined functions
+                const widgetContext: any = {};
+
                 const apiProxy = new Proxy(api as any, {
                     get(target, prop) {
+                        // First check widget context (for functions defined in widget JS)
+                        if (prop in widgetContext) return widgetContext[prop];
+                        // Then check api
                         if (prop in target) return target[prop];
+                        // Then check window
                         return (window as any)[prop];
                     },
                     set(target, prop, value) {
+                        // Store in widget context so it's accessible to event handlers
+                        widgetContext[prop] = value;
                         target[prop] = value;
                         return true;
                     }
                 });
 
-                const scriptFunction = new Function('api', `with(api) { ${jsContent} }`);
+                // Dynamically extract all function names from the JS content
+                const functionNames: string[] = [];
+                // Match both regular and async function declarations
+                const functionRegex = /(?:async\s+)?function\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\(/g;
+                let match;
+                while ((match = functionRegex.exec(jsContent)) !== null) {
+                    if (match[1] !== 'init') { // init is already called
+                        functionNames.push(match[1]);
+                    }
+                }
+                // Also add 'init' if present
+                if (/function\s+init\s*\(/.test(jsContent)) {
+                    functionNames.push('init');
+                }
+
+                // Build dynamic function export code
+                const functionExports = functionNames.map(name =>
+                    `if (typeof ${name} === 'function') api.${name} = ${name};`
+                ).join('\n');
+
+                // Wrap the script to capture function declarations
+                const wrappedScript = `
+                    ${jsContent}
+                    // After script runs, copy declared functions to api for event handler access
+                    try {
+                        ${functionExports}
+                    } catch(e) { console.error('Function export error:', e); }
+                `;
+
+                const scriptFunction = new Function('api', `with(api) { ${wrappedScript} }`);
                 scriptFunction(apiProxy);
                 this.bindEvents(shadow, apiProxy);
+
+                // Restore focus after re-render
+                if (focusedId) {
+                    setTimeout(() => {
+                        const elToFocus = shadow.getElementById(focusedId!) as HTMLInputElement | HTMLTextAreaElement;
+                        if (elToFocus) {
+                            elToFocus.focus();
+                            if (selectionStart !== null && selectionEnd !== null) {
+                                elToFocus.setSelectionRange(selectionStart, selectionEnd);
+                            }
+                        }
+                    }, 0);
+                }
             } catch (e) {
                 console.error('Widget JS Error:', e);
             }
@@ -418,6 +536,71 @@ export default class WidgetPlugin extends Plugin {
             new Notice(this.t('syncError', e.message));
         }
     }
+
+    async updateAllWidgetsInVault() {
+        try {
+            const files = this.app.vault.getMarkdownFiles();
+            let updatedWidgetsCount = 0;
+            let updatedFilesCount = 0;
+
+            const galleryWidgets = await this.getGalleryWidgets();
+            const galleryMap = new Map(galleryWidgets.map(w => [w.id, w]));
+
+            if (galleryMap.size === 0) {
+                new Notice(this.t('updateAllWidgetsNoWidgets'));
+                return;
+            }
+
+            // Regex to find widget code blocks
+            const widgetRegex = /```widget\n([\s\S]*?)```/g;
+
+            for (const file of files) {
+                let content = await this.app.vault.read(file);
+                let fileUpdated = false;
+
+                // Use replace with a callback to process each match
+                const newContent = content.replace(widgetRegex, (match, source) => {
+                    const sections = source.split('---');
+                    let firstSection = sections[0].trim();
+                    let widgetId = '';
+
+                    if (firstSection.startsWith('ID:')) {
+                        const lines = firstSection.split('\n');
+                        widgetId = lines[0].replace('ID:', '').trim().replace(/[^a-zA-Z0-9_-]/g, '');
+                    }
+
+                    if (widgetId && galleryMap.has(widgetId)) {
+                        const template = galleryMap.get(widgetId)!;
+                        const dataSection = sections[3] || ''; // Preserve data section
+
+                        // Reconstruct the widget block
+                        const newBlock = `ID: ${widgetId}\n${template.html}\n---\n${template.css}\n---\n${template.js}\n---${dataSection}`;
+
+                        if (`\`\`\`widget\n${newBlock}\`\`\`` !== match) {
+                            updatedWidgetsCount++;
+                            fileUpdated = true;
+                            return `\`\`\`widget\n${newBlock}\`\`\``;
+                        }
+                    }
+                    return match;
+                });
+
+                if (fileUpdated) {
+                    await this.app.vault.modify(file, newContent);
+                    updatedFilesCount++;
+                }
+            }
+
+            if (updatedWidgetsCount > 0) {
+                new Notice(this.t('updateAllWidgetsSuccess', updatedWidgetsCount, updatedFilesCount));
+            } else {
+                new Notice(this.t('updateAllWidgetsNoWidgets'));
+            }
+        } catch (e) {
+            console.error('ObsidGet: Update all widgets failed:', e);
+            new Notice(this.t('updateAllWidgetsError', e.message));
+        }
+    }
 }
 
 class WidgetGalleryModal extends Modal {
@@ -497,6 +680,15 @@ class WidgetGalleryModal extends Modal {
         // New Widget Button
         const addBtn = controlsContainer.createEl('button', { text: `+ ${this.plugin.t('addWidget')}`, cls: 'mod-cta gallery-add-btn' });
         addBtn.onclick = () => this.openWidgetEditor();
+
+        // Sync Button
+        const syncBtn = controlsContainer.createEl('button', { text: `🔄`, cls: 'gallery-sync-btn', attr: { title: this.plugin.t('syncGalleryBtn') } });
+        syncBtn.onclick = async () => {
+            syncBtn.addClass('is-loading');
+            await this.plugin.syncGallery();
+            syncBtn.removeClass('is-loading');
+            await this.refresh();
+        };
 
         // Grid
         this.gridEl = contentEl.createDiv({ cls: 'widget-gallery-grid' });
@@ -729,23 +921,29 @@ class WidgetGalleryModal extends Modal {
             return;
         }
 
-        const uniqueId = `widget_${Date.now()}`;
-        const dataStr = template.data ? JSON.stringify(template.data, null, 2) : '{}';
-        const content = `\n\n\`\`\`widget\nID: ${uniqueId}\n${template.html}\n---\n${template.css}\n---\n${template.js}\n---\n${dataStr}\n\`\`\``;
+        const dataStr = template.data ? JSON.stringify(template.data, null, 2) : '';
+        const content = `\n\n\`\`\`widget\nID: ${template.id}\n${template.html}\n---\n${template.css}\n---\n${template.js}\n---\n${dataStr}\n\`\`\``;
 
         if (editor) {
             const cursor = editor.getCursor();
             editor.replaceRange(content, cursor);
             new Notice(this.plugin.t('widgetSaved'));
-            this.close();
+            // this.close(); // Keep open as requested
         } else if (activeView) {
             const activeFile = activeView.file;
             if (activeFile) {
                 await this.app.vault.append(activeFile, content);
                 new Notice(this.plugin.t('widgetSaved'));
-                this.close();
+                // this.close(); // Keep open as requested
             }
         }
+    }
+
+    async refresh() {
+        this.allTemplates = await this.plugin.getGalleryWidgets();
+        this.extractAllTags();
+        this.populateTagDropdown();
+        this.filterAndRender();
     }
 
     openWidgetEditor(template?: WidgetTemplate) {
@@ -908,6 +1106,24 @@ class WidgetSettingTab extends PluginSettingTab {
                     await this.plugin.syncGallery();
                     btn.setDisabled(false);
                     btn.setButtonText("Update");
+                }));
+
+        containerEl.createEl('hr');
+        containerEl.createEl('h3', { text: "Maintenance" });
+
+        new Setting(containerEl)
+            .setName(this.plugin.t('updateAllWidgets'))
+            .setDesc(this.plugin.t('updateAllWidgetsDesc'))
+            .addButton(btn => btn
+                .setButtonText(this.plugin.t('updateAllWidgetsBtn'))
+                .setWarning()
+                .onClick(async () => {
+                    btn.setDisabled(true);
+                    const originalText = btn.buttonEl.innerText;
+                    btn.setButtonText("...");
+                    await this.plugin.updateAllWidgetsInVault();
+                    btn.setDisabled(false);
+                    btn.setButtonText(originalText);
                 }));
     }
 }

@@ -40,7 +40,13 @@ export const I18N_DICT = {
         syncGalleryBtn: "Update Gallery",
         syncGalleryDesc: "Download new widgets from the community gallery (won't overwrite your existing widgets).",
         syncSuccess: "✅ Gallery updated! {0} new widgets added.",
-        syncError: "❌ Error updating gallery: {0}"
+        syncError: "❌ Error updating gallery: {0}",
+        updateAllWidgets: "Update All Widgets in Vault",
+        updateAllWidgetsDesc: "Update the code of all widgets in your notes with the latest version from the gallery (preserves your data).",
+        updateAllWidgetsBtn: "Update All",
+        updateAllWidgetsSuccess: "✅ Updated {0} widgets in {1} files.",
+        updateAllWidgetsNoWidgets: "No widgets found to update.",
+        updateAllWidgetsError: "❌ Error updating widgets: {0}"
     },
     fr: {
         galleryTitle: "🧩 Galerie de Widgets",
@@ -83,7 +89,13 @@ export const I18N_DICT = {
         syncGalleryBtn: "Mettre à jour la galerie",
         syncGalleryDesc: "Téléchargez les nouveaux widgets de la galerie communautaire (n'écrase pas vos widgets existants).",
         syncSuccess: "✅ Galerie mise à jour ! {0} nouveaux widgets ajoutés.",
-        syncError: "❌ Erreur lors de la mise à jour : {0}"
+        syncError: "❌ Erreur lors de la mise à jour : {0}",
+        updateAllWidgets: "Mettre à jour tous les widgets du coffre",
+        updateAllWidgetsDesc: "Met à jour le code de tous les widgets dans vos notes avec la dernière version de la galerie (préserve vos données).",
+        updateAllWidgetsBtn: "Tout mettre à jour",
+        updateAllWidgetsSuccess: "✅ {0} widgets mis à jour dans {1} fichiers.",
+        updateAllWidgetsNoWidgets: "Aucun widget à mettre à jour trouvé.",
+        updateAllWidgetsError: "❌ Erreur lors de la mise à jour des widgets : {0}"
     },
     es: {
         galleryTitle: "🧩 Galería de Widgets",
@@ -126,7 +138,13 @@ export const I18N_DICT = {
         syncGalleryBtn: "Actualizar galería",
         syncGalleryDesc: "Descarga nuevos widgets de la galerie communautaire (no sobrescribirá tus widgets existentes).",
         syncSuccess: "✅ ¡Galería actualizada! {0} nuevos widgets añadidos.",
-        syncError: "❌ Error al actualizar la galería: {0}"
+        syncError: "❌ Error al actualizar la galería: {0}",
+        updateAllWidgets: "Actualizar todos los widgets en la bóveda",
+        updateAllWidgetsDesc: "Actualiza el código de todos los widgets en tus notas con la última versión de la galería (preserva tus datos).",
+        updateAllWidgetsBtn: "Actualizar todo",
+        updateAllWidgetsSuccess: "✅ Se actualizaron {0} widgets en {1} archivos.",
+        updateAllWidgetsNoWidgets: "No se encontraron widgets para actualizar.",
+        updateAllWidgetsError: "❌ Error al actualizar los widgets: {0}"
     },
     de: {
         galleryTitle: "🧩 Widget-Galerie",
@@ -169,7 +187,13 @@ export const I18N_DICT = {
         syncGalleryBtn: "Galerie aktualisieren",
         syncGalleryDesc: "Laden Sie neue Widgets aus der Community-Galerie herunter (Ihre vorhandenen Widgets werden nicht überschrieben).",
         syncSuccess: "✅ Galerie aktualisiert! {0} neue Widgets hinzugefügt.",
-        syncError: "❌ Fehler beim Aktualisieren der Galerie: {0}"
+        syncError: "❌ Fehler beim Aktualisieren der Galerie: {0}",
+        updateAllWidgets: "Alle Widgets im Vault aktualisieren",
+        updateAllWidgetsDesc: "Aktualisiert den Code aller Widgets in Ihren Notizen mit der neuesten Version aus der Galerie (Ihre Daten bleiben erhalten).",
+        updateAllWidgetsBtn: "Alle aktualisieren",
+        updateAllWidgetsSuccess: "✅ {0} Widgets in {1} Dateien aktualisiert.",
+        updateAllWidgetsNoWidgets: "Keine zu aktualisierenden Widgets gefunden.",
+        updateAllWidgetsError: "❌ Fehler beim Aktualisieren der Widgets: {0}"
     },
     pt: {
         galleryTitle: "🧩 Galeria de Widgets",
@@ -205,14 +229,20 @@ export const I18N_DICT = {
         settingsLanguageDesc: "Selecione o idioma do plugin.",
         saveToGallery: "Salvar na galeria",
         settingsTitle: "Configurações do Widget CSS",
-        insertError: "Abra uma nota para inserir o widget.",
+        insertError: "Abra uma nota para inserir le widget.",
         insertWidgetMenu: "Inserir Widget",
         settingsGithub: "Repositório GitHub",
         settingsGithubDesc: "Visite o projeto no GitHub para atualizações e contribuições.",
         syncGalleryBtn: "Atualizar Galeria",
         syncGalleryDesc: "Baixe novos widgets da galeria da comunidade (não substituirá seus widgets existentes).",
         syncSuccess: "✅ Galeria atualizada! {0} novos widgets adicionados.",
-        syncError: "❌ Erro ao atualizar a galeria: {0}"
+        syncError: "❌ Erro ao atualizar a galeria: {0}",
+        updateAllWidgets: "Atualizar todos os widgets no cofre",
+        updateAllWidgetsDesc: "Atualiza o código de todos os widgets em suas notas com a versão mais recente da galeria (preserva seus données).",
+        updateAllWidgetsBtn: "Atualizar tudo",
+        updateAllWidgetsSuccess: "✅ {0} widgets atualizados em {1} arquivos.",
+        updateAllWidgetsNoWidgets: "Nenhum widget encontrado para atualizar.",
+        updateAllWidgetsError: "❌ Erro ao atualizar widgets: {0}"
     }
 };
 
