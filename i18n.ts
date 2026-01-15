@@ -46,7 +46,9 @@ export const I18N_DICT = {
         updateAllWidgetsBtn: "Update All",
         updateAllWidgetsSuccess: "✅ Updated {0} widgets in {1} files.",
         updateAllWidgetsNoWidgets: "No widgets found to update.",
-        updateAllWidgetsError: "❌ Error updating widgets: {0}"
+        updateAllWidgetsError: "❌ Error updating widgets: {0}",
+        settingsMaxWidth: "Max Widget Width",
+        settingsMaxWidthDesc: "Limit the width of widgets when 'Readable line length' is disabled. Choose between percentage or fixed pixels."
     },
     fr: {
         galleryTitle: "🧩 Galerie de Widgets",
@@ -95,7 +97,9 @@ export const I18N_DICT = {
         updateAllWidgetsBtn: "Tout mettre à jour",
         updateAllWidgetsSuccess: "✅ {0} widgets mis à jour dans {1} fichiers.",
         updateAllWidgetsNoWidgets: "Aucun widget à mettre à jour trouvé.",
-        updateAllWidgetsError: "❌ Erreur lors de la mise à jour des widgets : {0}"
+        updateAllWidgetsError: "❌ Erreur lors de la mise à jour des widgets : {0}",
+        settingsMaxWidth: "Largeur maximale des widgets",
+        settingsMaxWidthDesc: "Limite la largeur des widgets quand 'Longueur de ligne lisible' est désactivée. Choisissez entre pourcentage ou pixels fixes."
     },
     es: {
         galleryTitle: "🧩 Galería de Widgets",
@@ -144,7 +148,9 @@ export const I18N_DICT = {
         updateAllWidgetsBtn: "Actualizar todo",
         updateAllWidgetsSuccess: "✅ Se actualizaron {0} widgets en {1} archivos.",
         updateAllWidgetsNoWidgets: "No se encontraron widgets para actualizar.",
-        updateAllWidgetsError: "❌ Error al actualizar los widgets: {0}"
+        updateAllWidgetsError: "❌ Error al actualizar los widgets: {0}",
+        settingsMaxWidth: "Ancho máximo del widget",
+        settingsMaxWidthDesc: "Limite el ancho de los widgets cuando 'Longitud de línea legible' está desactivada. Elija entre porcentaje o píxeles fijos."
     },
     de: {
         galleryTitle: "🧩 Widget-Galerie",
@@ -189,11 +195,13 @@ export const I18N_DICT = {
         syncSuccess: "✅ Galerie aktualisiert! {0} neue Widgets hinzugefügt.",
         syncError: "❌ Fehler beim Aktualisieren der Galerie: {0}",
         updateAllWidgets: "Alle Widgets im Vault aktualisieren",
-        updateAllWidgetsDesc: "Aktualisiert den Code aller Widgets in Ihren Notizen mit der neuesten Version aus der Galerie (Ihre Daten bleiben erhalten).",
+        updateAllWidgetsDesc: "Aktualisiert den Code aller Widgets in Ihren Notizen with der neuesten Version aus der Galerie (Ihre Daten bleiben erhalten).",
         updateAllWidgetsBtn: "Alle aktualisieren",
         updateAllWidgetsSuccess: "✅ {0} Widgets in {1} Dateien aktualisiert.",
         updateAllWidgetsNoWidgets: "Keine zu aktualisierenden Widgets gefunden.",
-        updateAllWidgetsError: "❌ Fehler beim Aktualisieren der Widgets: {0}"
+        updateAllWidgetsError: "❌ Fehler beim Aktualisieren der Widgets: {0}",
+        settingsMaxWidth: "Maximale Widget-Breite",
+        settingsMaxWidthDesc: "Begrenzt die Breite von Widgets, wenn 'Lesbare Zeilenlänge' deaktiviert ist. Wählen Sie zwischen Prozentsatz oder festen Pixeln."
     },
     pt: {
         galleryTitle: "🧩 Galeria de Widgets",
@@ -229,7 +237,7 @@ export const I18N_DICT = {
         settingsLanguageDesc: "Selecione o idioma do plugin.",
         saveToGallery: "Salvar na galeria",
         settingsTitle: "Configurações do Widget CSS",
-        insertError: "Abra uma nota para inserir le widget.",
+        insertError: "Abra une nota para inserir le widget.",
         insertWidgetMenu: "Inserir Widget",
         settingsGithub: "Repositório GitHub",
         settingsGithubDesc: "Visite o projeto no GitHub para atualizações e contribuições.",
@@ -242,7 +250,9 @@ export const I18N_DICT = {
         updateAllWidgetsBtn: "Atualizar tudo",
         updateAllWidgetsSuccess: "✅ {0} widgets atualizados em {1} arquivos.",
         updateAllWidgetsNoWidgets: "Nenhum widget encontrado para atualizar.",
-        updateAllWidgetsError: "❌ Erro ao atualizar widgets: {0}"
+        updateAllWidgetsError: "❌ Erro ao atualizar widgets: {0}",
+        settingsMaxWidth: "Largura Máxima do Widget",
+        settingsMaxWidthDesc: "Limite a largura dos widgets quando 'Comprimento de linha legível' estiver desativado. Escolha entre porcentagem ou pixels fixos."
     }
 };
 

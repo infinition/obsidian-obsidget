@@ -1,16 +1,20 @@
-import { App, Plugin, PluginSettingTab, Setting, Notice, TFile, normalizePath, MarkdownPostProcessorContext, Modal, MarkdownView, Editor, Menu, requestUrl } from 'obsidian';
+import { App, Plugin, PluginSettingTab, Setting, Notice, TFile, normalizePath, MarkdownPostProcessorContext, Modal, MarkdownView, Editor, Menu, requestUrl, DropdownComponent } from 'obsidian';
 import { I18N_DICT, Language } from './i18n';
 
 interface WidgetPluginSettings {
     galleryPath: string;
     language: Language;
     githubUrl: string;
+    maxWidthValue: number;
+    maxWidthUnit: 'percent' | 'pixel';
 }
 
 const DEFAULT_SETTINGS: WidgetPluginSettings = {
     galleryPath: '.obsidian/plugins/obsidian-obsidget/gallery',
     language: 'en',
-    githubUrl: 'https://github.com/infinition/obsidian-obsidget'
+    githubUrl: 'https://github.com/infinition/obsidian-obsidget',
+    maxWidthValue: 100,
+    maxWidthUnit: 'percent'
 };
 
 interface WidgetTemplate {
@@ -161,6 +165,18 @@ export default class WidgetPlugin extends Plugin {
             // Create widget container
             const container = el.createDiv({ cls: 'widget-instance-container' });
 
+            // Apply max width from settings
+            const { maxWidthValue, maxWidthUnit } = this.settings;
+            if (maxWidthUnit === 'percent' && maxWidthValue < 100) {
+                container.style.maxWidth = `${maxWidthValue}%`;
+                container.style.marginLeft = 'auto';
+                container.style.marginRight = 'auto';
+            } else if (maxWidthUnit === 'pixel') {
+                container.style.maxWidth = `${maxWidthValue}px`;
+                container.style.marginLeft = 'auto';
+                container.style.marginRight = 'auto';
+            }
+
             // Action Buttons Container
             const btnContainer = container.createDiv({ cls: 'widget-action-buttons' });
             btnContainer.style.position = 'absolute';
@@ -265,12 +281,13 @@ export default class WidgetPlugin extends Plugin {
             // Add styles
             const style = document.createElement('style');
             style.textContent = `
-                :host { display: block; position: relative; width: 100%; }
+                :host { display: block; position: relative; width: 100%; padding: 4px; box-sizing: border-box; }
                 ${cssContent}
             `;
             shadow.appendChild(style);
 
             const innerDiv = document.createElement('div');
+            innerDiv.style.width = '100%';
             innerDiv.innerHTML = htmlContent;
             shadow.appendChild(innerDiv);
 
@@ -839,10 +856,11 @@ class WidgetGalleryModal extends Modal {
         const preview = card.createDiv({ cls: 'widget-preview' });
         const shadow = preview.attachShadow({ mode: 'open' });
         const style = document.createElement('style');
-        style.textContent = `:host { display: block; padding: 10px; width: 100%; max-width: 100%; overflow: hidden; pointer-events: none; user-select: none; } * { pointer-events: none !important; max-width: 100%; box-sizing: border-box; } img, video, iframe { max-width: 100%; height: auto; } ${template.css}`;
+        style.textContent = `:host { display: block; padding: 4px; width: 100%; max-width: 100%; overflow: hidden; pointer-events: none; user-select: none; box-sizing: border-box; } * { pointer-events: none !important; max-width: 100%; box-sizing: border-box; } img, video, iframe { max-width: 100%; height: auto; } ${template.css}`;
         shadow.appendChild(style);
 
         const innerWrap = document.createElement('div');
+        innerWrap.style.width = '100%';
         innerWrap.innerHTML = template.html;
         shadow.appendChild(innerWrap);
 
@@ -1080,6 +1098,39 @@ class WidgetSettingTab extends PluginSettingTab {
                 .onChange(async (value) => {
                     this.plugin.settings.galleryPath = value;
                     await this.plugin.saveSettings();
+                }));
+
+        new Setting(containerEl)
+            .setName(this.plugin.t('settingsMaxWidth'))
+            .setDesc(this.plugin.t('settingsMaxWidthDesc'))
+            .addDropdown((dropdown: DropdownComponent) => dropdown
+                .addOption('percent', '%')
+                .addOption('pixel', 'px')
+                .setValue(this.plugin.settings.maxWidthUnit)
+                .onChange(async (value: 'percent' | 'pixel') => {
+                    this.plugin.settings.maxWidthUnit = value;
+                    if (value === 'percent') {
+                        this.plugin.settings.maxWidthValue = Math.min(this.plugin.settings.maxWidthValue, 100);
+                    } else {
+                        if (this.plugin.settings.maxWidthValue <= 100) {
+                            this.plugin.settings.maxWidthValue = 600; // Default pixel width
+                        }
+                    }
+                    await this.plugin.saveSettings();
+                    this.display(); // Refresh to update slider limits
+                }))
+            .addSlider(slider => slider
+                .setLimits(this.plugin.settings.maxWidthUnit === 'percent' ? 10 : 200, this.plugin.settings.maxWidthUnit === 'percent' ? 100 : 2000, 5)
+                .setValue(this.plugin.settings.maxWidthValue)
+                .setDynamicTooltip()
+                .onChange(async (value: number) => {
+                    this.plugin.settings.maxWidthValue = value;
+                    await this.plugin.saveSettings();
+                    // Force re-render of active view
+                    const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+                    if (view) {
+                        (view as any).previewMode?.rerender(true);
+                    }
                 }));
 
         containerEl.createEl('hr');
