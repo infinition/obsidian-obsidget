@@ -1,35 +1,50 @@
-name: Release
+name: Release Plugin
 
 on:
   push:
     tags:
       - "*"
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "18.x"
+          node-version: "18"
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: npm install
 
-      - name: Build plugin
+      - name: Build Plugin
         run: npm run build
 
-      - name: Create Release Zip
+      - name: Verify build output
+        run: |
+          if [ ! -f main.js ]; then
+            echo "❌ main.js not generated"
+            exit 1
+          fi
+          echo "✅ main.js generated"
+
+      - name: Create release archive
         run: |
           mkdir -p release/gallery
           cp main.js manifest.json styles.css release/
           cp gallery/*.json release/gallery/
-          cd release && zip -r ../obsidian-obsidget.zip .
+          cd release
+          zip -r ../obsidian-obsidget.zip .
+          cd ..
 
-      - name: Create Release
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
