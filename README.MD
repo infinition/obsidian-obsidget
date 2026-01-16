@@ -223,3 +223,13 @@ Your widget could help others enhance their Obsidian experience!
 - **GitHub Repository**: Direct link to the project for updates, bug reports, and contributions.
 - **Update Gallery**: A one-click button to download the latest community widgets from GitHub without overwriting your local modifications.
 
+
+## Star History
+
+<a href="https://www.star-history.com/#infinition/obsidian-obsidget&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=infinition/obsidian-obsidget&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=infinition/obsidian-obsidget&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=infinition/obsidian-obsidget&type=date&legend=top-left" />
+ </picture>
+</a>
