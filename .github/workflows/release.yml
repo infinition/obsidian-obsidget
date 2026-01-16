@@ -5,6 +5,9 @@ on:
     tags:
       - "*"
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -42,7 +45,6 @@ jobs:
       - name: Prepare release folder
         run: |
           mkdir -p release/gallery
-
           cp main.js manifest.json styles.css release/
 
           if [ -d gallery ]; then
@@ -67,5 +69,3 @@ jobs:
             manifest.json
             styles.css
             obsidian-obsidget.zip
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
