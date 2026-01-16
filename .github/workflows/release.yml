@@ -8,29 +8,59 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
 
-      - name: Use Node.js
-        uses: actions/setup-node@v3
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: "18.x"
+          node-version: 18
+          cache: npm
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
-      - name: Build plugin
+      - name: Clean previous build
+        run: |
+          rm -f main.js
+          rm -rf release obsidian-obsidget.zip
+
+      - name: Build plugin (TypeScript → JavaScript)
         run: npm run build
 
-      - name: Create Release Zip
+      - name: Verify build output
+        run: |
+          if [ ! -f main.js ]; then
+            echo "❌ main.js was not generated"
+            exit 1
+          fi
+          echo "✅ main.js generated"
+          ls -lh main.js
+
+      - name: Prepare release folder
         run: |
           mkdir -p release/gallery
-          cp main.js manifest.json styles.css release/
-          cp gallery/*.json release/gallery/
-          cd release && zip -r ../obsidian-obsidget.zip .
 
-      - name: Create Release
-        uses: softprops/action-gh-release@v1
+          cp main.js manifest.json styles.css release/
+
+          if [ -d gallery ]; then
+            cp gallery/*.json release/gallery/ || true
+          fi
+
+      - name: Create release zip
+        run: |
+          cd release
+          zip -r ../obsidian-obsidget.zip .
+          cd ..
+
+      - name: Verify release contents
+        run: |
+          unzip -l obsidian-obsidget.zip
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
           files: |
             main.js
