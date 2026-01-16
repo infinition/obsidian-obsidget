@@ -18,7 +18,7 @@ Obsidian plugin to create, manage, and reuse interactive widgets using HTML, CSS
 ## 📥 Installation
 
 ### Manual Installation
-1. Download the latest release from the [Releases](https://github.com/infinition/obsidian-obsidget/releases) page.
+1. Download the latest release from the [Releases](https://github.com/infinition/obsidian-obsidget/releases) page .
 2. Extract the `obsidian-obsidget.zip` into your vault's `.obsidian/plugins/` folder.
 3. Reload Obsidian and enable **ObsidGet** in the Community Plugins settings.
 
