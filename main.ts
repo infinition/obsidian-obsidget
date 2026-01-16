@@ -291,6 +291,9 @@ export default class WidgetPlugin extends Plugin {
             innerDiv.innerHTML = htmlContent;
             shadow.appendChild(innerDiv);
 
+            // Per-instance debounce timer
+            let saveTimeout: any = null;
+
             // API for widget
             const api = {
                 root: shadow,
@@ -301,9 +304,8 @@ export default class WidgetPlugin extends Plugin {
                         if (file instanceof TFile) {
                             const newDataStr = JSON.stringify(data, null, 2);
 
-                            // Debounce save to avoid too many file writes and re-renders
-                            if ((this as any)._saveTimeout) clearTimeout((this as any)._saveTimeout);
-                            (this as any)._saveTimeout = setTimeout(async () => {
+                            if (saveTimeout) clearTimeout(saveTimeout);
+                            saveTimeout = setTimeout(async () => {
                                 try {
                                     await this.app.vault.process(file, (oldContent) => {
                                         const lines = oldContent.split('\n');
@@ -311,28 +313,41 @@ export default class WidgetPlugin extends Plugin {
 
                                         const blockLines = lines.slice(section.lineStart + 1, section.lineEnd);
                                         const blockContent = blockLines.join('\n');
-                                        const blockSections = blockContent.split('---');
+
+                                        // Robust splitting: only the first 3 '---' are separators
+                                        const blockSections: string[] = [];
+                                        let remaining = blockContent;
+                                        for (let i = 0; i < 3; i++) {
+                                            const index = remaining.indexOf('---');
+                                            if (index !== -1) {
+                                                blockSections.push(remaining.substring(0, index));
+                                                remaining = remaining.substring(index + 3);
+                                            } else {
+                                                break;
+                                            }
+                                        }
+                                        blockSections.push(remaining);
 
                                         const currentDataStr = blockSections[3]?.trim() || "";
                                         if (newDataStr === currentDataStr) return oldContent;
 
                                         const newSections = [...blockSections];
-
-                                        // Ensure we have at least 4 sections (HTML, CSS, JS, DATA)
-                                        // For linked widgets, section[0] might just be "ID: xxx"
                                         while (newSections.length < 4) {
-                                            // Add empty section with newline
-                                            newSections.push('\n');
+                                            newSections.push('');
                                         }
 
-                                        // Ensure section[0] ends with newline (for linked widgets)
-                                        if (newSections[0] && !newSections[0].endsWith('\n')) {
-                                            newSections[0] = newSections[0] + '\n';
-                                        }
+                                        // Update data section
+                                        newSections[3] = newDataStr;
 
-                                        newSections[3] = `\n${newDataStr}\n`;
+                                        // Reconstruct block with precise newline handling
+                                        const trimmedData = newSections[3].trim();
+                                        const newBlockContent = [
+                                            newSections[0].trim(),
+                                            newSections[1].trim(),
+                                            newSections[2].trim(),
+                                            trimmedData
+                                        ].join('\n---\n') + (trimmedData ? '\n' : '');
 
-                                        const newBlockContent = newSections.join('---');
                                         lines.splice(section.lineStart + 1, section.lineEnd - section.lineStart - 1, newBlockContent);
                                         return lines.join('\n');
                                     });
@@ -351,7 +366,8 @@ export default class WidgetPlugin extends Plugin {
                     }
                     return null;
                 },
-                instanceId: instanceId
+                instanceId: instanceId,
+                requestUrl: requestUrl
             };
 
             // Execute JS
@@ -572,40 +588,59 @@ export default class WidgetPlugin extends Plugin {
             const widgetRegex = /```widget\n([\s\S]*?)```/g;
 
             for (const file of files) {
-                let content = await this.app.vault.read(file);
-                let fileUpdated = false;
-
-                // Use replace with a callback to process each match
-                const newContent = content.replace(widgetRegex, (match, source) => {
-                    const sections = source.split('---');
-                    let firstSection = sections[0].trim();
-                    let widgetId = '';
-
-                    if (firstSection.startsWith('ID:')) {
-                        const lines = firstSection.split('\n');
-                        widgetId = lines[0].replace('ID:', '').trim().replace(/[^a-zA-Z0-9_-]/g, '');
-                    }
-
-                    if (widgetId && galleryMap.has(widgetId)) {
-                        const template = galleryMap.get(widgetId)!;
-                        const dataSection = sections[3] || ''; // Preserve data section
-
-                        // Reconstruct the widget block
-                        const newBlock = `ID: ${widgetId}\n${template.html}\n---\n${template.css}\n---\n${template.js}\n---${dataSection}`;
-
-                        if (`\`\`\`widget\n${newBlock}\`\`\`` !== match) {
-                            updatedWidgetsCount++;
-                            fileUpdated = true;
-                            return `\`\`\`widget\n${newBlock}\`\`\``;
+                await this.app.vault.process(file, (content) => {
+                    let fileUpdated = false;
+                    const newContent = content.replace(widgetRegex, (match, source) => {
+                        // Robust splitting: only the first 3 '---' are separators
+                        const sections: string[] = [];
+                        let remaining = source;
+                        for (let i = 0; i < 3; i++) {
+                            const index = remaining.indexOf('---');
+                            if (index !== -1) {
+                                sections.push(remaining.substring(0, index));
+                                remaining = remaining.substring(index + 3);
+                            } else {
+                                break;
+                            }
                         }
-                    }
-                    return match;
-                });
+                        sections.push(remaining);
 
-                if (fileUpdated) {
-                    await this.app.vault.modify(file, newContent);
-                    updatedFilesCount++;
-                }
+                        let firstSection = sections[0].trim();
+                        let widgetId = '';
+
+                        if (firstSection.startsWith('ID:')) {
+                            const lines = firstSection.split('\n');
+                            widgetId = lines[0].replace('ID:', '').trim().replace(/[^a-zA-Z0-9_-]/g, '');
+                        }
+
+                        if (widgetId && galleryMap.has(widgetId)) {
+                            const template = galleryMap.get(widgetId)!;
+                            const dataSection = sections[3] || '';
+                            const trimmedData = dataSection.trim();
+
+                            // Reconstruct the widget block robustly (4 sections total)
+                            const newBlock = [
+                                `ID: ${widgetId}\n${template.html.trim()}`,
+                                template.css.trim(),
+                                template.js.trim(),
+                                trimmedData
+                            ].join('\n---\n') + (trimmedData ? '\n' : '');
+
+                            if (`\`\`\`widget\n${newBlock}\`\`\`` !== match) {
+                                updatedWidgetsCount++;
+                                fileUpdated = true;
+                                return `\`\`\`widget\n${newBlock}\`\`\``;
+                            }
+                        }
+                        return match;
+                    });
+
+                    if (fileUpdated) {
+                        updatedFilesCount++;
+                        return newContent;
+                    }
+                    return content;
+                });
             }
 
             if (updatedWidgetsCount > 0) {

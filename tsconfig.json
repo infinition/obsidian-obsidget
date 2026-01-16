@@ -16,6 +16,13 @@
         ]
     },
     "include": [
-        "main.ts"
+        "main.ts",
+        "i18n.ts",
+        "**/*.ts"
+    ],
+    "exclude": [
+        "node_modules",
+        "dist",
+        "main.js"
     ]
 }
