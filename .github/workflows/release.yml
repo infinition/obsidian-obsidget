@@ -48,9 +48,6 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            main.js
-            manifest.json
-            styles.css
             obsidian-obsidget.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
