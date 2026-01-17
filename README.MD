@@ -48,6 +48,7 @@ The gallery includes advanced widgets to demonstrate the power of the new API:
 *   🛠️ **YAML API Tester Pro**: Select any note and edit its Properties (YAML) directly in JSON format.
 *   📊 **Data Explorer Pro**: A universal editor for your vault's data files (JSON, CSV, LOG, XML, etc.).
 *   📂 **File API Tester Pro**: Test file reading/writing and manage custom log files with searchable paths.
+*   🔗 **Cross-Widget Controller Pro**: Remotely read and write data to any other widget in any note. Perfect for dashboards.
 
 ### Saving & Managing
 * **Save to Gallery**: Hover over any widget in your note and click the 💾 icon to save it as a template.
@@ -187,21 +188,23 @@ Every widget has access to the global `api` object.
 
 ### Core
 
-| Method | Description |
-| --- | --- |
-| `api.root` | The Shadow Root of your widget. Use this for all DOM selections. |
-| `api.saveState(data)` | Saves a JSON object directly into the 4th section of the code block. |
-| `api.getState()` | Returns a Promise resolving to the saved JSON state. |
-| `api.instanceId` | A unique identifier for the widget instance. |
+| Method | Arguments | Description |
+| --- | --- | --- |
+| `api.root` | - | The Shadow Root of your widget. Use this for all DOM selections. |
+| `api.saveState(data)` | `data`: any | Saves a JSON object directly into the 4th section of the code block. |
+| `api.getState()` | - | Returns a Promise resolving to the saved JSON state. |
+| `api.instanceId` | - | A unique identifier for the widget instance. |
 
 ### Metadata & Properties (YAML)
 
 Interact with the Frontmatter of any note.
 
-| Method | Description |
-| --- | --- |
-| `api.getFrontmatter(path?)` | Returns the YAML properties of a note as an object. Defaults to current note. |
-| `api.updateFrontmatter(data, path?)` | Merges the provided object into the note's YAML properties. |
+| Method | Arguments | Description |
+| --- | --- | --- |
+| `api.getFrontmatter(path?)` | `path`: string (opt) | Returns the YAML properties of a note as an object. Defaults to current note. |
+| `api.updateFrontmatter(data, path?)` | `data`: object, `path`: string (opt) | Merges the provided object into the note's YAML properties. |
+| `api.getWidgetState(id, path?)` | `id`: string, `path`: string (opt) | Reads the JSON data of another widget by its ID. |
+| `api.updateWidgetState(id, data, path?)` | `id`: string, `data`: any, `path`: string (opt) | Updates the JSON data of another widget by its ID. |
 
 ```javascript
 // Example: Update status in current note
@@ -216,11 +219,11 @@ await api.updateFrontmatter({
 
 Read and write files within the vault.
 
-| Method | Description |
-| --- | --- |
-| `api.getFiles(ext?)` | Returns an array of file paths in the vault. Optional extension filter (e.g., `'csv'`). |
-| `api.readFile(path)` | Reads the content of a file as a string. Returns `null` if not found. |
-| `api.writeFile(path, content)` | Writes the specified content to a file. Automatically creates parent folders. |
+| Method | Arguments | Description |
+| --- | --- | --- |
+| `api.getFiles(ext?)` | `ext`: string (opt) | Returns an array of file paths in the vault. Optional extension filter (e.g., `'csv'`). |
+| `api.readFile(path)` | `path`: string | Reads the content of a file as a string. Returns `null` if not found. |
+| `api.writeFile(path, content)` | `path`: string, `content`: string | Writes the specified content to a file. Automatically creates parent folders. |
 
 ```javascript
 // Example 1: Read a config file
@@ -237,23 +240,120 @@ mdContent += "\n- [ ] New task added from widget at " + new Date().toLocaleTimeS
 await api.writeFile(path, mdContent);
 ```
 
-### Utilities & Network
+// Example: Fetch external data
+const response = await api.requestUrl({ 
+    url: "https://api.example.com/data",
+    method: "GET",
+    headers: { "Content-Type": "application/json" }
+});
+const json = response.json;
+```
 
-| Method | Description |
-| --- | --- |
-| `api.parseCSV(text, sep?)` | Converts CSV text into an array of objects. Default separator is `,`. |
-| `api.stringifyCSV(data, sep?)` | Converts an array of objects back into a CSV string. |
-| `api.requestUrl(options)` | Wrapper for Obsidian's `requestUrl`. Bypasses CORS for external API calls. |
+### 📂 File Operations Cookbook
+
+Examples for common file types and operations within the vault.
+
+#### 📝 JSON Files (Config/Data)
+```javascript
+const path = "data/settings.json";
+
+// Read and Modify
+const raw = await api.readFile(path);
+const config = raw ? JSON.parse(raw) : { theme: "dark", enabled: true };
+config.lastUsed = new Date().toISOString();
+
+// Write (creates folders if needed)
+await api.writeFile(path, JSON.stringify(config, null, 2));
+```
+
+#### 📊 CSV Files (Spreadsheets)
+```javascript
+const path = "reports/stats.csv";
+
+// Read and Parse
+const content = await api.readFile(path);
+const rows = api.parseCSV(content || "date,value");
+
+// Add a row and Save
+rows.push({ date: "2024-01-01", value: "100" });
+const newCSV = api.stringifyCSV(rows);
+await api.writeFile(path, newCSV);
+```
+
+#### 📑 Markdown & Logs (Text/Append)
+```javascript
+// Append to a log file
+const logPath = "Logs/activity.log";
+let logs = await api.readFile(logPath) || "";
+logs += `[${new Date().toLocaleString()}] Action performed\n`;
+await api.writeFile(logPath, logs);
+
+// Search for all markdown files in a folder
+const allNotes = api.getFiles("md").filter(p => p.startsWith("Projects/"));
+```
+
+#### 🔗 Cross-Widget Interaction
+```javascript
+// Update the score of a widget named "leaderboard" in another note
+const targetNote = "Games/Level 1.md";
+const targetId = "leaderboard";
+
+// 1. Get current data
+const data = await api.getWidgetState(targetId, targetNote) || { scores: [] };
+
+// 2. Modify
+data.scores.push({ name: "Player 1", score: 1000 });
+
+// 3. Save back
+await api.updateWidgetState(targetId, data, targetNote);
+new Notice("Leaderboard updated!");
+```
+
+### 🚀 Master Example: Using all API methods
+This example demonstrates how to combine multiple API methods to create a complex workflow (fetching data, parsing CSV, updating metadata, and saving state).
 
 ```javascript
-// Example: Parse CSV data
-const csvText = "name,age\nAlice,30\nBob,25";
-const data = api.parseCSV(csvText); 
-// Result: [{name: "Alice", age: "30"}, {name: "Bob", age: "25"}]
+async function syncData() {
+    // 1. Core: Access the Shadow Root to show status
+    const statusEl = api.root.getElementById('status');
+    statusEl.innerText = "Syncing...";
 
-// Example: Fetch external data
-const response = await api.requestUrl({ url: "https://api.example.com/data" });
-const json = response.json;
+    // 2. Network: Fetch external CSV data (bypassing CORS)
+    const response = await api.requestUrl({ url: "https://example.com/data.csv" });
+    const csvRaw = response.text;
+
+    // 3. Utilities: Parse the CSV data
+    const data = api.parseCSV(csvRaw);
+
+    // 4. Vault: List all log files and write the sync result
+    const logFiles = api.getFiles('log');
+    const syncLogPath = "Logs/sync-report.log";
+    await api.writeFile(syncLogPath, `Synced ${data.length} items at ${new Date().toISOString()}`);
+
+    // 5. Metadata: Update the current note's properties
+    await api.updateFrontmatter({ 
+        last_sync: new Date().toISOString(),
+        item_count: data.length 
+    });
+
+    // 6. Persistence: Save the widget's internal state
+    await api.saveState({ 
+        lastSyncStatus: "success",
+        instance: api.instanceId // Use the unique instance ID
+    });
+
+    statusEl.innerText = "Sync Complete!";
+}
+
+// 7. Initialization: Load saved state on startup
+async function init() {
+    const saved = await api.getState();
+    if (saved && saved.lastSyncStatus === "success") {
+        console.log("Widget initialized with instance ID:", api.instanceId);
+    }
+}
+
+init();
 ```
 
 ---

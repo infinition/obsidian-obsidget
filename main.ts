@@ -404,6 +404,72 @@ export default class WidgetPlugin extends Plugin {
                         });
                     }
                 },
+                getWidgetState: async (widgetId: string, path?: string) => {
+                    const targetPath = path || ctx.sourcePath;
+                    const file = this.app.vault.getAbstractFileByPath(targetPath);
+                    if (!(file instanceof TFile)) return null;
+
+                    const content = await this.app.vault.read(file);
+                    // Regex to find the widget block with specific ID
+                    const regex = new RegExp("```widget\\s*\\nID:\\s*" + widgetId + "\\s*\\n([\\s\\S]*?)\\n```", "i");
+                    const match = content.match(regex);
+                    if (!match) return null;
+
+                    const blockContent = match[1];
+                    const sections: string[] = [];
+                    let remaining = blockContent;
+                    for (let i = 0; i < 3; i++) {
+                        const index = remaining.indexOf('---');
+                        if (index !== -1) {
+                            sections.push(remaining.substring(0, index));
+                            remaining = remaining.substring(index + 3);
+                        } else { break; }
+                    }
+                    sections.push(remaining);
+
+                    if (sections.length < 4) return null;
+                    try {
+                        return JSON.parse(sections[3].trim());
+                    } catch (e) { return null; }
+                },
+                updateWidgetState: async (widgetId: string, data: any, path?: string) => {
+                    const targetPath = path || ctx.sourcePath;
+                    const file = this.app.vault.getAbstractFileByPath(targetPath);
+                    if (!(file instanceof TFile)) return;
+
+                    await this.app.vault.process(file, (oldContent) => {
+                        const regex = new RegExp("(```widget\\s*\\nID:\\s*" + widgetId + "\\s*\\n)([\\s\\S]*?)(?=\\n```)", "i");
+                        const match = oldContent.match(regex);
+                        if (!match) return oldContent;
+
+                        const prefix = match[1];
+                        const blockContent = match[2];
+
+                        const sections: string[] = [];
+                        let remaining = blockContent;
+                        for (let i = 0; i < 3; i++) {
+                            const index = remaining.indexOf('---');
+                            if (index !== -1) {
+                                sections.push(remaining.substring(0, index));
+                                remaining = remaining.substring(index + 3);
+                            } else { break; }
+                        }
+                        sections.push(remaining);
+
+                        while (sections.length < 4) sections.push("");
+                        sections[3] = "\n" + JSON.stringify(data, null, 2) + "\n";
+
+                        // Reconstruct block
+                        const newBlockContent = [
+                            sections[0].trim(),
+                            sections[1].trim(),
+                            sections[2].trim(),
+                            sections[3].trim()
+                        ].join('\n---\n') + '\n';
+
+                        return oldContent.replace(match[0], prefix + newBlockContent);
+                    });
+                },
                 getFiles: (extension?: string) => {
                     let files = this.app.vault.getFiles();
                     if (extension) {
