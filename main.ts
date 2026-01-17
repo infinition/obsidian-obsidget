@@ -306,7 +306,7 @@ export default class WidgetPlugin extends Plugin {
 
             const innerDiv = document.createElement('div');
             innerDiv.style.width = '100%';
-            innerDiv.innerHTML = htmlContent;
+            innerDiv.innerHTML = htmlContent + "<slot></slot>";
             shadow.appendChild(innerDiv);
 
             // Per-instance debounce timer

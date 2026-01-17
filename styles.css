@@ -50,21 +50,21 @@
     opacity: 0;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 100;
-}
 
-.widget-instance-container:hover .widget-save-to-gallery-btn {
-    opacity: 0.8;
-}
+    .widget-instance-container:hover & {
+        opacity: 0.8;
+    }
 
-.widget-save-to-gallery-btn:hover {
-    background: var(--interactive-accent-hover);
-    transform: scale(1.15);
-    opacity: 1 !important;
-}
+    &:hover {
+        background: var(--interactive-accent-hover);
+        transform: scale(1.15);
+        opacity: 1 !important;
+    }
 
-/* Hide in reading mode */
-.markdown-rendered .widget-save-to-gallery-btn {
-    display: none !important;
+    /* Hide in reading mode */
+    .markdown-preview-view & {
+        display: none;
+    }
 }
 
 /* ========================================
