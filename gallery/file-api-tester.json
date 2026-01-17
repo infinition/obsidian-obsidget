@@ -1,7 +1,7 @@
 {
     "id": "file-api-tester",
-    "name": "📂 File API Tester Pro",
-    "description": "Advanced file management widget. Search, read, edit and save any text-based file in your vault (log, xml, json, csv, md, etc.). Features a customizable Quick Log system and state persistence.",
+    "name": "File API Tester",
+    "description": "Test the Obsidian-obsidget file API methods.",
     "author": "Infinition",
     "authorUrl": "https://github.com/infinition",
     "html": "<div class=\"api-tester\">\n  <h4>📂 File API Tester Pro</h4>\n  \n  <div class=\"section\">\n    <label>1. Search & Select File:</label>\n    <div class=\"search-row\">\n      <input type=\"text\" id=\"file-search\" list=\"file-datalist\" placeholder=\"Search any file (log, xml, md...)\" onchange=\"handleFileChange()\">\n      <datalist id=\"file-datalist\"></datalist>\n      <button onclick=\"refreshFiles()\" class=\"mini-btn\">🔄</button>\n    </div>\n  </div>\n\n  <div class=\"section\">\n    <div class=\"preview-header\">\n      <label>2. Editor:</label>\n      <div class=\"header-actions\">\n        <button onclick=\"saveChanges()\" class=\"save-btn\">💾 Save</button>\n      </div>\n    </div>\n    <textarea id=\"editor-box\" placeholder=\"Select a file to edit content...\"></textarea>\n  </div>\n\n  <div class=\"section\">\n    <label>3. Quick Log Configuration:</label>\n    <div class=\"log-config-row\">\n      <input type=\"text\" id=\"log-path\" list=\"log-datalist\" placeholder=\"Log file path (e.g. logs/daily.log)\" onchange=\"saveLocalState()\">\n      <datalist id=\"log-datalist\"></datalist>\n    </div>\n    <div class=\"log-row\">\n      <input type=\"text\" id=\"log-input\" placeholder=\"Message to append...\">\n      <button onclick=\"appendLog()\">➕ Append</button>\n    </div>\n  </div>\n\n  <div id=\"status-bar\" class=\"status\">Ready</div>\n</div>",

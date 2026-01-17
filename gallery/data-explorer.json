@@ -1,7 +1,7 @@
 {
     "id": "data-explorer",
-    "name": "📊 Data Explorer Pro",
-    "description": "Explore and edit any text-based file in your vault (JSON, CSV, LOG, XML, MD, etc.). Supports searchable selection, real-time preview, and state persistence.",
+    "name": "Data Explorer Pro",
+    "description": "Explore and edit any text-based file in your vault (JSON, CSV, LOG, XML, etc.).",
     "author": "Infinition",
     "authorUrl": "https://github.com/infinition",
     "html": "<div class=\"data-container\">\n  <h4>📊 Data Explorer Pro</h4>\n  \n  <div class=\"row\">\n    <label>1. Search & Select File:</label>\n    <div class=\"search-wrapper\">\n      <input type=\"text\" id=\"file-search\" list=\"data-file-list\" placeholder=\"Search files (json, csv, log, xml...)\" onchange=\"handleFileChange()\">\n      <datalist id=\"data-file-list\"></datalist>\n      <button onclick=\"refreshFileList()\" class=\"mini-btn\">🔄</button>\n    </div>\n  </div>\n\n  <div class=\"row\">\n    <div class=\"header-row\">\n      <label>2. Editor:</label>\n      <button onclick=\"saveData()\" class=\"save-btn\">💾 Save Changes</button>\n    </div>\n    <textarea id=\"data-editor\" placeholder=\"Select a file to edit...\"></textarea>\n  </div>\n\n  <div id=\"csv-stats\" class=\"stats-box\" style=\"display:none\">\n    <div id=\"row-count\">Rows: 0</div>\n    <div id=\"col-count\">Columns: 0</div>\n  </div>\n\n  <div id=\"status-bar\" class=\"status\">Ready</div>\n</div>",
