@@ -917,7 +917,7 @@ class WidgetGalleryModal extends Modal {
 
     filterAndRender() {
         // Check if search query contains a tag search (#tagname)
-        let searchText = this.searchQuery;
+        let searchText = this.searchQuery.trim();
         let tagFromSearch = '';
 
         if (searchText.startsWith('#')) {
@@ -931,10 +931,12 @@ class WidgetGalleryModal extends Modal {
         const activeTag = tagFromSearch || this.selectedTag;
 
         this.filteredTemplates = this.allTemplates.filter(t => {
-            // Search filter (only if not tag search)
+            // Search filter (name, id, description, OR tags if not a #tag search)
             const matchesSearch = searchText.length === 0 ||
                 t.name.toLowerCase().includes(searchText) ||
-                t.id.toLowerCase().includes(searchText);
+                t.id.toLowerCase().includes(searchText) ||
+                (t.description && t.description.toLowerCase().includes(searchText)) ||
+                (t.tags && t.tags.some(tag => tag.toLowerCase().includes(searchText)));
 
             // Tag filter (from dropdown or #search)
             const matchesTags = activeTag.length === 0 ||
