@@ -7,6 +7,7 @@ interface WidgetPluginSettings {
     githubUrl: string;
     maxWidthValue: number;
     maxWidthUnit: 'percent' | 'pixel';
+    firstRun: boolean;
 }
 
 const DEFAULT_SETTINGS: WidgetPluginSettings = {
@@ -14,7 +15,8 @@ const DEFAULT_SETTINGS: WidgetPluginSettings = {
     language: 'en',
     githubUrl: 'https://github.com/infinition/obsidian-obsidget',
     maxWidthValue: 100,
-    maxWidthUnit: 'percent'
+    maxWidthUnit: 'percent',
+    firstRun: true
 };
 
 interface WidgetTemplate {
@@ -47,6 +49,13 @@ export default class WidgetPlugin extends Plugin {
 
         // Ensure directories exist
         await this.ensureDirectory(this.settings.galleryPath);
+
+        // First run sync
+        if (this.settings.firstRun) {
+            this.settings.firstRun = false;
+            await this.saveSettings();
+            this.syncGallery();
+        }
 
         this.addSettingTab(new WidgetSettingTab(this.app, this));
 
