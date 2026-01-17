@@ -27,8 +27,8 @@ jobs:
 
       - name: Clean previous build
         run: |
-          rm -f main.js
           rm -rf release obsidian-obsidget.zip
+          rm -f main.js
 
       - name: Build plugin (TypeScript → JavaScript)
         run: npm run build
@@ -42,13 +42,26 @@ jobs:
           echo "✅ main.js generated"
           ls -lh main.js
 
+      - name: Verify required files
+        run: |
+          for file in manifest.json styles.css; do
+            if [ ! -f "$file" ]; then
+              echo "❌ Missing $file"
+              exit 1
+            fi
+          done
+          echo "✅ manifest.json and styles.css found"
+
       - name: Prepare release folder
         run: |
-          mkdir -p release/gallery
+          mkdir -p release
           cp main.js manifest.json styles.css release/
 
           if [ -d gallery ]; then
-            cp gallery/*.json release/gallery/ || true
+            cp -r gallery release/
+            echo "✅ gallery folder copied"
+          else
+            echo "⚠️ gallery folder not found (skipped)"
           fi
 
       - name: Create release zip
