@@ -663,7 +663,7 @@ export default class WidgetPlugin extends Plugin {
             } else {
                 new Notice(this.t('updateAllWidgetsNoWidgets'));
             }
-        } catch (e) {
+        } catch (e: any) {
             console.error('ObsidGet: Update all widgets failed:', e);
             new Notice(this.t('updateAllWidgetsError', e.message));
         }
@@ -762,6 +762,13 @@ class WidgetGalleryModal extends Modal {
 
         // Load templates and extract tags
         this.allTemplates = await this.plugin.getGalleryWidgets();
+
+        // Auto-sync if empty
+        if (this.allTemplates.length === 0) {
+            await this.plugin.syncGallery();
+            this.allTemplates = await this.plugin.getGalleryWidgets();
+        }
+
         this.extractAllTags();
         this.populateTagDropdown();
 
