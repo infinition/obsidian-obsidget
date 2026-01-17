@@ -1,36 +1,73 @@
+
 # ObsidGet
 
-Obsidian plugin to create, manage, and reuse interactive widgets using HTML, CSS, and JavaScript.
+**ObsidGet** is an Obsidian plugin that allows you to create, manage, and reuse interactive widgets using standard HTML, CSS, and JavaScript.
 
+Every widget runs in its own isolated environment (Shadow DOM), ensuring that your scripts and styles do not conflict with your Obsidian theme or other plugins.
 
+## ✨ Key Features
 
-## 🚀 Key Features
-
-- **Shadow DOM Isolation**: Every widget is rendered in its own Shadow DOM, preventing style leaks and script conflicts with Obsidian's UI.
-- **In-Note Data Persistence**: Widget state is stored directly inside the Markdown code block. Your notes are fully portable and self-contained.
-- **Modern Widget Gallery**: A beautiful, responsive gallery with tag filtering and search to manage your templates.
-- **Context Menu Integration**: Right-click anywhere in your note to quickly insert a widget from your gallery.
-- **Live Editor**: Create and modify widget templates with a built-in editor, including custom ID/filename management.
-- **Smart Sync**: Automatically downloads the community gallery on first install. You can also manually update your collection directly from the settings without updating the plugin.
-- **Multilingual Support**: Fully translated into English, French, Spanish, German, and Portuguese.
-- **Premium Aesthetics**: Designed to feel like a native part of Obsidian with support for CSS variables and smooth animations.
+- **Shadow DOM Isolation**: Widgets are encapsulated. Styles and scripts won't leak into the rest of Obsidian.
+- **In-Note Persistence**: Widget state is saved directly in the Markdown code block. Notes remain portable.
+- **Vault & Data Access**: Read/write files (JSON, CSV, etc.) and interact with Note Properties (YAML/Frontmatter).
+- **Template Gallery**: Built-in system to manage, tag, and search widgets. Includes "Smart Sync" for community templates.
+- **Context Menu**: Right-click anywhere to insert a widget instantly.
+- **Live Editor**: Create/modify templates with a built-in editor.
+- **Multilingual**: Available in English, French, Spanish, German, and Portuguese.
+- **Native Integration**: Supports Obsidian CSS variables and adapts to light/dark modes.
 
 ## 📥 Installation
 
 ### Manual Installation
-1. Download the latest release from the [Releases](https://github.com/infinition/obsidian-obsidget/releases) page .
-2. Extract the `obsidian-obsidget.zip` into your vault's `.obsidian/plugins/` folder.
-3. Reload Obsidian and enable **ObsidGet** in the Community Plugins settings.
+1. Download the latest release from the [Releases page](https://github.com/infinition/obsidian-obsidget/releases).
+2. Extract `obsidian-obsidget.zip` into your vault's `.obsidian/plugins/` folder.
+3. Reload Obsidian and enable **ObsidGet**.
 
 ### Via BRAT
 1. Install the [BRAT plugin](https://github.com/TfTHacker/obsidian42-brat).
-2. Go to **Settings** > **BRAT** > **Plugins** > **Add Beta plugin**.
-3. Paste the repository URL: `https://github.com/infinition/obsidian-obsidget`.
+2. Go to **Settings > BRAT > Plugins > Add Beta plugin**.
+3. Enter the repository URL: `https://github.com/infinition/obsidian-obsidget`.
 4. Enable the plugin.
 
-## 🛠️ How to use a Widget
+---
 
-Widgets are defined using a `widget` code block with 4 optional sections separated by `---`:
+## 🎨 Using the Widget Gallery
+
+The easiest way to use ObsidGet is via the Gallery. You don't need to write code to get started.
+
+### How to use
+1.  **Open the Gallery**:
+    * **Right-click** anywhere in your note and select **Insert Widget**.
+    * Alternatively, click the Ribbon Icon (layout icon) or use the Command Palette ("Open Widget Gallery").
+2.  **Search & Filter**: Find widgets by name or tags.
+3.  **Insert**: Click "Insert" to add the widget to your note at the cursor position.
+4.  **Sync**: The gallery includes a "Smart Sync" feature to download community widgets without overwriting your changes.
+
+### 🚀 Pro Examples
+The gallery includes advanced widgets to demonstrate the power of the new API:
+*   🛠️ **YAML API Tester Pro**: Select any note and edit its Properties (YAML) directly in JSON format.
+*   📊 **Data Explorer Pro**: A universal editor for your vault's data files (JSON, CSV, LOG, XML, etc.).
+*   📂 **File API Tester Pro**: Test file reading/writing and manage custom log files with searchable paths.
+
+### Saving & Managing
+* **Save to Gallery**: Hover over any widget in your note and click the 💾 icon to save it as a template.
+* **Custom IDs**: You can manually set filenames for your templates in the editor.
+
+### 📱 Mobile Ready
+The gallery and widgets are responsive. The interface adapts to touch screens with optimized layouts and stacked action buttons.
+
+---
+
+## 🛠️ Developer Guide: Creating Widgets
+
+For developers, widgets are defined in a `widget` code block separated into 4 sections by `---`:
+
+1.  **HTML** (Structure)
+2.  **CSS** (Style)
+3.  **JavaScript** (Logic)
+4.  **Data** (JSON State - auto-managed)
+
+### Widget Structure Example
 
 ```widget
 ID: my-unique-id
@@ -39,12 +76,11 @@ ID: my-unique-id
 
 ---
 
-:host { 
-    display: flex; 
-    flex-direction: column; 
-    align-items: center;
+:host {
+    display: flex;
+    flex-direction: column;
     padding: 1rem;
-    background: var(--background-secondary);
+    border: 1px solid var(--background-modifier-border);
     border-radius: 8px;
 }
 button {
@@ -52,7 +88,6 @@ button {
     color: var(--text-on-accent);
     border: none;
     padding: 5px 10px;
-    border-radius: 4px;
     cursor: pointer;
 }
 
@@ -79,168 +114,169 @@ getState().then(state => {
 {
   "count": 5
 }
+
 ```
-
-### The API
-Each widget has access to a powerful `api` object:
-- `root`: The Shadow Root of the widget. Use `root.querySelector` instead of `document`.
-- `saveState(data)`: Saves a JSON object **directly into the 4th section** of the code block in your note.
-- `getState()`: Retrieves the JSON object from the 4th section.
-- `instanceId`: A unique identifier for the widget instance.
-- `getFrontmatter(path?)`: Returns a Promise that resolves to the note's YAML Frontmatter (Properties) as an object. If `path` is provided, it targets that specific note; otherwise, it targets the current note.
-- `updateFrontmatter(data, path?)`: Updates the note's YAML Frontmatter with the provided object. If `path` is provided, it targets that specific note; otherwise, it targets the current note. Useful for Dashboards or interacting with other notes.
-- `getFiles(extension?)`: Returns an array of file paths in the vault. You can optionally filter by extension (e.g., `api.getFiles('csv')`).
-- `readFile(path)`: Returns a Promise that resolves to the content of the file at the specified path as a string. Returns `null` if the file doesn't exist.
-- `writeFile(path, content)`: Writes the specified content to a file at the given path. Automatically creates parent directories if they don't exist.
-- `parseCSV(text, delimiter?)`: A helper to parse CSV text into an array of objects. Default delimiter is `,`.
-- `stringifyCSV(data, delimiter?)`: A helper to convert an array of objects back into a CSV string. Default delimiter is `,`.
-- `requestUrl(request)`: A wrapper around Obsidian's `requestUrl` to make network requests (bypassing CORS).
-
-## 👨‍💻 Widget Development Guide
 
 ### Event Handling in Shadow DOM
 
-Widgets run inside an isolated Shadow DOM. This affects how you should handle events. There are **two approaches** you can use:
+Since widgets run in Shadow DOM, you have two ways to handle events:
 
-#### ✅ Recommended: Using `addEventListener` in JavaScript
-
-This is the most reliable approach. Attach event listeners programmatically in your `init()` function:
+**1. Recommended: Using `addEventListener` (JS)**
+Attach listeners programmatically in your `init()` function.
 
 ```javascript
 async function init() {
-    var saved = await api.getState();
-    // ... restore state ...
-    
-    // Attach event listeners
     api.root.getElementById('btn-add').onclick = addItem;
-    api.root.getElementById('btn-clear').onclick = clearAll;
-    api.root.getElementById('my-input').oninput = handleInput;
 }
-
-function addItem() {
-    // Your logic here
-}
-
-function clearAll() {
-    // Your logic here
-}
-
+function addItem() { /* logic */ }
 init();
+
 ```
 
-#### ✅ Alternative: Using `onclick` in HTML
+**2. Alternative: Using `onclick` (HTML)**
+You can use inline attributes, but functions must be declared clearly (no arrow functions).
 
-You can use inline `onclick` attributes in your HTML. The plugin automatically extracts all `function` declarations from your JavaScript and makes them available to event handlers:
-
-**HTML:**
 ```html
 <button onclick="addWater(250)">+250ml</button>
-<button onclick="resetWater()">Reset</button>
+
 ```
-
-**JavaScript:**
-```javascript
-function addWater(amount) {
-    currentWater += amount;
-    update();
-}
-
-function resetWater() {
-    currentWater = 0;
-    update();
-}
-
-function init() {
-    // ...
-}
-init();
-```
-
-> **Important:** Functions must be declared using the `function` keyword syntax. Arrow functions assigned to variables (`const myFunc = () => {}`) will NOT work with `onclick` handlers.
 
 ### Best Practices
 
 | Do ✅ | Don't ❌ |
-|-------|----------|
+| --- | --- |
 | Use `api.root.getElementById()` | Use `document.getElementById()` |
 | Use `api.root.querySelector()` | Use `document.querySelector()` |
-| Use `function myFunc() {}` for onclick | Use `const myFunc = () => {}` for onclick |
-| Use `api.saveState()` and `api.getState()` | Use `localStorage` |
-| Use CSS variables like `var(--text-normal)` | Use hardcoded colors |
+| Use `function myFunc() {}` | Use `const myFunc = () => {}` (for inline `onclick`) |
+| Use `api.saveState()` / `api.getState()` | Use `localStorage` |
+| Use Obsidian CSS variables (e.g., `var(--text-normal)`) | Use hardcoded colors (e.g., `#000`) |
 
-### Complete Widget Template
+### 🎨 Styling the Container
+To style the widget's outer container (the element that holds your HTML), use the `:host` selector in your CSS:
 
-Here's a minimal working template:
-
-```javascript
-// State
-var counter = 0;
-
-// Functions
-function increment() {
-    counter++;
-    render();
-    api.saveState({ counter: counter });
+```css
+:host {
+    display: block;
+    background: var(--background-secondary);
+    border-radius: 8px;
+    padding: 1rem;
+    border: 1px solid var(--background-modifier-border);
 }
-
-function render() {
-    api.root.getElementById('display').innerText = counter;
-}
-
-// Initialization
-async function init() {
-    var saved = await api.getState();
-    if (saved) counter = saved.counter;
-    
-    // Option 1: Attach events in JS (recommended)
-    api.root.getElementById('btn').onclick = increment;
-    
-    render();
-}
-
-init();
 ```
 
-## 🎨 Widget Gallery
+### 🔔 Obsidian UI Components
+You can use standard Obsidian UI components like `Notice` directly in your JavaScript:
 
-Access the gallery via the **Ribbon Icon** (layout icon), the command **"Open Widget Gallery"**, or the **Right-click Context Menu**.
+```javascript
+function onSave() {
+    api.saveState({ data: "..." });
+    new Notice("✅ Data saved successfully!");
+}
+```
 
-- **Search & Filter**: Find widgets by name or tags.
-- **Rich Metadata**: Each widget now displays a **description** and **author** information. Click on a truncated description to see the full text.
-- **Insert**: Quickly add a template to your current note at the cursor position.
-- **Edit**: Modify a template's HTML, CSS, JS, Tags, Description, and Author info.
-- **Custom ID**: Manually set the filename for your templates in the gallery.
-- **Save to Gallery**: Hover over any rendered widget in your notes and click the 💾 button to save it as a template.
+### 🔍 Debugging Tips
+- **Console**: Use `console.log()` in your JS. It will appear in the standard Obsidian Developer Tools (`Ctrl+Shift+I` or `Cmd+Opt+I`).
+- **Inspect**: You can inspect a widget's Shadow DOM by using the element picker in the Developer Tools.
+- **Status Bar**: Use a `div` in your HTML as a status bar to display messages during development.
 
-## 📱 Mobile Ready
+---
 
-The gallery and widgets are fully responsive. On mobile devices, the interface adapts to provide a seamless touch experience, with stacked action buttons and optimized layouts.
+## 📚 API Reference
 
-## 🤝 Contributing & Community Widgets
+Every widget has access to the global `api` object.
 
-We would love to grow the built-in widget collection! If you have created a cool widget and want to share it:
-1. Fork this repository.
-2. Add your widget's `.json` file to the `gallery/` directory.
-3. Submit a **Pull Request**.
+### Core
 
-Your widget could help others enhance their Obsidian experience!
+| Method | Description |
+| --- | --- |
+| `api.root` | The Shadow Root of your widget. Use this for all DOM selections. |
+| `api.saveState(data)` | Saves a JSON object directly into the 4th section of the code block. |
+| `api.getState()` | Returns a Promise resolving to the saved JSON state. |
+| `api.instanceId` | A unique identifier for the widget instance. |
+
+### Metadata & Properties (YAML)
+
+Interact with the Frontmatter of any note.
+
+* `api.getFrontmatter(path?)`
+* `api.updateFrontmatter(data, path?)`
+
+```javascript
+// Example: Update status in current note
+await api.updateFrontmatter({ 
+    status: "completed", 
+    last_edit: new Date().toISOString() 
+});
+
+```
+
+### Vault File System
+
+Read and write files within the vault.
+
+* `api.getFiles(ext?)` - List files (optional extension filter).
+* `api.readFile(path)` - Read file content (returns `null` if not found).
+* `api.writeFile(path, content)` - Write content (auto-creates folders).
+
+```javascript
+// Example 1: Read a config file
+const content = await api.readFile("data/config.json");
+if (content) {
+    const config = JSON.parse(content);
+    console.log(config.theme);
+}
+
+// Example 2: Read a markdown file and append content
+const path = "Journal/Daily Note.md";
+let mdContent = await api.readFile(path) || "";
+mdContent += "\n- [ ] New task added from widget at " + new Date().toLocaleTimeString();
+await api.writeFile(path, mdContent);
+```
+
+### Utilities & Network
+
+* `api.parseCSV(text, delimiter?)` - Converts CSV text into an array of objects.
+* `api.stringifyCSV(data, delimiter?)` - Converts an array of objects back into a CSV string.
+* `api.requestUrl(options)` - Wrapper for Obsidian's `requestUrl` (bypasses CORS).
+
+```javascript
+// Example: Parse CSV data
+const csvText = "name,age\nAlice,30\nBob,25";
+const data = api.parseCSV(csvText); 
+// Result: [{name: "Alice", age: "30"}, {name: "Bob", age: "25"}]
+
+// Example: Fetch external data
+const response = await api.requestUrl({ url: "https://api.example.com/data" });
+const json = response.json;
+```
+
+---
 
 ## ⚙️ Settings
 
-- **Gallery Path**: Choose where your `.json` templates are stored.
-- **Language**: Select your preferred language (English, French, Spanish, German, or Portuguese).
-- **GitHub Repository**: Direct link to the project for updates and contributions.
-- **Update Gallery**: Download the latest community widgets from GitHub without overwriting your local modifications.
-- **Update All Widgets in Vault**: A powerful tool to update the code of all widgets already inserted in your notes to their latest version from the gallery, while **preserving your data**.
-- **Max Widget Width**: Limit the width of widgets when 'Readable line length' is disabled. Choose between percentage or fixed pixels.
+* **Gallery Path**: Location of your `.json` template files.
+* **Language**: English, French, Spanish, German, Portuguese.
+* **GitHub Repository**: Link to the project.
+* **Update Gallery**: Download latest community widgets.
+* **Update All Widgets in Vault**: Updates the code of all widgets in your notes to the latest gallery version, while **preserving your data**.
+* **Max Widget Width**: Control the maximum width (percentage or pixels).
 
+## 🤝 Contributing
+
+Contributions are welcome! If you have created a cool widget:
+
+1. Fork this repository.
+2. Add your widget's `.json` file to the `gallery/` directory.
+3. Submit a Pull Request.
+
+---
 
 ## Star History
 
 <a href="https://www.star-history.com/#infinition/obsidian-obsidget&type=date&legend=top-left">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=infinition/obsidian-obsidget&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=infinition/obsidian-obsidget&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=infinition/obsidian-obsidget&type=date&legend=top-left" />
- </picture>
+<picture>
+<source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=infinition/obsidian-obsidget&type=date&theme=dark&legend=top-left" />
+<source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=infinition/obsidian-obsidget&type=date&legend=top-left" />
+<img alt="Star History Chart" src="https://api.star-history.com/svg?repos=infinition/obsidian-obsidget&type=date&legend=top-left" />
+</picture>
 </a>
