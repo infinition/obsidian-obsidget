@@ -198,8 +198,10 @@ Every widget has access to the global `api` object.
 
 Interact with the Frontmatter of any note.
 
-* `api.getFrontmatter(path?)`
-* `api.updateFrontmatter(data, path?)`
+| Method | Description |
+| --- | --- |
+| `api.getFrontmatter(path?)` | Returns the YAML properties of a note as an object. Defaults to current note. |
+| `api.updateFrontmatter(data, path?)` | Merges the provided object into the note's YAML properties. |
 
 ```javascript
 // Example: Update status in current note
@@ -214,9 +216,11 @@ await api.updateFrontmatter({
 
 Read and write files within the vault.
 
-* `api.getFiles(ext?)` - List files (optional extension filter).
-* `api.readFile(path)` - Read file content (returns `null` if not found).
-* `api.writeFile(path, content)` - Write content (auto-creates folders).
+| Method | Description |
+| --- | --- |
+| `api.getFiles(ext?)` | Returns an array of file paths in the vault. Optional extension filter (e.g., `'csv'`). |
+| `api.readFile(path)` | Reads the content of a file as a string. Returns `null` if not found. |
+| `api.writeFile(path, content)` | Writes the specified content to a file. Automatically creates parent folders. |
 
 ```javascript
 // Example 1: Read a config file
@@ -235,9 +239,11 @@ await api.writeFile(path, mdContent);
 
 ### Utilities & Network
 
-* `api.parseCSV(text, delimiter?)` - Converts CSV text into an array of objects.
-* `api.stringifyCSV(data, delimiter?)` - Converts an array of objects back into a CSV string.
-* `api.requestUrl(options)` - Wrapper for Obsidian's `requestUrl` (bypasses CORS).
+| Method | Description |
+| --- | --- |
+| `api.parseCSV(text, sep?)` | Converts CSV text into an array of objects. Default separator is `,`. |
+| `api.stringifyCSV(data, sep?)` | Converts an array of objects back into a CSV string. |
+| `api.requestUrl(options)` | Wrapper for Obsidian's `requestUrl`. Bypasses CORS for external API calls. |
 
 ```javascript
 // Example: Parse CSV data
