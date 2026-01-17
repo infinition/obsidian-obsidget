@@ -89,7 +89,12 @@ Each widget has access to a powerful `api` object:
 - `instanceId`: A unique identifier for the widget instance.
 - `getFrontmatter(path?)`: Returns a Promise that resolves to the note's YAML Frontmatter (Properties) as an object. If `path` is provided, it targets that specific note; otherwise, it targets the current note.
 - `updateFrontmatter(data, path?)`: Updates the note's YAML Frontmatter with the provided object. If `path` is provided, it targets that specific note; otherwise, it targets the current note. Useful for Dashboards or interacting with other notes.
-- `getFiles()`: Returns an array of all Markdown file paths in the vault. Useful for creating file selectors in widgets.
+- `getFiles(extension?)`: Returns an array of file paths in the vault. You can optionally filter by extension (e.g., `api.getFiles('csv')`).
+- `readFile(path)`: Returns a Promise that resolves to the content of the file at the specified path as a string. Returns `null` if the file doesn't exist.
+- `writeFile(path, content)`: Writes the specified content to a file at the given path. Automatically creates parent directories if they don't exist.
+- `parseCSV(text, delimiter?)`: A helper to parse CSV text into an array of objects. Default delimiter is `,`.
+- `stringifyCSV(data, delimiter?)`: A helper to convert an array of objects back into a CSV string. Default delimiter is `,`.
+- `requestUrl(request)`: A wrapper around Obsidian's `requestUrl` to make network requests (bypassing CORS).
 
 ## 👨‍💻 Widget Development Guide
 
@@ -200,9 +205,10 @@ init();
 
 Access the gallery via the **Ribbon Icon** (layout icon), the command **"Open Widget Gallery"**, or the **Right-click Context Menu**.
 
-- **Search & Filter**: Find widgets by name or tags (e.g., search `#tools` to see all tool-related widgets).
+- **Search & Filter**: Find widgets by name or tags.
+- **Rich Metadata**: Each widget now displays a **description** and **author** information. Click on a truncated description to see the full text.
 - **Insert**: Quickly add a template to your current note at the cursor position.
-- **Edit**: Modify a template's HTML, CSS, JS, and Tags.
+- **Edit**: Modify a template's HTML, CSS, JS, Tags, Description, and Author info.
 - **Custom ID**: Manually set the filename for your templates in the gallery.
 - **Save to Gallery**: Hover over any rendered widget in your notes and click the 💾 button to save it as a template.
 
@@ -221,10 +227,12 @@ Your widget could help others enhance their Obsidian experience!
 
 ## ⚙️ Settings
 
-- **Gallery Path**: Choose where your `.json` templates are stored (default: `.obsidian/plugins/obsidian-obsidget/gallery`).
+- **Gallery Path**: Choose where your `.json` templates are stored.
 - **Language**: Select your preferred language (English, French, Spanish, German, or Portuguese).
-- **GitHub Repository**: Direct link to the project for updates, bug reports, and contributions.
-- **Update Gallery**: A one-click button to download the latest community widgets from GitHub without overwriting your local modifications.
+- **GitHub Repository**: Direct link to the project for updates and contributions.
+- **Update Gallery**: Download the latest community widgets from GitHub without overwriting your local modifications.
+- **Update All Widgets in Vault**: A powerful tool to update the code of all widgets already inserted in your notes to their latest version from the gallery, while **preserving your data**.
+- **Max Widget Width**: Limit the width of widgets when 'Readable line length' is disabled. Choose between percentage or fixed pixels.
 
 
 ## Star History

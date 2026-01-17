@@ -404,8 +404,58 @@ export default class WidgetPlugin extends Plugin {
                         });
                     }
                 },
-                getFiles: () => {
-                    return this.app.vault.getMarkdownFiles().map(f => f.path);
+                getFiles: (extension?: string) => {
+                    let files = this.app.vault.getFiles();
+                    if (extension) {
+                        files = files.filter(f => f.extension === extension.replace('.', ''));
+                    }
+                    return files.map(f => f.path);
+                },
+                readFile: async (path: string) => {
+                    const normalizedPath = normalizePath(path);
+                    try {
+                        const exists = await this.app.vault.adapter.exists(normalizedPath);
+                        if (!exists) return null;
+                        return await this.app.vault.adapter.read(normalizedPath);
+                    } catch (e) {
+                        return null;
+                    }
+                },
+                writeFile: async (path: string, content: string) => {
+                    const normalizedPath = normalizePath(path);
+                    try {
+                        // Ensure directory exists
+                        const dirPath = normalizedPath.split('/').slice(0, -1).join('/');
+                        if (dirPath && !(await this.app.vault.adapter.exists(dirPath))) {
+                            await this.app.vault.createFolder(dirPath);
+                        }
+                        await this.app.vault.adapter.write(normalizedPath, content);
+                    } catch (e) {
+                        console.error('ObsidGet: Error writing file:', e);
+                    }
+                },
+                parseCSV: (text: string, delimiter: string = ',') => {
+                    if (!text) return [];
+                    const lines = text.split('\n').filter(l => l.trim());
+                    if (lines.length === 0) return [];
+                    const headers = lines[0].split(delimiter).map(h => h.trim());
+                    return lines.slice(1).map(line => {
+                        const values = line.split(delimiter);
+                        const obj: any = {};
+                        headers.forEach((header, i) => {
+                            obj[header] = values[i]?.trim();
+                        });
+                        return obj;
+                    });
+                },
+                stringifyCSV: (data: any[], delimiter: string = ',') => {
+                    if (!data || data.length === 0) return "";
+                    const headers = Object.keys(data[0]);
+                    const csvLines = [headers.join(delimiter)];
+                    data.forEach(row => {
+                        csvLines.push(headers.map(h => row[h]).join(delimiter));
+                    });
+                    return csvLines.join('\n');
                 }
             };
 
