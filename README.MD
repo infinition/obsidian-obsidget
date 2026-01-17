@@ -11,7 +11,7 @@ Obsidian plugin to create, manage, and reuse interactive widgets using HTML, CSS
 - **Modern Widget Gallery**: A beautiful, responsive gallery with tag filtering and search to manage your templates.
 - **Context Menu Integration**: Right-click anywhere in your note to quickly insert a widget from your gallery.
 - **Live Editor**: Create and modify widget templates with a built-in editor, including custom ID/filename management.
-- **Smart Sync**: Update your widget collection directly from the community gallery in settings without updating the plugin.
+- **Smart Sync**: Automatically downloads the community gallery on first install. You can also manually update your collection directly from the settings without updating the plugin.
 - **Multilingual Support**: Fully translated into English, French, Spanish, German, and Portuguese.
 - **Premium Aesthetics**: Designed to feel like a native part of Obsidian with support for CSS variables and smooth animations.
 
@@ -87,6 +87,9 @@ Each widget has access to a powerful `api` object:
 - `saveState(data)`: Saves a JSON object **directly into the 4th section** of the code block in your note.
 - `getState()`: Retrieves the JSON object from the 4th section.
 - `instanceId`: A unique identifier for the widget instance.
+- `getFrontmatter(path?)`: Returns a Promise that resolves to the note's YAML Frontmatter (Properties) as an object. If `path` is provided, it targets that specific note; otherwise, it targets the current note.
+- `updateFrontmatter(data, path?)`: Updates the note's YAML Frontmatter with the provided object. If `path` is provided, it targets that specific note; otherwise, it targets the current note. Useful for Dashboards or interacting with other notes.
+- `getFiles()`: Returns an array of all Markdown file paths in the vault. Useful for creating file selectors in widgets.
 
 ## 👨‍💻 Widget Development Guide
 

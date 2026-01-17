@@ -48,7 +48,13 @@ export const I18N_DICT = {
         updateAllWidgetsNoWidgets: "No widgets found to update.",
         updateAllWidgetsError: "❌ Error updating widgets: {0}",
         settingsMaxWidth: "Max Widget Width",
-        settingsMaxWidthDesc: "Limit the width of widgets when 'Readable line length' is disabled. Choose between percentage or fixed pixels."
+        settingsMaxWidthDesc: "Limit the width of widgets when 'Readable line length' is disabled. Choose between percentage or fixed pixels.",
+        widgetDescription: "Description",
+        widgetDescriptionDesc: "Describe what this widget does",
+        widgetAuthor: "Author",
+        widgetAuthorDesc: "Your name or username",
+        widgetAuthorUrl: "Author URL",
+        widgetAuthorUrlDesc: "Link to your GitHub profile (optional)"
     },
     fr: {
         galleryTitle: "🧩 Galerie de Widgets",
@@ -99,7 +105,13 @@ export const I18N_DICT = {
         updateAllWidgetsNoWidgets: "Aucun widget à mettre à jour trouvé.",
         updateAllWidgetsError: "❌ Erreur lors de la mise à jour des widgets : {0}",
         settingsMaxWidth: "Largeur maximale des widgets",
-        settingsMaxWidthDesc: "Limite la largeur des widgets quand 'Longueur de ligne lisible' est désactivée. Choisissez entre pourcentage ou pixels fixes."
+        settingsMaxWidthDesc: "Limite la largeur des widgets quand 'Longueur de ligne lisible' est désactivée. Choisissez entre pourcentage ou pixels fixes.",
+        widgetDescription: "Description",
+        widgetDescriptionDesc: "Décrivez ce que fait ce widget",
+        widgetAuthor: "Auteur",
+        widgetAuthorDesc: "Votre nom ou pseudo",
+        widgetAuthorUrl: "URL de l'auteur",
+        widgetAuthorUrlDesc: "Lien vers votre profil GitHub (optionnel)"
     },
     es: {
         galleryTitle: "🧩 Galería de Widgets",
@@ -150,7 +162,13 @@ export const I18N_DICT = {
         updateAllWidgetsNoWidgets: "No se encontraron widgets para actualizar.",
         updateAllWidgetsError: "❌ Error al actualizar los widgets: {0}",
         settingsMaxWidth: "Ancho máximo del widget",
-        settingsMaxWidthDesc: "Limite el ancho de los widgets cuando 'Longitud de línea legible' está desactivada. Elija entre porcentaje o píxeles fijos."
+        settingsMaxWidthDesc: "Limite el ancho de los widgets cuando 'Longitud de línea legible' está desactivada. Elija entre porcentaje o píxeles fijos.",
+        widgetDescription: "Descripción",
+        widgetDescriptionDesc: "Describe lo que hace este widget",
+        widgetAuthor: "Autor",
+        widgetAuthorDesc: "Tu nombre o apodo",
+        widgetAuthorUrl: "URL del autor",
+        widgetAuthorUrlDesc: "Enlace a tu perfil de GitHub (opcional)"
     },
     de: {
         galleryTitle: "🧩 Widget-Galerie",
@@ -201,7 +219,13 @@ export const I18N_DICT = {
         updateAllWidgetsNoWidgets: "Keine zu aktualisierenden Widgets gefunden.",
         updateAllWidgetsError: "❌ Fehler beim Aktualisieren der Widgets: {0}",
         settingsMaxWidth: "Maximale Widget-Breite",
-        settingsMaxWidthDesc: "Begrenzt die Breite von Widgets, wenn 'Lesbare Zeilenlänge' deaktiviert ist. Wählen Sie zwischen Prozentsatz oder festen Pixeln."
+        settingsMaxWidthDesc: "Begrenzt die Breite von Widgets, wenn 'Lesbare Zeilenlänge' deaktiviert ist. Wählen Sie zwischen Prozentsatz oder festen Pixeln.",
+        widgetDescription: "Beschreibung",
+        widgetDescriptionDesc: "Beschreiben Sie, was dieses Widget macht",
+        widgetAuthor: "Autor",
+        widgetAuthorDesc: "Ihr Name oder Benutzername",
+        widgetAuthorUrl: "Autor-URL",
+        widgetAuthorUrlDesc: "Link zu Ihrem GitHub-Profil (optional)"
     },
     pt: {
         galleryTitle: "🧩 Galeria de Widgets",
@@ -252,7 +276,13 @@ export const I18N_DICT = {
         updateAllWidgetsNoWidgets: "Nenhum widget encontrado para atualizar.",
         updateAllWidgetsError: "❌ Erro ao atualizar widgets: {0}",
         settingsMaxWidth: "Largura Máxima do Widget",
-        settingsMaxWidthDesc: "Limite a largura dos widgets quando 'Comprimento de linha legível' estiver desativado. Escolha entre porcentagem ou pixels fixos."
+        settingsMaxWidthDesc: "Limite a largura dos widgets quando 'Comprimento de linha legível' estiver desativado. Escolha entre porcentagem ou pixels fixos.",
+        widgetDescription: "Descrição",
+        widgetDescriptionDesc: "Descreva o que este widget faz",
+        widgetAuthor: "Autor",
+        widgetAuthorDesc: "Seu nome ou apelido",
+        widgetAuthorUrl: "URL do autor",
+        widgetAuthorUrlDesc: "Link para seu perfil do GitHub (opcional)"
     }
 };
 

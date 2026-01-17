@@ -27,6 +27,9 @@ interface WidgetTemplate {
     js: string;
     data?: any;
     tags?: string[];
+    description?: string;
+    author?: string;
+    authorUrl?: string;
 }
 
 export default class WidgetPlugin extends Plugin {
@@ -382,7 +385,28 @@ export default class WidgetPlugin extends Plugin {
                     return null;
                 },
                 instanceId: instanceId,
-                requestUrl: requestUrl
+                requestUrl: requestUrl,
+                getFrontmatter: async (path?: string) => {
+                    const targetPath = path || ctx.sourcePath;
+                    const file = this.app.vault.getAbstractFileByPath(targetPath);
+                    if (file instanceof TFile) {
+                        const cache = this.app.metadataCache.getFileCache(file);
+                        return cache?.frontmatter || {};
+                    }
+                    return {};
+                },
+                updateFrontmatter: async (data: any, path?: string) => {
+                    const targetPath = path || ctx.sourcePath;
+                    const file = this.app.vault.getAbstractFileByPath(targetPath);
+                    if (file instanceof TFile) {
+                        await this.app.fileManager.processFrontMatter(file, (frontmatter: any) => {
+                            Object.assign(frontmatter, data);
+                        });
+                    }
+                },
+                getFiles: () => {
+                    return this.app.vault.getMarkdownFiles().map(f => f.path);
+                }
             };
 
             // Execute JS
@@ -898,6 +922,21 @@ class WidgetGalleryModal extends Modal {
         const cardHeader = card.createDiv({ cls: 'widget-card-header' });
         cardHeader.createEl('h3', { text: template.name });
 
+        // Author info
+        if (template.author) {
+            const authorRow = cardHeader.createDiv({ cls: 'widget-card-author' });
+            if (template.authorUrl) {
+                const authorLink = authorRow.createEl('a', {
+                    text: `👤 ${template.author}`,
+                    href: template.authorUrl,
+                    cls: 'widget-author-link'
+                });
+                authorLink.setAttribute('target', '_blank');
+            } else {
+                authorRow.createSpan({ text: `👤 ${template.author}` });
+            }
+        }
+
         // Tags display
         if (template.tags && template.tags.length > 0) {
             const tagsContainer = cardHeader.createDiv({ cls: 'widget-card-tags' });
@@ -907,6 +946,20 @@ class WidgetGalleryModal extends Modal {
             if (template.tags.length > 3) {
                 tagsContainer.createSpan({ text: `+${template.tags.length - 3}`, cls: 'widget-tag more' });
             }
+        }
+
+        // Description (truncated to 4 lines)
+        if (template.description) {
+            const descContainer = card.createDiv({ cls: 'widget-card-description' });
+            const descText = descContainer.createEl('p', { text: template.description });
+
+            // Click handler for popup
+            descContainer.onclick = () => {
+                const popup = new Modal(this.app);
+                popup.titleEl.setText(template.name);
+                popup.contentEl.createEl('p', { text: template.description });
+                popup.open();
+            };
         }
 
         // Preview (non-interactive)
@@ -1081,6 +1134,27 @@ class WidgetEditorModal extends Modal {
                 .onChange(v => {
                     this.template.tags = v.split(',').map(t => t.trim()).filter(t => t.length > 0);
                 }));
+
+        new Setting(contentEl)
+            .setName(this.plugin.t('widgetDescription'))
+            .setDesc(this.plugin.t('widgetDescriptionDesc'))
+            .addTextArea(text => text
+                .setValue(this.template.description || '')
+                .onChange(v => this.template.description = v));
+
+        new Setting(contentEl)
+            .setName(this.plugin.t('widgetAuthor'))
+            .setDesc(this.plugin.t('widgetAuthorDesc'))
+            .addText(text => text
+                .setValue(this.template.author || '')
+                .onChange(v => this.template.author = v));
+
+        new Setting(contentEl)
+            .setName(this.plugin.t('widgetAuthorUrl'))
+            .setDesc(this.plugin.t('widgetAuthorUrlDesc'))
+            .addText(text => text
+                .setValue(this.template.authorUrl || '')
+                .onChange(v => this.template.authorUrl = v));
 
         this.createEditorField(contentEl, this.plugin.t('htmlContent'), this.template.html, (v: string) => this.template.html = v);
         this.createEditorField(contentEl, this.plugin.t('cssContent'), this.template.css, (v: string) => this.template.css = v);
