@@ -54,7 +54,11 @@ export const I18N_DICT = {
         widgetAuthor: "Author",
         widgetAuthorDesc: "Your name or username",
         widgetAuthorUrl: "Author URL",
-        widgetAuthorUrlDesc: "Link to your GitHub profile (optional)"
+        widgetAuthorUrlDesc: "Link to your GitHub profile (optional)",
+        updatePlugin: "Update Plugin",
+        updatePluginDesc: "Update the plugin to the latest version from GitHub.",
+        updatePluginBtn: "Build Update",
+        updatePluginCommand: "Update Plugin from GitHub"
     },
     fr: {
         galleryTitle: "🧩 Galerie de Widgets",
@@ -111,7 +115,11 @@ export const I18N_DICT = {
         widgetAuthor: "Auteur",
         widgetAuthorDesc: "Votre nom ou pseudo",
         widgetAuthorUrl: "URL de l'auteur",
-        widgetAuthorUrlDesc: "Lien vers votre profil GitHub (optionnel)"
+        widgetAuthorUrlDesc: "Lien vers votre profil GitHub (optionnel)",
+        updatePlugin: "Mettre à jour le plugin",
+        updatePluginDesc: "Mettre à jour le plugin vers la dernière version depuis GitHub.",
+        updatePluginBtn: "Mettre à jour (Build)",
+        updatePluginCommand: "Mettre à jour le plugin depuis GitHub"
     },
     es: {
         galleryTitle: "🧩 Galería de Widgets",
@@ -168,7 +176,11 @@ export const I18N_DICT = {
         widgetAuthor: "Autor",
         widgetAuthorDesc: "Tu nombre o apodo",
         widgetAuthorUrl: "URL del autor",
-        widgetAuthorUrlDesc: "Enlace a tu perfil de GitHub (opcional)"
+        widgetAuthorUrlDesc: "Enlace a tu perfil de GitHub (opcional)",
+        updatePlugin: "Actualizar plugin",
+        updatePluginDesc: "Actualiza el plugin a la última versión desde GitHub.",
+        updatePluginBtn: "Actualizar (Build)",
+        updatePluginCommand: "Actualizar plugin desde GitHub"
     },
     de: {
         galleryTitle: "🧩 Widget-Galerie",
@@ -225,7 +237,11 @@ export const I18N_DICT = {
         widgetAuthor: "Autor",
         widgetAuthorDesc: "Ihr Name oder Benutzername",
         widgetAuthorUrl: "Autor-URL",
-        widgetAuthorUrlDesc: "Link zu Ihrem GitHub-Profil (optional)"
+        widgetAuthorUrlDesc: "Link zu Ihrem GitHub-Profil (optional)",
+        updatePlugin: "Plugin aktualisieren",
+        updatePluginDesc: "Aktualisieren Sie das Plugin auf die neueste Version von GitHub.",
+        updatePluginBtn: "Update (Build)",
+        updatePluginCommand: "Plugin von GitHub aktualisieren"
     },
     pt: {
         galleryTitle: "🧩 Galeria de Widgets",
@@ -282,7 +298,11 @@ export const I18N_DICT = {
         widgetAuthor: "Autor",
         widgetAuthorDesc: "Seu nome ou apelido",
         widgetAuthorUrl: "URL do autor",
-        widgetAuthorUrlDesc: "Link para seu perfil do GitHub (opcional)"
+        widgetAuthorUrlDesc: "Link para seu perfil do GitHub (opcional)",
+        updatePlugin: "Atualizar Plugin",
+        updatePluginDesc: "Atualize o plugin para a versão mais recente do GitHub.",
+        updatePluginBtn: "Atualizar (Build)",
+        updatePluginCommand: "Atualizar plugin do GitHub"
     }
 };
 

@@ -95,6 +95,15 @@ export default class WidgetPlugin extends Plugin {
             }
         });
 
+        // Command to update plugin from GitHub
+        this.addCommand({
+            id: 'update-plugin',
+            name: this.t('updatePluginCommand'),
+            callback: () => {
+                this.updatePlugin();
+            }
+        });
+
         // Context menu integration
         this.registerEvent(
             this.app.workspace.on("editor-menu", (menu: Menu, editor: Editor, view: MarkdownView) => {
@@ -722,6 +731,51 @@ export default class WidgetPlugin extends Plugin {
         } catch (e) {
             console.error('ObsidGet: Gallery sync failed:', e);
             new Notice(this.t('syncError', e.message));
+        }
+    }
+
+    async updatePlugin() {
+        try {
+            const releaseUrl = "https://api.github.com/repos/infinition/obsidian-obsidget/releases/latest";
+            new Notice("Checking for plugin updates...");
+            const response = await requestUrl({ url: releaseUrl });
+
+            if (response.status !== 200) {
+                throw new Error(`GitHub API returned ${response.status}`);
+            }
+
+            const release = response.json;
+            const assets = release.assets;
+
+            if (!assets || !Array.isArray(assets)) {
+                throw new Error("No assets found in the latest release.");
+            }
+
+            const filesToDownload = ['main.js', 'manifest.json', 'styles.css'];
+            const pluginDir = `.obsidian/plugins/obsidian-obsidget`;
+
+            for (const fileName of filesToDownload) {
+                const asset = assets.find((a: any) => a.name === fileName);
+                if (asset) {
+                    new Notice(`Downloading ${fileName}...`);
+                    const fileResponse = await requestUrl({ url: asset.browser_download_url });
+                    if (fileResponse.status === 200) {
+                        await this.app.vault.adapter.write(`${pluginDir}/${fileName}`, fileResponse.text);
+                    }
+                }
+            }
+
+            new Notice("Plugin updated! Reloading...");
+
+            // Reload the plugin
+            // @ts-ignore
+            const plugins = this.app.plugins;
+            await plugins.disablePlugin(this.manifest.id);
+            await plugins.enablePlugin(this.manifest.id);
+
+        } catch (e) {
+            console.error('ObsidGet: Plugin update failed:', e);
+            new Notice(`Update failed: ${e.message}`);
         }
     }
 
@@ -1406,6 +1460,20 @@ class WidgetSettingTab extends PluginSettingTab {
                     await this.plugin.syncGallery();
                     btn.setDisabled(false);
                     btn.setButtonText("Update");
+                }));
+
+        new Setting(containerEl)
+            .setName(this.plugin.t('updatePlugin'))
+            .setDesc(this.plugin.t('updatePluginDesc'))
+            .addButton(btn => btn
+                .setButtonText(this.plugin.t('updatePluginBtn'))
+                .setCta()
+                .onClick(async () => {
+                    btn.setDisabled(true);
+                    btn.setButtonText("...");
+                    await this.plugin.updatePlugin();
+                    btn.setDisabled(false);
+                    btn.setButtonText(this.plugin.t('updatePluginBtn'));
                 }));
 
         containerEl.createEl('hr');

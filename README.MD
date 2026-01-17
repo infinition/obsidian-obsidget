@@ -15,6 +15,7 @@ Every widget runs in its own isolated environment (Shadow DOM), ensuring that yo
 - **Live Editor**: Create/modify templates with a built-in editor.
 - **Multilingual**: Available in English, French, Spanish, German, and Portuguese.
 - **Native Integration**: Supports Obsidian CSS variables and adapts to light/dark modes.
+- **Self-Update**: Update the plugin directly from Obsidian using the latest GitHub release.
 
 ## 📥 Installation
 
@@ -28,6 +29,17 @@ Every widget runs in its own isolated environment (Shadow DOM), ensuring that yo
 2. Go to **Settings > BRAT > Plugins > Add Beta plugin**.
 3. Enter the repository URL: `https://github.com/infinition/obsidian-obsidget`.
 4. Enable the plugin.
+
+---
+
+## 🔄 Automatic Updates
+
+ObsidGet can update itself to the latest version directly from GitHub without manual intervention.
+
+- **Via Settings**: Go to **Settings > ObsidGet > Update Plugin** and click **Build Update**.
+- **Via Command**: Open the Command Palette (`Ctrl+P`) and search for `ObsidGet: Update Plugin from GitHub`.
+
+This feature fetches the latest `main.js`, `manifest.json`, and `styles.css` from the official GitHub releases and reloads the plugin automatically.
 
 ---
 
@@ -366,6 +378,7 @@ init();
 * **Update Gallery**: Download latest community widgets.
 * **Update All Widgets in Vault**: Updates the code of all widgets in your notes to the latest gallery version, while **preserving your data**.
 * **Max Widget Width**: Control the maximum width (percentage or pixels).
+* **Update Plugin**: Fetch the latest version of the plugin from GitHub releases.
 
 ## 🤝 Contributing
 
