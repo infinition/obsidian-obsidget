@@ -30,6 +30,7 @@ interface WidgetTemplate {
 }
 
 export default class WidgetPlugin extends Plugin {
+    app: App;
     settings: WidgetPluginSettings;
     templateCache: Map<string, WidgetTemplate> = new Map();
 
@@ -51,11 +52,16 @@ export default class WidgetPlugin extends Plugin {
         await this.ensureDirectory(this.settings.galleryPath);
 
         // First run sync
-        if (this.settings.firstRun) {
-            this.settings.firstRun = false;
-            await this.saveSettings();
-            this.syncGallery();
-        }
+        this.app.workspace.onLayoutReady(async () => {
+            console.log("ObsidGet: Checking first run status...", this.settings.firstRun);
+            if (this.settings.firstRun) {
+                console.log("ObsidGet: First run detected, starting sync...");
+                new Notice("ObsidGet: First installation detected. Downloading widgets...");
+                this.settings.firstRun = false;
+                await this.saveSettings();
+                await this.syncGallery();
+            }
+        });
 
         this.addSettingTab(new WidgetSettingTab(this.app, this));
 
