@@ -1,19 +1,4 @@
-import {
-    App,
-    Plugin,
-    PluginSettingTab,
-    Setting,
-    Notice,
-    TFile,
-    normalizePath,
-    MarkdownPostProcessorContext,
-    Modal,
-    MarkdownView,
-    Editor,
-    Menu,
-    requestUrl,
-    DropdownComponent
-} from 'obsidian';
+import { App, Plugin, PluginSettingTab, Setting, Notice, TFile, normalizePath, MarkdownPostProcessorContext, Modal, MarkdownView, Editor, Menu, requestUrl, DropdownComponent } from 'obsidian';
 import { I18N_DICT, Language } from './i18n';
 
 interface WidgetPluginSettings {
@@ -22,6 +7,7 @@ interface WidgetPluginSettings {
     githubUrl: string;
     maxWidthValue: number;
     maxWidthUnit: 'percent' | 'pixel';
+    firstRun: boolean;
 }
 
 const DEFAULT_SETTINGS: WidgetPluginSettings = {
@@ -29,7 +15,8 @@ const DEFAULT_SETTINGS: WidgetPluginSettings = {
     language: 'en',
     githubUrl: 'https://github.com/infinition/obsidian-obsidget',
     maxWidthValue: 100,
-    maxWidthUnit: 'percent'
+    maxWidthUnit: 'percent',
+    firstRun: true
 };
 
 interface WidgetTemplate {
@@ -61,15 +48,20 @@ export default class WidgetPlugin extends Plugin {
     async onload() {
         await this.loadSettings();
 
-        // Ensure directory exists (local)
+        // Ensure directories exist
         await this.ensureDirectory(this.settings.galleryPath);
 
-        // ✅ Robust startup sync (BRAT-safe): run when vault is truly ready
-        this.registerEvent(
-            this.app.vault.on('ready', async () => {
-                await this.syncGalleryIfEmpty();
-            })
-        );
+        // First run sync
+        this.app.workspace.onLayoutReady(async () => {
+            console.log("ObsidGet: Checking first run status...", this.settings.firstRun);
+            if (this.settings.firstRun) {
+                console.log("ObsidGet: First run detected, starting sync...");
+                new Notice("ObsidGet: First installation detected. Downloading widgets...");
+                this.settings.firstRun = false;
+                await this.saveSettings();
+                await this.syncGallery();
+            }
+        });
 
         this.addSettingTab(new WidgetSettingTab(this.app, this));
 
@@ -167,7 +159,7 @@ export default class WidgetPlugin extends Plugin {
                         } else {
                             htmlContent = `<div class="mod-warning">Widget "${widgetId}" not found in gallery.</div>`;
                         }
-                    } catch (e: any) {
+                    } catch (e) {
                         console.error(`Error loading widget "${widgetId}" from ${galleryPath}:`, e);
                         htmlContent = `<div class="mod-warning">Error loading widget "${widgetId}": ${e.message}</div>`;
                     }
@@ -291,7 +283,7 @@ export default class WidgetPlugin extends Plugin {
             const activeEl = document.activeElement;
             if (activeEl && el.contains(activeEl)) {
                 // Check if it's within our container's shadow root
-                const shadowActive = (container.shadowRoot?.activeElement as HTMLInputElement | HTMLTextAreaElement) ?? null;
+                const shadowActive = container.shadowRoot?.activeElement as HTMLInputElement | HTMLTextAreaElement;
                 if (shadowActive && shadowActive.id) {
                     focusedId = shadowActive.id;
                     selectionStart = shadowActive.selectionStart;
@@ -405,12 +397,12 @@ export default class WidgetPlugin extends Plugin {
                         // Then check api
                         if (prop in target) return target[prop];
                         // Then check window
-                        return (window as any)[prop as any];
+                        return (window as any)[prop];
                     },
                     set(target, prop, value) {
                         // Store in widget context so it's accessible to event handlers
                         widgetContext[prop] = value;
-                        (target as any)[prop] = value;
+                        target[prop] = value;
                         return true;
                     }
                 });
@@ -495,27 +487,6 @@ export default class WidgetPlugin extends Plugin {
     async ensureDirectory(path: string) {
         if (!(await this.app.vault.adapter.exists(path))) {
             await this.app.vault.adapter.mkdir(path);
-        }
-    }
-
-    async syncGalleryIfEmpty() {
-        const path = this.settings.galleryPath;
-
-        try {
-            if (!(await this.app.vault.adapter.exists(path))) {
-                await this.ensureDirectory(path);
-            }
-
-            const listing = await this.app.vault.adapter.list(path);
-            const hasWidgets = listing.files.some(f => f.endsWith('.json'));
-
-            if (!hasWidgets) {
-                console.log("ObsidGet: Empty gallery detected → auto sync");
-                new Notice("ObsidGet: Initializing widget gallery…");
-                await this.syncGallery();
-            }
-        } catch (e) {
-            console.error('ObsidGet: syncGalleryIfEmpty failed:', e);
         }
     }
 
@@ -608,7 +579,7 @@ export default class WidgetPlugin extends Plugin {
 
             console.log(`ObsidGet: Sync complete. ${addedCount} widgets added.`);
             new Notice(this.t('syncSuccess', addedCount));
-        } catch (e: any) {
+        } catch (e) {
             console.error('ObsidGet: Gallery sync failed:', e);
             new Notice(this.t('syncError', e.message));
         }
@@ -692,7 +663,7 @@ export default class WidgetPlugin extends Plugin {
             } else {
                 new Notice(this.t('updateAllWidgetsNoWidgets'));
             }
-        } catch (e: any) {
+        } catch (e) {
             console.error('ObsidGet: Update all widgets failed:', e);
             new Notice(this.t('updateAllWidgetsError', e.message));
         }
@@ -1025,11 +996,13 @@ class WidgetGalleryModal extends Modal {
             const cursor = editor.getCursor();
             editor.replaceRange(content, cursor);
             new Notice(this.plugin.t('widgetSaved'));
+            // this.close(); // Keep open as requested
         } else if (activeView) {
             const activeFile = activeView.file;
             if (activeFile) {
                 await this.app.vault.append(activeFile, content);
                 new Notice(this.plugin.t('widgetSaved'));
+                // this.close(); // Keep open as requested
             }
         }
     }
@@ -1042,7 +1015,7 @@ class WidgetGalleryModal extends Modal {
     }
 
     openWidgetEditor(template?: WidgetTemplate) {
-        new WidgetEditorModal(this.app, this.plugin, async (_saved) => {
+        new WidgetEditorModal(this.app, this.plugin, async (saved) => {
             this.allTemplates = await this.plugin.getGalleryWidgets();
             this.extractAllTags();
             this.populateTagDropdown();
