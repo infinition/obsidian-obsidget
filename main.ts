@@ -51,12 +51,16 @@ export default class WidgetPlugin extends Plugin {
         // Ensure directories exist
         await this.ensureDirectory(this.settings.galleryPath);
 
-        // First run sync
+        // First run sync or empty gallery check (for BRAT installations)
         this.app.workspace.onLayoutReady(async () => {
-            console.log("ObsidGet: Checking first run status...", this.settings.firstRun);
-            if (this.settings.firstRun) {
-                console.log("ObsidGet: First run detected, starting sync...");
-                new Notice("ObsidGet: First installation detected. Downloading widgets...");
+            const galleryFiles = await this.app.vault.adapter.list(this.settings.galleryPath);
+            const isEmpty = !galleryFiles.files.some((f: string) => f.endsWith('.json'));
+
+            if (this.settings.firstRun || isEmpty) {
+                console.log("ObsidGet: Gallery empty or first run detected, starting sync...");
+                if (isEmpty) {
+                    new Notice("ObsidGet: Gallery is empty. Downloading community widgets...");
+                }
                 this.settings.firstRun = false;
                 await this.saveSettings();
                 await this.syncGallery();
