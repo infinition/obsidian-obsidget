@@ -61,9 +61,14 @@
         opacity: 1 !important;
     }
 
-    /* Hide in reading mode */
-    .markdown-preview-view & {
+    /* Hide only in Reading (preview) mode */
+    .workspace-leaf-content[data-mode="preview"] & {
         display: none;
+    }
+
+    /* Optional: ensure visible in Editing (source) mode */
+    .workspace-leaf-content[data-mode="source"] & {
+        display: inline-flex;
     }
 }
 
