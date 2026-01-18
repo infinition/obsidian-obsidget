@@ -190,6 +190,11 @@ export default class WidgetPlugin extends Plugin {
             // Create widget container
             const container = el.createDiv({ cls: 'widget-instance-container' });
 
+            // Prevent default Obsidian double-click behavior (switching to edit mode)
+            container.addEventListener('dblclick', (e) => {
+                e.stopPropagation();
+            });
+
             // Apply max width from settings
             const { maxWidthValue, maxWidthUnit } = this.settings;
             if (maxWidthUnit === 'percent' && maxWidthValue < 100) {
@@ -1211,7 +1216,12 @@ class WidgetGalleryModal extends Modal {
         const actions = card.createDiv({ cls: 'widget-card-actions' });
         const insertBtn = actions.createEl('button', { text: `📥 ${this.plugin.t('insert')}`, cls: 'mod-cta' });
         insertBtn.onclick = () => {
-            this.insertWidget(template);
+            this.insertWidget(template, true);
+        };
+
+        const insertFullBtn = actions.createEl('button', { text: `📄`, attr: { title: this.plugin.t('insertFullCode') || "Insert Full Code (Local)" } });
+        insertFullBtn.onclick = () => {
+            this.insertWidget(template, false);
         };
 
         const editBtn = actions.createEl('button', { text: `✏️ ${this.plugin.t('edit')}` });
@@ -1273,7 +1283,7 @@ class WidgetGalleryModal extends Modal {
         }
     }
 
-    async insertWidget(template: WidgetTemplate) {
+    async insertWidget(template: WidgetTemplate, linked: boolean = true) {
         const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
         const editor = this.targetEditor || activeView?.editor;
 
@@ -1283,7 +1293,18 @@ class WidgetGalleryModal extends Modal {
         }
 
         const dataStr = template.data ? JSON.stringify(template.data, null, 2) : '';
-        const content = `\n\n\`\`\`widget\nID: ${template.id}\n${template.html}\n---\n${template.css}\n---\n${template.js}\n---\n${dataStr}\n\`\`\`\n\n`;
+        let content = "";
+
+        if (linked) {
+            // Insert as Linked Widget (only ID and Data)
+            const dataSection = (dataStr && dataStr.trim() !== "" && dataStr.trim() !== "{}")
+                ? `\n---\n---\n---\n${dataStr.trim()}`
+                : "";
+            content = `\n\n\`\`\`widget\nID: ${template.id}${dataSection}\n\`\`\`\n\n`;
+        } else {
+            // Insert as Local Widget (Full Code)
+            content = `\n\n\`\`\`widget\nID: ${template.id}\n${template.html}\n---\n${template.css}\n---\n${template.js}\n---\n${dataStr}\n\`\`\`\n\n`;
+        }
 
         if (editor) {
             const cursor = editor.getCursor();

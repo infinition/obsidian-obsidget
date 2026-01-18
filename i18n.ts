@@ -63,7 +63,8 @@ export const I18N_DICT = {
         tabVisual: "Visual Style",
         livePreview: "Live Preview",
         visualEditor: "Visual Editor",
-        detectedVariables: "Detected CSS Variables"
+        detectedVariables: "Detected CSS Variables",
+        insertFullCode: "Insert Full Code (Local)"
     },
     fr: {
         galleryTitle: "🧩 Galerie de Widgets",
@@ -129,7 +130,8 @@ export const I18N_DICT = {
         tabVisual: "Style Visuel",
         livePreview: "Aperçu en direct",
         visualEditor: "Éditeur Visuel",
-        detectedVariables: "Variables CSS détectées"
+        detectedVariables: "Variables CSS détectées",
+        insertFullCode: "Insérer le code complet (Local)"
     },
     es: {
         galleryTitle: "🧩 Galería de Widgets",
@@ -195,7 +197,8 @@ export const I18N_DICT = {
         tabVisual: "Visual Style",
         livePreview: "Live Preview",
         visualEditor: "Visual Editor",
-        detectedVariables: "Detected CSS Variables"
+        detectedVariables: "Detected CSS Variables",
+        insertFullCode: "Insertar código completo (Local)"
     },
     de: {
         galleryTitle: "🧩 Widget-Galerie",
@@ -261,7 +264,8 @@ export const I18N_DICT = {
         tabVisual: "Visual Style",
         livePreview: "Live Preview",
         visualEditor: "Visual Editor",
-        detectedVariables: "Detected CSS Variables"
+        detectedVariables: "Detected CSS Variables",
+        insertFullCode: "Vollständigen Code einfügen (Lokal)"
     },
     pt: {
         galleryTitle: "🧩 Galeria de Widgets",
@@ -327,7 +331,8 @@ export const I18N_DICT = {
         tabVisual: "Visual Style",
         livePreview: "Live Preview",
         visualEditor: "Visual Editor",
-        detectedVariables: "Detected CSS Variables"
+        detectedVariables: "Detected CSS Variables",
+        insertFullCode: "Inserir código completo (Local)"
     }
 };
 
