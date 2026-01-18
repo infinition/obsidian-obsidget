@@ -33,8 +33,7 @@ interface WidgetTemplate {
 }
 
 export default class WidgetPlugin extends Plugin {
-    app: App;
-    settings: WidgetPluginSettings;
+    settings!: WidgetPluginSettings;
     templateCache: Map<string, WidgetTemplate> = new Map();
 
     t(key: keyof typeof I18N_DICT['en'], ...args: any[]): string {
@@ -106,8 +105,8 @@ export default class WidgetPlugin extends Plugin {
 
         // Context menu integration
         this.registerEvent(
-            this.app.workspace.on("editor-menu", (menu: Menu, editor: Editor, view: MarkdownView) => {
-                menu.addItem((item) => {
+            this.app.workspace.on("editor-menu" as any, (menu: any, editor: any, view: any) => {
+                menu.addItem((item: any) => {
                     item
                         .setTitle(this.t('insertWidgetMenu'))
                         .setIcon("zap")
@@ -151,30 +150,29 @@ export default class WidgetPlugin extends Plugin {
             }
 
             // If HTML is empty but we have an ID, try to load from gallery
-            if (!htmlContent && widgetId) {
+            if (!htmlContent.trim() && widgetId) {
                 isLinked = true;
-                if (this.templateCache.has(widgetId)) {
-                    const template = this.templateCache.get(widgetId)!;
-                    htmlContent = template.html;
-                    if (!cssContent) cssContent = template.css;
-                    if (!jsContent) jsContent = template.js;
-                } else {
+                let template = this.templateCache.get(widgetId);
+
+                if (!template) {
                     const galleryPath = normalizePath(`${this.settings.galleryPath}/${widgetId}.json`);
                     try {
                         if (await this.app.vault.adapter.exists(galleryPath)) {
                             const content = await this.app.vault.adapter.read(galleryPath);
-                            const template: WidgetTemplate = JSON.parse(content);
-                            this.templateCache.set(widgetId, template);
-                            htmlContent = template.html;
-                            if (!cssContent) cssContent = template.css;
-                            if (!jsContent) jsContent = template.js;
-                        } else {
-                            htmlContent = `<div class="mod-warning">Widget "${widgetId}" not found in gallery.</div>`;
+                            template = JSON.parse(content);
+                            this.templateCache.set(widgetId, template!);
                         }
                     } catch (e) {
-                        console.error(`Error loading widget "${widgetId}" from ${galleryPath}:`, e);
-                        htmlContent = `<div class="mod-warning">Error loading widget "${widgetId}": ${e.message}</div>`;
+                        console.error(`Error loading widget "${widgetId}":`, e);
                     }
+                }
+
+                if (template) {
+                    if (!htmlContent.trim()) htmlContent = template.html || '';
+                    if (!cssContent.trim()) cssContent = template.css || '';
+                    if (!jsContent.trim()) jsContent = template.js || '';
+                } else {
+                    htmlContent = `<div class="mod-warning">Widget "${widgetId}" not found in gallery.</div>`;
                 }
             }
 
@@ -226,20 +224,48 @@ export default class WidgetPlugin extends Plugin {
 
             if (isLinked) {
                 // Edit Button for Linked Widgets
-                createBtn('✏️', 'Edit this widget in gallery', () => {
-                    const template: WidgetTemplate = {
-                        id: widgetId,
-                        name: widgetId,
-                        html: htmlContent,
-                        css: cssContent,
-                        js: jsContent
-                    };
-                    new WidgetEditorModal(this.app, this, async (saved) => {
-                        await this.saveToGallery(saved);
-                        new Notice(`Widget "${saved.name}" updated!`);
-                        // Refresh the view to show changes
-                        this.app.workspace.trigger('layout-change');
-                    }, template).open();
+                createBtn('✏️', 'Edit this widget in gallery', async () => {
+                    let template = this.templateCache.get(widgetId);
+                    if (!template || !template.css || !template.js) {
+                        const galleryPath = normalizePath(`${this.settings.galleryPath}/${widgetId}.json`);
+                        if (await this.app.vault.adapter.exists(galleryPath)) {
+                            const content = await this.app.vault.adapter.read(galleryPath);
+                            template = JSON.parse(content);
+                            if (template) this.templateCache.set(widgetId, template);
+                        }
+                    }
+
+                    if (template) {
+                        new WidgetEditorModal(this.app, this, async (saved) => {
+                            await this.saveToGallery(saved);
+                            this.templateCache.set(saved.id, saved);
+                            new Notice(`Widget "${saved.name}" updated!`);
+                            this.app.workspace.trigger('layout-change');
+                        }, template).open();
+                    } else {
+                        new Notice(`Could not load widget "${widgetId}" from gallery.`);
+                    }
+                });
+
+                // Reverse to Local Button
+                createBtn('🔓', 'Convert to Local Widget (Full Code)', async () => {
+                    const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+                    if (view) {
+                        const editor = view.editor;
+                        const section = ctx.getSectionInfo(el);
+                        if (section) {
+                            const rangeStart = { line: section.lineStart, ch: 0 };
+                            const rangeEnd = { line: section.lineEnd + 1, ch: 0 };
+
+                            const dataSection = (inlineDataStr && inlineDataStr.trim() !== "" && inlineDataStr.trim() !== "{}")
+                                ? `\n---\n${inlineDataStr.trim()}`
+                                : "";
+
+                            const newContent = `\n\`\`\`widget\nID: ${widgetId}\n${htmlContent}\n---\n${cssContent}\n---\n${jsContent}${dataSection}\n\`\`\`\n\n`;
+                            editor.replaceRange(newContent, rangeStart, rangeEnd);
+                            new Notice('Converted to Local Widget!');
+                        }
+                    }
                 });
             } else {
                 // Save Button
@@ -257,6 +283,40 @@ export default class WidgetPlugin extends Plugin {
                     }, template).open();
                 });
 
+                // Edit Button for Local Widgets
+                createBtn('✏️', 'Edit this widget', () => {
+                    const template: WidgetTemplate = {
+                        id: widgetId || `widget_${Date.now()}`,
+                        name: widgetId || 'Local Widget',
+                        html: htmlContent,
+                        css: cssContent,
+                        js: jsContent,
+                        data: inlineDataStr ? JSON.parse(inlineDataStr) : undefined
+                    };
+                    const modal = new WidgetEditorModal(this.app, this, async (saved) => {
+                        // Save to gallery
+                        await this.saveToGallery(saved);
+                        new Notice(`Widget "${saved.name}" saved to gallery!`);
+
+                        // Update local block
+                        const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+                        if (view) {
+                            const editor = view.editor;
+                            const section = ctx.getSectionInfo(el);
+                            if (section) {
+                                const rangeStart = { line: section.lineStart, ch: 0 };
+                                const rangeEnd = { line: section.lineEnd + 1, ch: 0 };
+                                const dataSection = (saved.data && JSON.stringify(saved.data) !== "{}")
+                                    ? `\n---\n${JSON.stringify(saved.data, null, 2)}`
+                                    : "";
+                                const newContent = `\n\`\`\`widget\nID: ${saved.id}\n${saved.html}\n---\n${saved.css}\n---\n${saved.js}${dataSection}\n\`\`\`\n\n`;
+                                editor.replaceRange(newContent, rangeStart, rangeEnd);
+                            }
+                        }
+                    }, template);
+                    modal.open();
+                });
+
                 // Convert to Link Button
                 createBtn('🔗', 'Convert to Linked Widget (Short Code)', async () => {
                     if (!widgetId) {
@@ -264,22 +324,23 @@ export default class WidgetPlugin extends Plugin {
                         return;
                     }
 
-                    // Check if exists in gallery
                     const galleryPath = normalizePath(`${this.settings.galleryPath}/${widgetId}.json`);
                     if (!(await this.app.vault.adapter.exists(galleryPath))) {
                         new Notice(`Widget "${widgetId}" not found in gallery. Please save it first.`);
                         return;
                     }
 
-                    // Replace code block
                     const view = this.app.workspace.getActiveViewOfType(MarkdownView);
                     if (view) {
                         const editor = view.editor;
                         const section = ctx.getSectionInfo(el);
                         if (section) {
                             const rangeStart = { line: section.lineStart, ch: 0 };
-                            const rangeEnd = { line: section.lineEnd, ch: 0 };
-                            const newContent = `\`\`\`widget\nID: ${widgetId}\n\`\`\``;
+                            const rangeEnd = { line: section.lineEnd + 1, ch: 0 };
+                            const dataSection = (inlineDataStr && inlineDataStr.trim() !== "" && inlineDataStr.trim() !== "{}")
+                                ? `\n---\n---\n---\n${inlineDataStr.trim()}`
+                                : "";
+                            const newContent = `\n\`\`\`widget\nID: ${widgetId}${dataSection}\n\`\`\`\n\n`;
                             editor.replaceRange(newContent, rangeStart, rangeEnd);
                             new Notice('Converted to Linked Widget!');
                         }
@@ -314,8 +375,7 @@ export default class WidgetPlugin extends Plugin {
             shadow.appendChild(style);
 
             const innerDiv = document.createElement('div');
-            innerDiv.style.width = '100%';
-            innerDiv.innerHTML = htmlContent;
+            innerDiv.innerHTML = htmlContent + "<slot></slot>";
             shadow.appendChild(innerDiv);
 
             // Per-instance debounce timer
@@ -367,13 +427,14 @@ export default class WidgetPlugin extends Plugin {
                                         newSections[3] = newDataStr;
 
                                         // Reconstruct block with precise newline handling
-                                        const trimmedData = newSections[3].trim();
-                                        const newBlockContent = [
-                                            newSections[0].trim(),
-                                            newSections[1].trim(),
-                                            newSections[2].trim(),
-                                            trimmedData
-                                        ].join('\n---\n') + (trimmedData ? '\n' : '');
+                                        const reconstructedSections = [
+                                            blockSections[0].trim(),
+                                            blockSections[1]?.trim() || '',
+                                            blockSections[2]?.trim() || '',
+                                            newDataStr.trim()
+                                        ];
+
+                                        const newBlockContent = reconstructedSections.join('\n---\n') + '\n';
 
                                         lines.splice(section.lineStart + 1, section.lineEnd - section.lineStart - 1, newBlockContent);
                                         return lines.join('\n');
@@ -728,9 +789,9 @@ export default class WidgetPlugin extends Plugin {
 
             console.log(`ObsidGet: Sync complete. ${addedCount} widgets added.`);
             new Notice(this.t('syncSuccess', addedCount));
-        } catch (e) {
-            console.error('ObsidGet: Gallery sync failed:', e);
-            new Notice(this.t('syncError', e.message));
+        } catch (e: any) {
+            console.error('ObsidGet: Sync failed:', e);
+            new Notice(`Sync failed: ${e.message}`);
         }
     }
 
@@ -773,9 +834,9 @@ export default class WidgetPlugin extends Plugin {
             await plugins.disablePlugin(this.manifest.id);
             await plugins.enablePlugin(this.manifest.id);
 
-        } catch (e) {
+        } catch (e: unknown) {
             console.error('ObsidGet: Plugin update failed:', e);
-            new Notice(`Update failed: ${e.message}`);
+            new Notice(`Update failed: ${(e as Error).message}`);
         }
     }
 
@@ -873,10 +934,10 @@ class WidgetGalleryModal extends Modal {
     filteredTemplates: WidgetTemplate[] = [];
     allTags: string[] = [];
     selectedTag: string = "";
-    gridEl: HTMLElement;
-    tagSelectEl: HTMLSelectElement;
-    searchInputEl: HTMLInputElement;
-    clearBtnEl: HTMLElement;
+    gridEl!: HTMLElement;
+    tagSelectEl!: HTMLSelectElement;
+    searchInputEl!: HTMLInputElement;
+    clearBtnEl!: HTMLElement;
     isMobile: boolean;
     targetEditor: Editor | null = null;
 
@@ -1222,7 +1283,7 @@ class WidgetGalleryModal extends Modal {
         }
 
         const dataStr = template.data ? JSON.stringify(template.data, null, 2) : '';
-        const content = `\n\n\`\`\`widget\nID: ${template.id}\n${template.html}\n---\n${template.css}\n---\n${template.js}\n---\n${dataStr}\n\`\`\``;
+        const content = `\n\n\`\`\`widget\nID: ${template.id}\n${template.html}\n---\n${template.css}\n---\n${template.js}\n---\n${dataStr}\n\`\`\`\n\n`;
 
         if (editor) {
             const cursor = editor.getCursor();
@@ -1261,6 +1322,11 @@ class WidgetEditorModal extends Modal {
     template: WidgetTemplate;
     originalId: string;
     onSave: (template: WidgetTemplate) => void;
+    previewEl: HTMLElement;
+    editorContainer: HTMLElement;
+    activeTab: 'info' | 'code' | 'visual' = 'code';
+    initialCss: string;
+    initialVariables: Map<string, string> = new Map();
 
     constructor(app: App, plugin: WidgetPlugin, onSave: (template: WidgetTemplate) => void, template?: WidgetTemplate) {
         super(app);
@@ -1275,64 +1341,129 @@ class WidgetEditorModal extends Modal {
             tags: []
         };
         this.originalId = template ? template.id : "";
+        this.initialCss = this.template.css;
+
+        // Capture initial variables for per-element reset
+        const varRegex = /(--[a-zA-Z0-9_-]+)\s*:\s*([^;]+);/g;
+        let match;
+        while ((match = varRegex.exec(this.initialCss)) !== null) {
+            this.initialVariables.set(match[1], match[2].trim());
+        }
+
+        this.previewEl = document.createElement('div');
+        this.editorContainer = document.createElement('div');
     }
 
     onOpen() {
         const { contentEl } = this;
         contentEl.empty();
-        (this as any).modalEl.addClass('widget-editor-modal');
+        (this as any).modalEl.addClass('widget-editor-modal-v2');
+
+        const mainContainer = contentEl.createDiv({ cls: 'editor-main-container' });
+
+        // Left Side: Editor
+        this.editorContainer = mainContainer.createDiv({ cls: 'editor-side' });
+
+        // Right Side: Preview
+        const previewSide = mainContainer.createDiv({ cls: 'preview-side' });
+        previewSide.createEl('h3', { text: `👁️ ${this.plugin.t('livePreview')}` });
+        this.previewEl = previewSide.createDiv({ cls: 'preview-container' });
+
+        this.renderEditor();
+        this.updatePreview();
+    }
+
+    renderEditor() {
+        this.editorContainer.empty();
 
         const isNew = !this.template.name || this.template.name === 'Nouveau Widget';
-        contentEl.createEl('h2', { text: isNew ? `✨ ${this.plugin.t('createWidget')}` : this.plugin.t('editWidget', this.template.name) });
+        this.editorContainer.createEl('h2', { text: isNew ? `✨ ${this.plugin.t('createWidget')}` : this.plugin.t('editWidget', this.template.name) });
 
-        new Setting(contentEl)
-            .setName(this.plugin.t('widgetName'))
-            .addText(text => text
-                .setValue(this.template.name)
-                .onChange(v => this.template.name = v));
+        // Tabs
+        const tabsContainer = this.editorContainer.createDiv({ cls: 'editor-tabs' });
+        const tabs = [
+            { id: 'info', label: 'ℹ️ Info' },
+            { id: 'code', label: `💻 ${this.plugin.t('tabCode')}` },
+            { id: 'visual', label: `🎨 ${this.plugin.t('tabVisual')}` }
+        ];
 
-        new Setting(contentEl)
-            .setName(this.plugin.t('widgetId'))
-            .addText(text => text
-                .setValue(this.template.id)
-                .onChange(v => {
-                    this.template.id = v.replace(/[^a-zA-Z0-9_-]/g, '');
-                }));
+        tabs.forEach(tab => {
+            const tabBtn = tabsContainer.createEl('button', {
+                text: tab.label,
+                cls: `tab-btn ${this.activeTab === tab.id ? 'is-active' : ''}`
+            });
+            tabBtn.onclick = () => {
+                this.activeTab = tab.id as any;
+                this.renderEditor();
+            };
+        });
 
-        new Setting(contentEl)
-            .setName(this.plugin.t('widgetTags'))
-            .addText(text => text
-                .setValue((this.template.tags || []).join(', '))
-                .onChange(v => {
-                    this.template.tags = v.split(',').map(t => t.trim()).filter(t => t.length > 0);
-                }));
+        const scrollArea = this.editorContainer.createDiv({ cls: 'editor-scroll-area' });
 
-        new Setting(contentEl)
-            .setName(this.plugin.t('widgetDescription'))
-            .setDesc(this.plugin.t('widgetDescriptionDesc'))
-            .addTextArea(text => text
-                .setValue(this.template.description || '')
-                .onChange(v => this.template.description = v));
+        if (this.activeTab === 'info') {
+            new Setting(scrollArea)
+                .setName(this.plugin.t('widgetName'))
+                .addText(text => text
+                    .setValue(this.template.name)
+                    .onChange(v => {
+                        this.template.name = v;
+                        this.updatePreview(false);
+                    }));
 
-        new Setting(contentEl)
-            .setName(this.plugin.t('widgetAuthor'))
-            .setDesc(this.plugin.t('widgetAuthorDesc'))
-            .addText(text => text
-                .setValue(this.template.author || '')
-                .onChange(v => this.template.author = v));
+            new Setting(scrollArea)
+                .setName(this.plugin.t('widgetId'))
+                .addText(text => text
+                    .setValue(this.template.id)
+                    .onChange(v => {
+                        this.template.id = v.replace(/[^a-zA-Z0-9_-]/g, '');
+                    }));
 
-        new Setting(contentEl)
-            .setName(this.plugin.t('widgetAuthorUrl'))
-            .setDesc(this.plugin.t('widgetAuthorUrlDesc'))
-            .addText(text => text
-                .setValue(this.template.authorUrl || '')
-                .onChange(v => this.template.authorUrl = v));
+            new Setting(scrollArea)
+                .setName(this.plugin.t('widgetTags'))
+                .addText(text => text
+                    .setValue((this.template.tags || []).join(', '))
+                    .onChange(v => {
+                        this.template.tags = v.split(',').map(t => t.trim()).filter(t => t.length > 0);
+                    }));
 
-        this.createEditorField(contentEl, this.plugin.t('htmlContent'), this.template.html, (v: string) => this.template.html = v);
-        this.createEditorField(contentEl, this.plugin.t('cssContent'), this.template.css, (v: string) => this.template.css = v);
-        this.createEditorField(contentEl, this.plugin.t('jsContent'), this.template.js, (v: string) => this.template.js = v);
+            new Setting(scrollArea)
+                .setName(this.plugin.t('widgetDescription'))
+                .setDesc(this.plugin.t('widgetDescriptionDesc'))
+                .addTextArea(text => text
+                    .setValue(this.template.description || '')
+                    .onChange(v => this.template.description = v));
 
-        const footer = contentEl.createDiv({ cls: 'modal-footer' });
+            new Setting(scrollArea)
+                .setName(this.plugin.t('widgetAuthor'))
+                .setDesc(this.plugin.t('widgetAuthorDesc'))
+                .addText(text => text
+                    .setValue(this.template.author || '')
+                    .onChange(v => this.template.author = v));
+
+            new Setting(scrollArea)
+                .setName(this.plugin.t('widgetAuthorUrl'))
+                .setDesc(this.plugin.t('widgetAuthorUrlDesc'))
+                .addText(text => text
+                    .setValue(this.template.authorUrl || '')
+                    .onChange(v => this.template.authorUrl = v));
+        } else if (this.activeTab === 'code') {
+            this.createEditorField(scrollArea, this.plugin.t('htmlContent'), this.template.html, (v: string) => {
+                this.template.html = v;
+                this.updatePreview(false);
+            });
+            this.createEditorField(scrollArea, this.plugin.t('cssContent'), this.template.css, (v: string) => {
+                this.template.css = v;
+                this.updatePreview(true);
+            });
+            this.createEditorField(scrollArea, this.plugin.t('jsContent'), this.template.js, (v: string) => {
+                this.template.js = v;
+                this.updatePreview(false);
+            });
+        } else if (this.activeTab === 'visual') {
+            this.renderVisualEditor(scrollArea);
+        }
+
+        const footer = this.editorContainer.createDiv({ cls: 'modal-footer' });
         const cancelBtn = footer.createEl('button', { text: this.plugin.t('cancel') });
         cancelBtn.onclick = () => this.close();
 
@@ -1341,6 +1472,15 @@ class WidgetEditorModal extends Modal {
             if (!this.template.id) {
                 new Notice("ID is required");
                 return;
+            }
+
+            // Check for overwrite if ID changed or if it's a new widget
+            if (this.template.id !== this.originalId) {
+                const exists = await this.plugin.app.vault.adapter.exists(normalizePath(`${this.plugin.settings.galleryPath}/${this.template.id}.json`));
+                if (exists) {
+                    const confirm = window.confirm(`A widget with ID "${this.template.id}" already exists in the gallery. Overwrite?`);
+                    if (!confirm) return;
+                }
             }
 
             // If ID changed, delete old file
@@ -1353,6 +1493,461 @@ class WidgetEditorModal extends Modal {
             this.onSave(this.template);
             this.close();
         };
+    }
+
+    renderVisualEditor(container: HTMLElement) {
+        const header = container.createDiv({ cls: 'visual-editor-header' });
+        header.createEl('h3', { text: this.plugin.t('detectedVariables') });
+
+        const actions = header.createDiv({ cls: 'visual-header-actions' });
+
+        const resetAllBtn = actions.createEl('button', { text: '🔄 Reset All', cls: 'clickable-icon' });
+        resetAllBtn.title = "Reset all visual styles to initial state";
+        resetAllBtn.onclick = () => {
+            if (window.confirm("Reset all visual styles to initial state?")) {
+                this.template.css = this.initialCss;
+                this.renderEditor();
+                this.updatePreview();
+            }
+        };
+
+        const magicBtn = actions.createEl('button', { text: '✨ Magic Scan', cls: 'clickable-icon' });
+        magicBtn.title = "Scan for hardcoded values and convert to variables";
+        magicBtn.onclick = () => {
+            this.magicScanAndInject();
+            this.renderEditor();
+        };
+
+        const addVarBtn = actions.createEl('button', { text: '➕', cls: 'clickable-icon' });
+        addVarBtn.title = "Add new variable";
+        addVarBtn.onclick = () => this.promptAddVariable(container);
+
+        const scrollArea = container.createDiv({ cls: 'visual-variables-list' });
+        this.renderVariablesList(scrollArea);
+    }
+
+    renderVariablesList(container: HTMLElement) {
+        container.empty();
+
+        const css = this.template.css;
+        const variablesMap = new Map<string, { value: string, isDefined: boolean }>();
+
+        // 1. Find all definitions: --var: val;
+        const defRegex = /(--[a-zA-Z0-9_-]+)\s*:\s*([^;]+);/g;
+        let match;
+        while ((match = defRegex.exec(css)) !== null) {
+            variablesMap.set(match[1], { value: match[2].trim(), isDefined: true });
+        }
+
+        // 2. Find all usages: var(--var)
+        const usageRegex = /var\((--[a-zA-Z0-9_-]+)\)/g;
+        usageRegex.lastIndex = 0;
+        while ((match = usageRegex.exec(css)) !== null) {
+            if (!variablesMap.has(match[1])) {
+                variablesMap.set(match[1], { value: '', isDefined: false });
+            }
+        }
+
+        // 3. Find any other --vars
+        const genericVarRegex = /(--[a-zA-Z0-9_-]+)/g;
+        genericVarRegex.lastIndex = 0;
+        while ((match = genericVarRegex.exec(css)) !== null) {
+            if (!variablesMap.has(match[1])) {
+                variablesMap.set(match[1], { value: '', isDefined: false });
+            }
+        }
+
+        if (variablesMap.size === 0) {
+            const emptyState = container.createDiv({ cls: 'visual-empty-state' });
+            emptyState.createEl('p', {
+                text: 'No CSS variables detected. Use the Magic Scan button above to automatically convert your CSS to visual controls.',
+                cls: 'mod-muted'
+            });
+            return;
+        }
+
+        // Sort variables: defined first, then by name
+        const sortedVars = Array.from(variablesMap.entries()).sort((a, b) => {
+            if (a[1].isDefined && !b[1].isDefined) return -1;
+            if (!a[1].isDefined && b[1].isDefined) return 1;
+            return a[0].localeCompare(b[0]);
+        });
+
+        sortedVars.forEach(([name, info]) => {
+            const s = new Setting(container)
+                .setName(name.replace('--', '').replace(/-/g, ' '));
+
+            // Add hover events for highlighting
+            s.settingEl.onmouseenter = () => this.highlightVariable(name);
+            s.settingEl.onmouseleave = () => this.clearHighlight();
+
+            const val = info.value.toLowerCase();
+            const n = name.toLowerCase();
+
+            // Helper to check if it's a color
+            const isColor = (varName: string, varVal: string) => {
+                const colorKeywords = ['color', 'bg', 'background', 'accent', 'text', 'border', 'shadow', 'fill', 'stroke'];
+                const v = varVal.toLowerCase();
+                // If it's a size variable, it's NOT a color even if it looks like one (unlikely but safe)
+                if (varName.includes('size') || varName.includes('padding') || varName.includes('margin') || varName.includes('radius') || varName.includes('gap')) return false;
+                return colorKeywords.some(k => varName.toLowerCase().includes(k)) ||
+                    v.startsWith('#') || v.startsWith('rgb') || v.startsWith('hsl') || v === 'transparent';
+            };
+
+            if (!info.isDefined) {
+                s.setDesc('Theme variable. Override it?');
+                s.addButton(btn => btn.setButtonText('Override').onClick(() => {
+                    let defaultValue = 'inherit';
+                    if (isColor(name, '')) defaultValue = '#ffffff';
+                    else if (n.includes('size') || n.includes('padding') || n.includes('margin')) defaultValue = '1rem';
+                    else if (n.includes('radius')) defaultValue = '8px';
+
+                    this.updateCssVariable(name, defaultValue);
+                    this.renderEditor();
+                }));
+                return;
+            }
+
+            // 1. Dropdowns for keywords
+            if (n.includes('display')) {
+                s.addDropdown(d => d.addOptions({ 'block': 'block', 'flex': 'flex', 'grid': 'grid', 'inline-block': 'inline-block', 'none': 'none' })
+                    .setValue(val).onChange(v => this.updateCssVariable(name, v)));
+            } else if (n.includes('flex-direction')) {
+                s.addDropdown(d => d.addOptions({ 'row': 'row', 'column': 'column', 'row-reverse': 'row-reverse', 'column-reverse': 'column-reverse' })
+                    .setValue(val).onChange(v => this.updateCssVariable(name, v)));
+            } else if (n.includes('align-items') || n.includes('justify-content')) {
+                s.addDropdown(d => d.addOptions({ 'center': 'center', 'flex-start': 'start', 'flex-end': 'end', 'space-between': 'between', 'space-around': 'around' })
+                    .setValue(val).onChange(v => this.updateCssVariable(name, v)));
+            } else if (n.includes('font-weight')) {
+                s.addDropdown(d => d.addOptions({ 'normal': 'normal', 'bold': 'bold', '100': '100', '300': '300', '400': '400', '500': '500', '600': '600', '700': '700', '900': '900' })
+                    .setValue(val).onChange(v => this.updateCssVariable(name, v)));
+            }
+            // 2. Color Picker
+            else if (isColor(name, info.value)) {
+                s.addColorPicker(color => color
+                    .setValue(val.includes('var(') ? '#ffffff' : info.value)
+                    .onChange(v => this.updateCssVariable(name, v)));
+            }
+            // 3. Slider for sizes
+            else if (val.includes('px') || val.includes('rem') || val.includes('%') || val.includes('em') || /^-?\d+\.?\d*$/.test(val)) {
+                const numMatch = val.match(/(-?\d+\.?\d*)/);
+                const unit = val.replace(/[0-9.-]/g, '').trim() || (n.includes('weight') ? '' : 'px');
+                const currentVal = numMatch ? parseFloat(numMatch[0]) : 0;
+
+                const valueInput = s.controlEl.createEl('input', {
+                    type: 'text',
+                    cls: 'slider-value-input',
+                    value: info.value
+                });
+
+                s.addSlider(slider => {
+                    slider
+                        .setLimits(0, unit === '%' ? 100 : (unit === 'rem' || unit === 'em' ? 10 : (unit === '' ? 900 : 200)), unit === 'rem' || unit === 'em' ? 0.1 : (unit === '' ? 100 : 1))
+                        .setValue(currentVal)
+                        .onChange(v => {
+                            const newVal = `${v}${unit}`;
+                            valueInput.value = newVal;
+                            this.updateCssVariable(name, newVal);
+                        });
+
+                    valueInput.oninput = (e) => {
+                        const inputVal = (e.target as HTMLInputElement).value;
+                        const match = inputVal.match(/(-?\d+\.?\d*)/);
+                        if (match) {
+                            const num = parseFloat(match[0]);
+                            slider.setValue(num);
+                            this.updateCssVariable(name, inputVal);
+                        }
+                    };
+                });
+            }
+            // 4. Generic Text
+            else {
+                s.addText(text => text
+                    .setValue(info.value)
+                    .onChange(v => this.updateCssVariable(name, v)));
+            }
+
+            // Reset button
+            if (this.initialVariables.has(name)) {
+                s.addExtraButton(btn => btn.setIcon('reset').setTooltip('Reset to initial value').onClick(() => {
+                    this.updateCssVariable(name, this.initialVariables.get(name)!);
+                    this.renderEditor();
+                }));
+            }
+
+            // Delete button
+            s.addExtraButton(btn => btn.setIcon('trash').setTooltip('Remove variable').onClick(() => {
+                this.removeCssVariable(name);
+                this.renderEditor();
+            }));
+        });
+    }
+
+    highlightVariable(name: string) {
+        if (!this.previewEl || !this.previewEl.shadowRoot) return;
+        const shadow = this.previewEl.shadowRoot;
+
+        // 1. Find selectors using this variable
+        const css = this.template.css;
+        const selectors: string[] = [];
+
+        // Match blocks: selector { ... var(--name) ... }
+        // This is a simplified parser but works for most widget CSS
+        const blockRegex = /([^{}]+)\{[^{}]*var\(\s*name\s*\)[^{}]*\}/g.source.replace('name', name);
+        const regex = new RegExp(blockRegex, 'g');
+        let match;
+        while ((match = regex.exec(css)) !== null) {
+            const sel = match[1].trim();
+            // Split multiple selectors: .a, .b -> [.a, .b]
+            sel.split(',').forEach(s => {
+                const trimmed = s.trim();
+                if (trimmed) selectors.push(trimmed);
+            });
+        }
+
+        if (selectors.length === 0) return;
+
+        // 2. Apply highlight to matching elements
+        selectors.forEach(selector => {
+            try {
+                if (selector === ':host') {
+                    const content = shadow.querySelector('.widget-content');
+                    if (content) content.classList.add('widget-visual-highlight');
+                } else {
+                    const elements = shadow.querySelectorAll(selector);
+                    elements.forEach(el => el.classList.add('widget-visual-highlight'));
+                }
+            } catch (e) {
+                // Ignore invalid selectors
+            }
+        });
+    }
+
+    clearHighlight() {
+        if (!this.previewEl || !this.previewEl.shadowRoot) return;
+        const shadow = this.previewEl.shadowRoot;
+        shadow.querySelectorAll('.widget-visual-highlight').forEach(el => {
+            el.classList.remove('widget-visual-highlight');
+        });
+    }
+
+    magicScanAndInject() {
+        let css = this.template.css;
+
+        // 1. Extract :host block to avoid scanning existing variables
+        const hostMatch = css.match(/:host\s*\{([\s\S]*?)\}/);
+        let hostContent = hostMatch ? hostMatch[1] : '';
+        let restOfCss = css.replace(/:host\s*\{[\s\S]*?\}/, '');
+
+        const replacements: { prop: string, val: string, varName: string }[] = [];
+        const valueMap = new Map<string, string>(); // "prop:val" -> varName
+
+        // Comprehensive list of properties to convert
+        const propRegex = /(padding(?:-top|-bottom|-left|-right)?|margin(?:-top|-bottom|-left|-right)?|border-radius|background(?:-color)?|color|font-size|font-weight|gap|width|height|max-width|max-height|min-width|min-height|flex|line-height|letter-spacing|box-shadow|opacity|outline|border(?:-color|-width)?|display|flex-direction|align-items|justify-content|text-align|text-transform|overflow(?:-x|-y)?|cursor|transition|z-index)\s*:\s*([^;!{}]+);/g;
+
+        let match;
+        while ((match = propRegex.exec(restOfCss)) !== null) {
+            const prop = match[1];
+            const val = match[2].trim();
+
+            // Skip if already a variable or too complex (e.g. calc with multiple vars)
+            if (val.includes('var(')) continue;
+
+            const key = `${prop}:${val}`;
+            if (!valueMap.has(key)) {
+                // Check if this value is already defined in :host under a different name
+                const existingVarMatch = hostContent.match(new RegExp(`(--[a-zA-Z0-9_-]+)\\s*:\\s*${val.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*;`));
+                if (existingVarMatch) {
+                    valueMap.set(key, existingVarMatch[1]);
+                } else {
+                    const index = valueMap.size + 1;
+                    const varName = `--w-${prop.replace(/[^a-zA-Z0-9]/g, '-')}-${index}`; // Sanitize prop for var name
+                    valueMap.set(key, varName);
+                    replacements.push({ prop, val, varName });
+                }
+            }
+        }
+
+        if (replacements.length === 0 && valueMap.size === 0) {
+            this.injectCommonVariables();
+            return;
+        }
+
+        // 2. Inject new variables into :host
+        if (replacements.length > 0) {
+            const newVars = replacements.map(r => `    ${r.varName}: ${r.val};`).join('\n');
+            if (!hostMatch) {
+                css = `:host {\n${newVars}\n}\n` + css;
+            } else {
+                // Insert new variables right after the opening brace of :host
+                css = css.replace(/:host\s*\{/, `:host {\n${newVars}\n`);
+            }
+        }
+
+        // 3. Replace hardcoded values with variables in the rest of the CSS
+        valueMap.forEach((varName, key) => {
+            const [prop, val] = key.split(':');
+            const escapedVal = val.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            // Use a regex that ensures we match the property and value exactly
+            const rRegex = new RegExp(`${prop}\\s*:\\s*${escapedVal}\\s*;`, 'g');
+            restOfCss = restOfCss.replace(rRegex, `${prop}: var(${varName});`);
+        });
+
+        // Reconstruct CSS
+        if (hostMatch) {
+            // Update hostContent with new variables if we didn't just prepend them
+            const updatedHostMatch = css.match(/:host\s*\{([\s\S]*?)\}/);
+            const updatedHostBlock = updatedHostMatch ? updatedHostMatch[0] : '';
+            this.template.css = updatedHostBlock + '\n' + restOfCss;
+        } else {
+            this.template.css = css;
+        }
+
+        this.updatePreview();
+    }
+
+    removeCssVariable(name: string) {
+        const regex = new RegExp(`${name}\\s*:\\s*([^;]+);\\n?`, 'g');
+        this.template.css = this.template.css.replace(regex, '');
+        this.updatePreview();
+    }
+
+    injectCommonVariables() {
+        const commonVars = `
+:host {
+    --widget-bg: var(--background-secondary);
+    --widget-accent: var(--interactive-accent);
+    --widget-radius: 12px;
+    --widget-padding: 1rem;
+    --widget-text: var(--text-normal);
+}
+`;
+        if (!this.template.css.includes(':host')) {
+            this.template.css = commonVars + this.template.css;
+        } else {
+            this.template.css = this.template.css.replace(':host {', `:host {\n    --widget-bg: var(--background-secondary);\n    --widget-accent: var(--interactive-accent);\n    --widget-radius: 12px;\n    --widget-padding: 1rem;\n    --widget-text: var(--text-normal);`);
+        }
+        this.updatePreview();
+    }
+
+    promptAddVariable(container: HTMLElement) {
+        // Simple prompt for now, could be a small modal or inline form
+        const name = prompt("Variable name (e.g. --my-color):", "--");
+        if (name && name.startsWith('--')) {
+            const value = prompt("Initial value (e.g. #ff0000 or 10px):", "#");
+            if (value) {
+                if (!this.template.css.includes(':host')) {
+                    this.template.css = `:host {\n    ${name}: ${value};\n}\n` + this.template.css;
+                } else {
+                    this.template.css = this.template.css.replace(':host {', `:host {\n    ${name}: ${value};`);
+                }
+                this.renderEditor();
+                this.updatePreview();
+            }
+        }
+    }
+
+    updateCssVariable(name: string, value: string) {
+        const regex = new RegExp(`(${name}\\s*:\\s*)([^;]+);`, 'g');
+        if (regex.test(this.template.css)) {
+            this.template.css = this.template.css.replace(regex, `$1${value};`);
+        } else {
+            // Inject into :host
+            if (!this.template.css.includes(':host')) {
+                this.template.css = `:host {\n    ${name}: ${value};\n}\n` + this.template.css;
+            } else {
+                this.template.css = this.template.css.replace(':host {', `:host {\n    ${name}: ${value};`);
+            }
+        }
+        this.updatePreview(true);
+    }
+
+    updatePreview(onlyCss = false) {
+        if (!this.previewEl) return;
+
+        let shadow = this.previewEl.shadowRoot;
+        if (!shadow) {
+            shadow = this.previewEl.attachShadow({ mode: 'open' });
+        }
+
+        let styleEl = shadow.querySelector('style');
+        if (!styleEl) {
+            styleEl = document.createElement('style');
+            shadow.appendChild(styleEl);
+        }
+
+        styleEl.textContent = `
+            :host { display: block; background: var(--background-primary); padding: 20px; border-radius: 8px; min-height: 100%; color: var(--text-normal); }
+            ${this.template.css}
+            
+            /* Highlight styles */
+            .widget-visual-highlight {
+                outline: 2px solid var(--interactive-accent) !important;
+                outline-offset: 2px !important;
+                box-shadow: 0 0 0 4px rgba(var(--interactive-accent-rgb), 0.4) !important;
+                transition: outline 0.2s ease, box-shadow 0.2s ease !important;
+                z-index: 10000 !important;
+            }
+        `;
+
+        if (onlyCss) return;
+
+        // Full update (HTML + JS)
+        let contentEl = shadow.querySelector('.widget-content');
+        if (contentEl) contentEl.remove();
+
+        contentEl = document.createElement('div');
+        contentEl.className = 'widget-content';
+        contentEl.innerHTML = this.template.html;
+        shadow.appendChild(contentEl);
+
+        this.runPreviewJs(shadow);
+    }
+
+    runPreviewJs(shadow: ShadowRoot) {
+        const jsContent = this.template.js;
+        if (!jsContent || !jsContent.trim()) return;
+
+        try {
+            const apiProxy = {
+                root: shadow,
+                data: this.template.data || {},
+                saveState: async (newData: any) => {
+                    this.template.data = newData;
+                },
+                getState: () => this.template.data || {},
+                getWidgetState: (id: string) => Promise.resolve({}),
+                updateWidgetState: (id: string, data: any) => Promise.resolve(),
+                getNoteState: () => Promise.resolve({}),
+                updateNoteState: (data: any) => Promise.resolve(),
+                t: (key: string, ...args: any[]) => this.plugin.t(key as any, ...args),
+            };
+
+            // Extract function names for export
+            const functionNames: string[] = [];
+            const functionRegex = /(?:async\s+)?function\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\(/g;
+            let match;
+            while ((match = functionRegex.exec(jsContent)) !== null) {
+                if (match[1] !== 'init') functionNames.push(match[1]);
+            }
+            if (/function\s+init\s*\(/.test(jsContent)) functionNames.push('init');
+
+            const functionExports = functionNames.map(name =>
+                `if (typeof ${name} === 'function') api.${name} = ${name};`
+            ).join('\n');
+
+            const wrappedScript = `
+                ${jsContent}
+                try { ${functionExports} } catch(e) {}
+            `;
+
+            const scriptFunction = new Function('api', `with(api) { ${wrappedScript} }`);
+            scriptFunction(apiProxy);
+            this.plugin.bindEvents(shadow, apiProxy);
+        } catch (e) {
+            console.error('Preview JS Error:', e);
+        }
     }
 
     createEditorField(container: HTMLElement, name: string, value: string, onChange: (v: string) => void) {
@@ -1387,8 +1982,8 @@ class WidgetSettingTab extends PluginSettingTab {
                 .addOption('de', 'Deutsch')
                 .addOption('pt', 'Português')
                 .setValue(this.plugin.settings.language)
-                .onChange(async (value: Language) => {
-                    this.plugin.settings.language = value;
+                .onChange(async (value) => {
+                    this.plugin.settings.language = value as Language;
                     await this.plugin.saveSettings();
                     this.display(); // Refresh to update labels
                 }));
@@ -1410,8 +2005,8 @@ class WidgetSettingTab extends PluginSettingTab {
                 .addOption('percent', '%')
                 .addOption('pixel', 'px')
                 .setValue(this.plugin.settings.maxWidthUnit)
-                .onChange(async (value: 'percent' | 'pixel') => {
-                    this.plugin.settings.maxWidthUnit = value;
+                .onChange(async (value) => {
+                    this.plugin.settings.maxWidthUnit = value as 'percent' | 'pixel';
                     if (value === 'percent') {
                         this.plugin.settings.maxWidthValue = Math.min(this.plugin.settings.maxWidthValue, 100);
                     } else {

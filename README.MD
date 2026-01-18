@@ -12,7 +12,9 @@ Every widget runs in its own isolated environment (Shadow DOM), ensuring that yo
 - **Vault & Data Access**: Read/write files (JSON, CSV, etc.) and interact with Note Properties (YAML/Frontmatter).
 - **Template Gallery**: Built-in system to manage, tag, and search widgets. Includes "Smart Sync" for community templates.
 - **Context Menu**: Right-click anywhere to insert a widget instantly.
-- **Live Editor**: Create/modify templates with a built-in editor.
+- **Live Editor & Visual Design**: Create/modify templates with a built-in split-view editor.
+- **Visual CSS Editor**: Tweak styles using sliders and color pickers for detected CSS variables.
+- **Real-time Preview**: See your changes instantly as you type or adjust visual controls.
 - **Multilingual**: Available in English, French, Spanish, German, and Portuguese.
 - **Native Integration**: Supports Obsidian CSS variables and adapts to light/dark modes.
 - **Self-Update**: Update the plugin directly from Obsidian using the latest GitHub release.

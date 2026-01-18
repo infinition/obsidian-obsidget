@@ -58,7 +58,12 @@ export const I18N_DICT = {
         updatePlugin: "Update Plugin",
         updatePluginDesc: "Update the plugin to the latest version from GitHub.",
         updatePluginBtn: "Build Update",
-        updatePluginCommand: "Update Plugin from GitHub"
+        updatePluginCommand: "Update Plugin from GitHub",
+        tabCode: "Code",
+        tabVisual: "Visual Style",
+        livePreview: "Live Preview",
+        visualEditor: "Visual Editor",
+        detectedVariables: "Detected CSS Variables"
     },
     fr: {
         galleryTitle: "🧩 Galerie de Widgets",
@@ -119,7 +124,12 @@ export const I18N_DICT = {
         updatePlugin: "Mettre à jour le plugin",
         updatePluginDesc: "Mettre à jour le plugin vers la dernière version depuis GitHub.",
         updatePluginBtn: "Mettre à jour (Build)",
-        updatePluginCommand: "Mettre à jour le plugin depuis GitHub"
+        updatePluginCommand: "Mettre à jour le plugin depuis GitHub",
+        tabCode: "Code",
+        tabVisual: "Style Visuel",
+        livePreview: "Aperçu en direct",
+        visualEditor: "Éditeur Visuel",
+        detectedVariables: "Variables CSS détectées"
     },
     es: {
         galleryTitle: "🧩 Galería de Widgets",
@@ -180,7 +190,12 @@ export const I18N_DICT = {
         updatePlugin: "Actualizar plugin",
         updatePluginDesc: "Actualiza el plugin a la última versión desde GitHub.",
         updatePluginBtn: "Actualizar (Build)",
-        updatePluginCommand: "Actualizar plugin desde GitHub"
+        updatePluginCommand: "Actualizar plugin desde GitHub",
+        tabCode: "Code",
+        tabVisual: "Visual Style",
+        livePreview: "Live Preview",
+        visualEditor: "Visual Editor",
+        detectedVariables: "Detected CSS Variables"
     },
     de: {
         galleryTitle: "🧩 Widget-Galerie",
@@ -241,7 +256,12 @@ export const I18N_DICT = {
         updatePlugin: "Plugin aktualisieren",
         updatePluginDesc: "Aktualisieren Sie das Plugin auf die neueste Version von GitHub.",
         updatePluginBtn: "Update (Build)",
-        updatePluginCommand: "Plugin von GitHub aktualisieren"
+        updatePluginCommand: "Plugin von GitHub aktualisieren",
+        tabCode: "Code",
+        tabVisual: "Visual Style",
+        livePreview: "Live Preview",
+        visualEditor: "Visual Editor",
+        detectedVariables: "Detected CSS Variables"
     },
     pt: {
         galleryTitle: "🧩 Galeria de Widgets",
@@ -302,7 +322,12 @@ export const I18N_DICT = {
         updatePlugin: "Atualizar Plugin",
         updatePluginDesc: "Atualize o plugin para a versão mais recente do GitHub.",
         updatePluginBtn: "Atualizar (Build)",
-        updatePluginCommand: "Atualizar plugin do GitHub"
+        updatePluginCommand: "Atualizar plugin do GitHub",
+        tabCode: "Code",
+        tabVisual: "Visual Style",
+        livePreview: "Live Preview",
+        visualEditor: "Visual Editor",
+        detectedVariables: "Detected CSS Variables"
     }
 };
 
