@@ -64,7 +64,19 @@ export const I18N_DICT = {
         livePreview: "Live Preview",
         visualEditor: "Visual Editor",
         detectedVariables: "Detected CSS Variables",
-        insertFullCode: "Insert Full Code (Local)"
+        insertFullCode: "Insert Full Code (Local)",
+        settingsShowDataFiles: "Show Data Files (CSV, JSON, XML)",
+        settingsShowDataFilesDesc: "Show these file types in the Obsidian file explorer. Requires reload.",
+        sortBy: "Sort by",
+        sortByLastModified: "Last Modified",
+        sortByCreated: "Created Date",
+        sortByName: "Name (A-Z)",
+        checkForUpdates: "Check for Updates",
+        checkForUpdatesDesc: "Check if a new version of the plugin is available on GitHub.",
+        checkingForUpdates: "Checking for updates...",
+        pluginUpToDate: "Plugin is up to date (v{0}).",
+        updateAvailable: "Update available: v{0}. Current: v{1}.",
+        updateNow: "Update Now"
     },
     fr: {
         galleryTitle: "🧩 Galerie de Widgets",
@@ -131,7 +143,19 @@ export const I18N_DICT = {
         livePreview: "Aperçu en direct",
         visualEditor: "Éditeur Visuel",
         detectedVariables: "Variables CSS détectées",
-        insertFullCode: "Insérer le code complet (Local)"
+        insertFullCode: "Insérer le code complet (Local)",
+        settingsShowDataFiles: "Afficher les fichiers de données (CSV, JSON, XML)",
+        settingsShowDataFilesDesc: "Afficher ces types de fichiers dans l'explorateur de fichiers Obsidian. Nécessite un redémarrage.",
+        sortBy: "Trier par",
+        sortByLastModified: "Dernière modification",
+        sortByCreated: "Date de création",
+        sortByName: "Nom (A-Z)",
+        checkForUpdates: "Vérifier les mises à jour",
+        checkForUpdatesDesc: "Vérifier si une nouvelle version du plugin est disponible sur GitHub.",
+        checkingForUpdates: "Recherche de mises à jour...",
+        pluginUpToDate: "Le plugin est à jour (v{0}).",
+        updateAvailable: "Mise à jour disponible : v{0}. Actuelle : v{1}.",
+        updateNow: "Mettre à jour maintenant"
     },
     es: {
         galleryTitle: "🧩 Galería de Widgets",
@@ -198,7 +222,19 @@ export const I18N_DICT = {
         livePreview: "Live Preview",
         visualEditor: "Visual Editor",
         detectedVariables: "Detected CSS Variables",
-        insertFullCode: "Insertar código completo (Local)"
+        insertFullCode: "Insertar código completo (Local)",
+        settingsShowDataFiles: "Mostrar archivos de datos (CSV, JSON, XML)",
+        settingsShowDataFilesDesc: "Mostrar estos tipos de archivos en el explorador de archivos de Obsidian. Requiere recargar.",
+        sortBy: "Ordenar por",
+        sortByLastModified: "Última modificación",
+        sortByCreated: "Fecha de creación",
+        sortByName: "Nombre (A-Z)",
+        checkForUpdates: "Buscar actualizaciones",
+        checkForUpdatesDesc: "Compruebe si hay una nueva versión del plugin disponible en GitHub.",
+        checkingForUpdates: "Buscando actualizaciones...",
+        pluginUpToDate: "El plugin está actualizado (v{0}).",
+        updateAvailable: "Actualización disponible: v{0}. Actual: v{1}.",
+        updateNow: "Actualizar ahora"
     },
     de: {
         galleryTitle: "🧩 Widget-Galerie",
@@ -265,7 +301,19 @@ export const I18N_DICT = {
         livePreview: "Live Preview",
         visualEditor: "Visual Editor",
         detectedVariables: "Detected CSS Variables",
-        insertFullCode: "Vollständigen Code einfügen (Lokal)"
+        insertFullCode: "Vollständigen Code einfügen (Lokal)",
+        settingsShowDataFiles: "Datendateien anzeigen (CSV, JSON, XML)",
+        settingsShowDataFilesDesc: "Diese Dateitypen im Obsidian-Dateiexplorer anzeigen. Erfordert Neustart.",
+        sortBy: "Sortieren nach",
+        sortByLastModified: "Zuletzt geändert",
+        sortByCreated: "Erstellungsdatum",
+        sortByName: "Name (A-Z)",
+        checkForUpdates: "Nach Updates suchen",
+        checkForUpdatesDesc: "Prüfen Sie, ob eine neue Version des Plugins auf GitHub verfügbar ist.",
+        checkingForUpdates: "Suche nach Updates...",
+        pluginUpToDate: "Plugin ist auf dem neuesten Stand (v{0}).",
+        updateAvailable: "Update verfügbar: v{0}. Aktuell: v{1}.",
+        updateNow: "Jetzt aktualisieren"
     },
     pt: {
         galleryTitle: "🧩 Galeria de Widgets",
@@ -332,7 +380,19 @@ export const I18N_DICT = {
         livePreview: "Live Preview",
         visualEditor: "Visual Editor",
         detectedVariables: "Detected CSS Variables",
-        insertFullCode: "Inserir código completo (Local)"
+        insertFullCode: "Inserir código completo (Local)",
+        settingsShowDataFiles: "Mostrar arquivos de dados (CSV, JSON, XML)",
+        settingsShowDataFilesDesc: "Mostrar esses tipos de arquivos no explorador de arquivos do Obsidian. Requer recarregamento.",
+        sortBy: "Ordenar por",
+        sortByLastModified: "Última modificação",
+        sortByCreated: "Data de criação",
+        sortByName: "Nome (A-Z)",
+        checkForUpdates: "Verificar atualizações",
+        checkForUpdatesDesc: "Verifique se uma nova versão do plugin está disponível no GitHub.",
+        checkingForUpdates: "Verificando atualizações...",
+        pluginUpToDate: "O plugin está atualizado (v{0}).",
+        updateAvailable: "Atualização disponível: v{0}. Atual: v{1}.",
+        updateNow: "Atualizar agora"
     }
 };
 

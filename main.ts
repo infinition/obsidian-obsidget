@@ -8,6 +8,7 @@ interface WidgetPluginSettings {
     maxWidthValue: number;
     maxWidthUnit: 'percent' | 'pixel';
     firstRun: boolean;
+    showDataFiles: boolean;
 }
 
 const DEFAULT_SETTINGS: WidgetPluginSettings = {
@@ -16,7 +17,8 @@ const DEFAULT_SETTINGS: WidgetPluginSettings = {
     githubUrl: 'https://github.com/infinition/obsidian-obsidget',
     maxWidthValue: 100,
     maxWidthUnit: 'percent',
-    firstRun: true
+    firstRun: true,
+    showDataFiles: false
 };
 
 interface WidgetTemplate {
@@ -30,6 +32,8 @@ interface WidgetTemplate {
     description?: string;
     author?: string;
     authorUrl?: string;
+    createdDate?: number;
+    lastModifiedDate?: number;
 }
 
 export default class WidgetPlugin extends Plugin {
@@ -47,8 +51,44 @@ export default class WidgetPlugin extends Plugin {
         return text;
     }
 
+    /**
+     * Split content on delimiter lines (---) that are on their own line
+     * This prevents splitting on --- that appears inside JSON or other content
+     */
+    private splitOnDelimiters(content: string, maxSplits: number = 3): string[] {
+        const lines = content.split('\n');
+        const sections: string[] = [];
+        let currentSection: string[] = [];
+        let splitCount = 0;
+
+        for (const line of lines) {
+            if (line.trim() === '---' && splitCount < maxSplits) {
+                sections.push(currentSection.join('\n'));
+                currentSection = [];
+                splitCount++;
+            } else {
+                currentSection.push(line);
+            }
+        }
+
+        // Add the last section
+        sections.push(currentSection.join('\n'));
+
+        return sections;
+    }
+
+
+
     async onload() {
         await this.loadSettings();
+
+        // Register data file extensions if enabled
+        if (this.settings.showDataFiles) {
+            this.registerExtensions(['json', 'csv', 'xml'], 'markdown');
+        }
+
+        // Check for updates on startup
+        this.checkForUpdates(true);
 
         // Ensure directories exist
         await this.ensureDirectory(this.settings.galleryPath);
@@ -128,7 +168,8 @@ export default class WidgetPlugin extends Plugin {
         );
 
         this.registerMarkdownCodeBlockProcessor('widget', async (source: string, el: HTMLElement, ctx: MarkdownPostProcessorContext) => {
-            const sections = source.split('---');
+            // Robust splitting: only the first 3 '---' on their own lines are separators
+            const sections = this.splitOnDelimiters(source, 3);
             let firstSection = sections[0].trim();
             let widgetId = '';
             let htmlContent = '';
@@ -211,7 +252,8 @@ export default class WidgetPlugin extends Plugin {
             const btnContainer = container.createDiv({ cls: 'widget-action-buttons' });
             btnContainer.style.position = 'absolute';
             btnContainer.style.top = '10px';
-            btnContainer.style.right = '10px';
+            btnContainer.style.left = '50%';
+            btnContainer.style.transform = 'translateX(-50%)';
             btnContainer.style.display = 'flex';
             btnContainer.style.gap = '5px';
             btnContainer.style.zIndex = '100';
@@ -400,49 +442,83 @@ export default class WidgetPlugin extends Plugin {
                             saveTimeout = setTimeout(async () => {
                                 try {
                                     await this.app.vault.process(file, (oldContent) => {
-                                        const lines = oldContent.split('\n');
-                                        if (section.lineStart + 1 >= lines.length || section.lineEnd > lines.length) return oldContent;
+                                        // Use regex to find the widget block instead of line numbers
+                                        // This prevents including frontmatter YAML
+                                        const widgetRegex = /(```widget\n)([\s\S]*?)(```)/g;
+                                        let match;
+                                        let targetMatch = null;
+                                        let matchIndex = 0;
 
-                                        const blockLines = lines.slice(section.lineStart + 1, section.lineEnd);
-                                        const blockContent = blockLines.join('\n');
-
-                                        // Robust splitting: only the first 3 '---' are separators
-                                        const blockSections: string[] = [];
-                                        let remaining = blockContent;
-                                        for (let i = 0; i < 3; i++) {
-                                            const index = remaining.indexOf('---');
-                                            if (index !== -1) {
-                                                blockSections.push(remaining.substring(0, index));
-                                                remaining = remaining.substring(index + 3);
-                                            } else {
+                                        // Find all widget blocks and locate the one at our section
+                                        while ((match = widgetRegex.exec(oldContent)) !== null) {
+                                            const matchStart = oldContent.substring(0, match.index).split('\n').length - 1;
+                                            if (matchStart === section.lineStart) {
+                                                targetMatch = match;
                                                 break;
                                             }
+                                            matchIndex++;
                                         }
-                                        blockSections.push(remaining);
 
-                                        const currentDataStr = blockSections[3]?.trim() || "";
+                                        if (!targetMatch) return oldContent;
+
+                                        const blockContent = targetMatch[2];
+
+                                        // Robust splitting: only the first 3 '---' on their own lines are separators
+                                        const blockSections = this.splitOnDelimiters(blockContent, 3);
+
+                                        const finalSections = ['', '', '', ''];
+
+                                        // Identifier le type de widget d'abord
+                                        const firstSection = blockSections[0] || '';
+                                        const isLinkedWidget = firstSection.includes('ID:') &&
+                                            blockSections.length >= 2 &&
+                                            !blockSections[1].trim() &&
+                                            (blockSections.length < 3 || !blockSections[2].trim());
+
+                                        if (isLinkedWidget) {
+                                            // Widget lié: ID + 3 délimiteurs vides + data
+                                            finalSections[0] = blockSections[0];  // ID
+                                            finalSections[1] = '';                 // CSS vide
+                                            finalSections[2] = '';                 // JS vide
+                                            finalSections[3] = blockSections[blockSections.length - 1]; // Data
+                                        } else {
+                                            // Widget complet: mapper normalement
+                                            if (blockSections.length === 4) {
+                                                finalSections[0] = blockSections[0];
+                                                finalSections[1] = blockSections[1];
+                                                finalSections[2] = blockSections[2];
+                                                finalSections[3] = blockSections[3];
+                                            } else if (blockSections.length === 1) {
+                                                finalSections[0] = blockSections[0];
+                                            } else if (blockSections.length === 2) {
+                                                finalSections[0] = blockSections[0];
+                                                finalSections[3] = blockSections[1];
+                                            } else if (blockSections.length === 3) {
+                                                finalSections[0] = blockSections[0];
+                                                finalSections[1] = blockSections[1];
+                                                finalSections[3] = blockSections[2];
+                                            }
+                                        }
+
+                                        const currentDataStr = finalSections[3]?.trim() || "";
                                         if (newDataStr === currentDataStr) return oldContent;
 
-                                        const newSections = [...blockSections];
-                                        while (newSections.length < 4) {
-                                            newSections.push('');
+                                        // Reconstruction
+                                        let newBlockContent: string;
+                                        if (isLinkedWidget) {
+                                            newBlockContent = finalSections[0].trim() + '\n---\n---\n---\n' + newDataStr.trim() + '\n';
+                                        } else {
+                                            const reconstructedSections = [
+                                                finalSections[0].trim(),
+                                                finalSections[1].trim(),
+                                                finalSections[2].trim(),
+                                                newDataStr.trim()
+                                            ];
+                                            newBlockContent = reconstructedSections.join('\n---\n') + '\n';
                                         }
 
-                                        // Update data section
-                                        newSections[3] = newDataStr;
-
-                                        // Reconstruct block with precise newline handling
-                                        const reconstructedSections = [
-                                            blockSections[0].trim(),
-                                            blockSections[1]?.trim() || '',
-                                            blockSections[2]?.trim() || '',
-                                            newDataStr.trim()
-                                        ];
-
-                                        const newBlockContent = reconstructedSections.join('\n---\n') + '\n';
-
-                                        lines.splice(section.lineStart + 1, section.lineEnd - section.lineStart - 1, newBlockContent);
-                                        return lines.join('\n');
+                                        // Replace the matched widget block
+                                        return oldContent.replace(targetMatch[0], '```widget\n' + newBlockContent + '```');
                                     });
                                 } catch (e) {
                                     console.error('Inline save failed:', e);
@@ -491,16 +567,7 @@ export default class WidgetPlugin extends Plugin {
                     if (!match) return null;
 
                     const blockContent = match[1];
-                    const sections: string[] = [];
-                    let remaining = blockContent;
-                    for (let i = 0; i < 3; i++) {
-                        const index = remaining.indexOf('---');
-                        if (index !== -1) {
-                            sections.push(remaining.substring(0, index));
-                            remaining = remaining.substring(index + 3);
-                        } else { break; }
-                    }
-                    sections.push(remaining);
+                    const sections = this.splitOnDelimiters(blockContent, 3);
 
                     if (sections.length < 4) return null;
                     try {
@@ -520,27 +587,63 @@ export default class WidgetPlugin extends Plugin {
                         const prefix = match[1];
                         const blockContent = match[2];
 
-                        const sections: string[] = [];
-                        let remaining = blockContent;
-                        for (let i = 0; i < 3; i++) {
-                            const index = remaining.indexOf('---');
-                            if (index !== -1) {
-                                sections.push(remaining.substring(0, index));
-                                remaining = remaining.substring(index + 3);
-                            } else { break; }
+                        const blockSections = this.splitOnDelimiters(blockContent, 3);
+
+                        // Count delimiters to detect linked vs local widget
+                        const originalDelimiterCount = blockContent.split('\n').filter(line => line.trim() === '---').length;
+
+                        // Identifier le type de widget d'abord
+                        const firstSection = blockSections[0] || '';
+                        const isLinkedWidget = firstSection.includes('ID:') &&
+                            blockSections.length >= 2 &&
+                            !blockSections[1].trim() &&
+                            (blockSections.length < 3 || !blockSections[2].trim());
+
+                        // Map sections to their correct roles: [HTML, CSS, JS, DATA]
+                        const finalSections = ['', '', '', ''];
+
+                        if (isLinkedWidget) {
+                            // Widget lié: ID + 3 délimiteurs vides + data
+                            finalSections[0] = blockSections[0];  // ID
+                            finalSections[1] = '';                 // CSS vide
+                            finalSections[2] = '';                 // JS vide
+                            finalSections[3] = blockSections[blockSections.length - 1]; // Data
+                        } else {
+                            // Widget complet: mapper normalement
+                            if (blockSections.length === 4) {
+                                finalSections[0] = blockSections[0];
+                                finalSections[1] = blockSections[1];
+                                finalSections[2] = blockSections[2];
+                                finalSections[3] = blockSections[3];
+                            } else if (blockSections.length === 1) {
+                                finalSections[0] = blockSections[0];
+                            } else if (blockSections.length === 2) {
+                                finalSections[0] = blockSections[0];
+                                finalSections[3] = blockSections[1];
+                            } else if (blockSections.length === 3) {
+                                finalSections[0] = blockSections[0];
+                                finalSections[1] = blockSections[1];
+                                finalSections[3] = blockSections[2];
+                            }
                         }
-                        sections.push(remaining);
 
-                        while (sections.length < 4) sections.push("");
-                        sections[3] = "\n" + JSON.stringify(data, null, 2) + "\n";
+                        finalSections[3] = "\n" + JSON.stringify(data, null, 2) + "\n";
 
-                        // Reconstruct block
-                        const newBlockContent = [
-                            sections[0].trim(),
-                            sections[1].trim(),
-                            sections[2].trim(),
-                            sections[3].trim()
-                        ].join('\n---\n') + '\n';
+                        let newBlockContent: string;
+
+                        if (isLinkedWidget) {
+                            // Preserve linked widget structure: ID + 3 empty delimiters + data
+                            newBlockContent = finalSections[0].trim() + '\n---\n---\n---\n' + finalSections[3].trim() + '\n';
+                        } else {
+                            // Standard widget structure: 3 delimiters separating 4 sections
+                            const reconstructedSections = [
+                                finalSections[0].trim(),
+                                finalSections[1].trim(),
+                                finalSections[2].trim(),
+                                finalSections[3].trim()
+                            ];
+                            newBlockContent = reconstructedSections.join('\n---\n') + '\n';
+                        }
 
                         return oldContent.replace(match[0], prefix + newBlockContent);
                     });
@@ -740,6 +843,10 @@ export default class WidgetPlugin extends Plugin {
     }
 
     async saveToGallery(template: WidgetTemplate) {
+        template.lastModifiedDate = Date.now();
+        if (!template.createdDate) {
+            template.createdDate = Date.now();
+        }
         const filePath = normalizePath(`${this.settings.galleryPath}/${template.id}.json`);
         await this.app.vault.adapter.write(filePath, JSON.stringify(template, null, 2));
     }
@@ -797,6 +904,53 @@ export default class WidgetPlugin extends Plugin {
         } catch (e: any) {
             console.error('ObsidGet: Sync failed:', e);
             new Notice(`Sync failed: ${e.message}`);
+        }
+    }
+
+    async checkForUpdates(quiet: boolean = false) {
+        try {
+            const PLUGIN_ID = this.manifest.id;
+            const now = Date.now();
+            const CHECK_INTERVAL = 1000 * 60 * 60 * 24; // 24 hours
+
+            // @ts-ignore
+            const lastChecked = this.app.plugins?.manifests?.[PLUGIN_ID]?.lastUpdateCheck;
+
+            if (quiet && lastChecked && (now - lastChecked < CHECK_INTERVAL)) {
+                return false;
+            }
+
+            if (!quiet) new Notice(this.t('checkingForUpdates'));
+            const releaseUrl = "https://api.github.com/repos/infinition/obsidian-obsidget/releases/latest";
+            const response = await requestUrl({ url: releaseUrl });
+
+            if (response.status !== 200) {
+                if (!quiet) throw new Error(`GitHub API returned ${response.status}`);
+                return;
+            }
+
+            const release = response.json;
+            const latestVersion = release.tag_name.replace(/^v/, '');
+            const currentVersion = this.manifest.version;
+
+            // Update last checked time
+            // @ts-ignore
+            if (this.app.plugins?.manifests?.[PLUGIN_ID]) {
+                // @ts-ignore
+                this.app.plugins.manifests[PLUGIN_ID].lastUpdateCheck = now;
+            }
+
+            if (latestVersion !== currentVersion) {
+                new Notice(this.t('updateAvailable', latestVersion, currentVersion), 10000);
+                return true;
+            } else {
+                if (!quiet) new Notice(this.t('pluginUpToDate', currentVersion));
+                return false;
+            }
+        } catch (e: any) {
+            console.error('ObsidGet: Update check failed:', e);
+            if (!quiet) new Notice(`Update check failed: ${e.message}`);
+            return false;
         }
     }
 
@@ -945,6 +1099,8 @@ class WidgetGalleryModal extends Modal {
     clearBtnEl!: HTMLElement;
     isMobile: boolean;
     targetEditor: Editor | null = null;
+    sortOption: 'modified' | 'created' | 'name' = 'modified';
+    sortSelectEl!: HTMLSelectElement;
 
     constructor(app: App, plugin: WidgetPlugin, editor?: Editor) {
         super(app);
@@ -1000,6 +1156,30 @@ class WidgetGalleryModal extends Modal {
         this.tagSelectEl = tagContainer.createEl('select', { cls: 'gallery-tag-select' });
         this.tagSelectEl.onchange = () => {
             this.selectedTag = this.tagSelectEl.value;
+            this.currentPage = 1;
+            this.filterAndRender();
+        };
+
+        // Sort Dropdown
+        const sortContainer = controlsContainer.createDiv({ cls: 'gallery-sort-container' });
+        this.sortSelectEl = sortContainer.createEl('select', { cls: 'gallery-sort-select' });
+
+        const sortOptions = [
+            { value: 'modified', label: this.plugin.t('sortByLastModified') },
+            { value: 'created', label: this.plugin.t('sortByCreated') },
+            { value: 'name', label: this.plugin.t('sortByName') }
+        ];
+
+        sortOptions.forEach(opt => {
+            const option = document.createElement('option');
+            option.value = opt.value;
+            option.textContent = opt.label;
+            if (this.sortOption === opt.value) option.selected = true;
+            this.sortSelectEl.appendChild(option);
+        });
+
+        this.sortSelectEl.onchange = () => {
+            this.sortOption = this.sortSelectEl.value as any;
             this.currentPage = 1;
             this.filterAndRender();
         };
@@ -1129,6 +1309,24 @@ class WidgetGalleryModal extends Modal {
                 (t.tags && t.tags.some(tag => tag.toLowerCase().includes(activeTag)));
 
             return matchesSearch && matchesTags;
+        });
+
+        // Sort
+        this.filteredTemplates.sort((a, b) => {
+            if (this.sortOption === 'name') {
+                return a.name.localeCompare(b.name);
+            } else if (this.sortOption === 'created') {
+                const dateA = a.createdDate || 0;
+                const dateB = b.createdDate || 0;
+                if (dateA === dateB) return a.name.localeCompare(b.name);
+                return dateB - dateA; // Newest first
+            } else {
+                // Default: Last Modified
+                const dateA = a.lastModifiedDate || 0;
+                const dateB = b.lastModifiedDate || 0;
+                if (dateA === dateB) return a.name.localeCompare(b.name);
+                return dateB - dateA; // Newest first
+            }
         });
 
         this.gridEl.empty();
@@ -2020,6 +2218,16 @@ class WidgetSettingTab extends PluginSettingTab {
                 }));
 
         new Setting(containerEl)
+            .setName(this.plugin.t('settingsShowDataFiles'))
+            .setDesc(this.plugin.t('settingsShowDataFilesDesc'))
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.showDataFiles)
+                .onChange(async (value) => {
+                    this.plugin.settings.showDataFiles = value;
+                    await this.plugin.saveSettings();
+                }));
+
+        new Setting(containerEl)
             .setName(this.plugin.t('settingsMaxWidth'))
             .setDesc(this.plugin.t('settingsMaxWidthDesc'))
             .addDropdown((dropdown: DropdownComponent) => dropdown
@@ -2090,6 +2298,17 @@ class WidgetSettingTab extends PluginSettingTab {
                     await this.plugin.updatePlugin();
                     btn.setDisabled(false);
                     btn.setButtonText(this.plugin.t('updatePluginBtn'));
+                }));
+
+        new Setting(containerEl)
+            .setName(this.plugin.t('checkForUpdates'))
+            .setDesc(this.plugin.t('checkForUpdatesDesc'))
+            .addButton(btn => btn
+                .setButtonText("Check")
+                .onClick(async () => {
+                    btn.setDisabled(true);
+                    await this.plugin.checkForUpdates(false);
+                    btn.setDisabled(false);
                 }));
 
         containerEl.createEl('hr');
