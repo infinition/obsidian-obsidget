@@ -3,7 +3,12 @@
 
 **ObsidGet** is an Obsidian plugin that allows you to create, manage, and reuse interactive widgets using standard HTML, CSS, and JavaScript.
 
+
 Every widget runs in its own isolated environment (Shadow DOM), ensuring that your scripts and styles do not conflict with your Obsidian theme or other plugins.
+
+<img width="1354" height="967" alt="image" src="https://github.com/user-attachments/assets/14d584c8-6932-4ac9-b00a-ba7251450bc5" />
+<img width="1351" height="558" alt="image" src="https://github.com/user-attachments/assets/3f627afa-b487-4e2d-828d-68dd6bef011e" />
+<img width="1343" height="609" alt="image" src="https://github.com/user-attachments/assets/b429ea51-7726-4fde-b1c7-7b06b846f3e0" />
 
 ## ✨ Key Features
 
