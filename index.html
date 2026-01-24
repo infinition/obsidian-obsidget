@@ -2610,7 +2610,7 @@
         async function performToggleVersionsPage(btn, pushHistory = true) {
             const viewer = document.getElementById('markdown-viewer');
 
-            // Update state and UI labels
+            // Mise à jour de l'état UI
             STATE.currentFolder = "";
             STATE.currentFilename = "";
             STATE.currentTitle = CONFIG.ui.changelogTitle;
@@ -2621,14 +2621,13 @@
             document.getElementById('page-nav').innerHTML = '';
             document.getElementById('reading-time').innerHTML = '';
             document.getElementById('last-updated').innerHTML = '';
-            document.getElementById('clear-highlight-btn').classList.add('hidden'); // Ensure button is hidden
+            document.getElementById('clear-highlight-btn').classList.add('hidden');
 
+            // Affichage initial (Loader)
             viewer.innerHTML = `<h1>${CONFIG.ui.changelogTitle}</h1><div id="versions-list" class="space-y-4 mt-6"><div class="animate-pulse text-hack-green">${CONFIG.ui.fetchingReleasesText}</div></div>`;
 
-            // Update TOC with initial H1
             enhanceMarkdownContent();
             generateTOC();
-            // Update sidebar to clear active links
             renderSidebar();
 
             if (pushHistory) window.history.pushState({ page: 'versions' }, "", "?page=changelog");
@@ -2636,36 +2635,92 @@
 
             try {
                 const res = await fetch(`https://api.github.com/repos/${STATE.repo}/releases`);
-                if (!res.ok) throw new Error("API Limit");
+
+                // Gestion des erreurs API (ex: limite de rate atteinte)
+                if (!res.ok) {
+                    const errData = await res.json();
+                    throw new Error(errData.message || "API Error");
+                }
+
                 const data = await res.json();
                 const list = document.getElementById('versions-list');
                 list.innerHTML = '';
 
-                if (data.length === 0) list.innerHTML = '<p>No releases found.</p>';
+                if (!Array.isArray(data) || data.length === 0) {
+                    list.innerHTML = '<p class="text-gray-500 italic">Aucune release trouvée sur GitHub.</p>';
+                    return;
+                }
 
                 data.forEach(r => {
                     const div = document.createElement('div');
-                    div.className = 'border-b border-hack-border pb-4 mb-4';
-                    const body = DOMPurify.sanitize(marked.parse(r.body || 'No description'));
+                    div.className = 'border-b border-hack-border pb-6 mb-6 last:border-0';
+
+                    // --- LOGIQUE AMÉLIORÉE ICI ---
+                    // 1. On récupère le body
+                    let rawContent = r.body;
+
+                    // 2. Si le body est vide/null, on tente d'utiliser le titre (r.name) 
+                    // seulement s'il est différent du tag (pour éviter la duplication v1.0.0 / v1.0.0)
+                    if (!rawContent && r.name && r.name !== r.tag_name) {
+                        rawContent = `**${r.name}**`;
+                    }
+
+                    // 3. Fallback final si tout est vide
+                    if (!rawContent || rawContent.trim() === '') {
+                        rawContent = "_Aucune description fournie pour cette version._";
+                    }
+
+                    // Parsing du contenu Markdown
+                    const body = DOMPurify.sanitize(marked.parse(rawContent));
+
+                    // Formatage de la date
+                    const date = new Date(r.published_at).toLocaleDateString(undefined, {
+                        year: 'numeric', month: 'long', day: 'numeric'
+                    });
+
+                    // Affichage conditionnel du titre secondaire si différent du tag
+                    const secondaryTitle = (r.name && r.name !== r.tag_name)
+                        ? `<span class="text-sm font-normal text-gray-500 ml-2">(${r.name})</span>`
+                        : '';
+
                     div.innerHTML = `
-                        <div class="flex items-center justify-between mb-2">
-                            <h2 class="text-xl font-bold !mt-0 !mb-0 flex items-center gap-2 text-hack-green">${r.tag_name}</h2>
-                            <span class="text-xs font-mono text-gray-500">${new Date(r.published_at).toLocaleDateString()}</span>
-                        </div>
-                        <div class="markdown-body text-sm pl-2 border-l-2 border-hack-border/50">${body}</div>
-                        <a href="${r.html_url}" target="_blank" rel="noopener noreferrer" class="text-xs mt-2 inline-block opacity-50 hover:opacity-100">View on GitHub &rarr;</a>
-                    `;
+                <div class="flex flex-col md:flex-row md:items-center justify-between mb-3 gap-1">
+                    <h2 class="text-2xl font-bold !mt-0 !mb-0 flex items-center text-hack-green">
+                        ${r.tag_name}
+                        ${r.prerelease ? '<span class="ml-2 text-[10px] border border-orange-500 text-orange-500 px-1.5 rounded uppercase">Pre-release</span>' : ''}
+                        ${secondaryTitle}
+                    </h2>
+                    <span class="text-xs font-mono text-gray-500 flex items-center gap-1">
+                        <i data-lucide="calendar" class="w-3 h-3"></i> ${date}
+                    </span>
+                </div>
+                
+                <div class="markdown-body text-sm pl-4 border-l-2 border-hack-border/50 hover:border-hack-green transition-colors">
+                    ${body}
+                </div>
+                
+                <div class="mt-3 flex gap-4">
+                    <a href="${r.html_url}" target="_blank" rel="noopener noreferrer" class="text-xs text-hack-green opacity-70 hover:opacity-100 flex items-center gap-1">
+                        <i data-lucide="github" class="w-3 h-3"></i> View on GitHub
+                    </a>
+                     ${r.assets.length > 0 ? `<span class="text-xs text-gray-500 flex items-center gap-1"><i data-lucide="package" class="w-3 h-3"></i> ${r.assets.length} assets</span>` : ''}
+                </div>
+            `;
                     list.appendChild(div);
                 });
 
-                // Update TOC with new H2s
                 enhanceMarkdownContent();
                 generateTOC();
+                lucide.createIcons(); // Important pour réafficher les icônes ajoutées dynamiquement
 
             } catch (e) {
-                document.getElementById('versions-list').innerHTML = `<p class="text-red-400">Unable to load changelog. Check back later.</p>`;
-                enhanceMarkdownContent();
-                generateTOC();
+                console.error(e);
+                document.getElementById('versions-list').innerHTML = `
+            <div class="p-4 border border-red-900 bg-red-900/10 rounded text-red-400 text-sm">
+                <strong>Erreur de chargement :</strong> Impossible de récupérer les releases depuis GitHub.<br>
+                <span class="text-xs opacity-70 mt-1 block">${e.message}</span>
+                <span class="text-xs opacity-50 mt-2 block">Vérifiez que le repo est public ou que vous n'avez pas dépassé la limite d'API (60 req/h).</span>
+            </div>`;
             }
         }
 
