@@ -1,0 +1,70 @@
+:root {
+    --bg-body: #ffffff;
+    --bg-sidebar: #f0f0f0;
+    --border-color: #c0c0c0;
+    --text-main: #000000;
+    --text-heading: #000080;
+    --accent-green: #008000;
+    --accent-dim: rgba(0, 128, 0, 0.1);
+    --code-bg: #ffffff;
+}
+
+/* Retro IRC specific overrides */
+body {
+    font-family: "Fixedsys", "Courier New", monospace !important;
+    background-color: var(--bg-body);
+    color: var(--text-main);
+}
+
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3 {
+    color: #000080;
+    font-weight: bold;
+    border-bottom: 2px solid #000080;
+}
+
+.markdown-body a {
+    color: #0000ff;
+    text-decoration: underline;
+}
+
+.markdown-body a:hover {
+    color: #ff0000;
+}
+
+#sidebar,
+#mobile-toc-sidebar {
+    background-color: #c0c0c0 !important;
+    border-right: 2px solid #808080;
+}
+
+.nav-link {
+    color: #000 !important;
+    border: 1px solid transparent;
+}
+
+.nav-link:hover {
+    background-color: #000080 !important;
+    color: #fff !important;
+}
+
+.nav-link.active {
+    background-color: #000080 !important;
+    color: #fff !important;
+    border-left: 4px solid #ff0000 !important;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #808080 !important;
+    border: 1px solid #ffffff;
+}
+
+.markdown-body pre {
+    border: 1px solid #808080 !important;
+    background-color: #f0f0f0 !important;
+}
+
+.markdown-body code {
+    color: #800000 !important;
+}

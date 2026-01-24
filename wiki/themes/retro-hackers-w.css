@@ -1,0 +1,130 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap');
+
+:root {
+    --bg-body: #050505;
+    --bg-sidebar: rgba(5, 5, 5, 0.8);
+    --border-color: #13aff0;
+    --text-main: #80ff80;
+    --text-heading: #13aff0;
+    --accent-green: #0f0;
+    --accent-dim: rgba(0, 255, 0, 0.1);
+    --code-bg: #000;
+
+    /* Hacker Specific */
+    --neon-blue: #13aff0;
+    --neon-orange: #FF6B00;
+    --neon-purple: #bd00ff;
+}
+
+/* --- THE 3D GRID --- */
+body::before {
+    content: "";
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) perspective(600px) rotateX(60deg);
+    width: 300vw;
+    height: 300vh;
+    background-image:
+        linear-gradient(rgba(0, 243, 255, 0.3) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 243, 255, 0.3) 1px, transparent 1px);
+    background-size: 60px 60px;
+    animation: grid-scroll 11s linear infinite;
+    z-index: -1;
+    pointer-events: none;
+    -webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0) 80%);
+    mask-image: linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0) 80%);
+}
+
+@keyframes grid-scroll {
+    0% {
+        background-position: 0 0;
+    }
+
+    100% {
+        background-position: 0 60px;
+    }
+}
+
+/* --- SCANLINES --- */
+body::after {
+    content: " ";
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background:
+        linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%),
+        linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+    z-index: 9999;
+    background-size: 100% 3px, 3px 100%;
+    pointer-events: none;
+    opacity: 0.4;
+}
+
+/* --- TYPOGRAPHY --- */
+body {
+    font-family: 'JetBrains Mono', monospace !important;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: 'Cinzel', serif !important;
+    text-transform: uppercase;
+    text-shadow: 0 0 10px var(--neon-blue);
+}
+
+.markdown-body h1 {
+    color: var(--neon-blue) !important;
+    border-bottom-color: var(--neon-blue) !important;
+}
+
+.markdown-body h2 {
+    color: var(--neon-orange) !important;
+    text-shadow: 0 0 10px var(--neon-orange);
+}
+
+.markdown-body h3 {
+    color: var(--neon-purple) !important;
+    text-shadow: 0 0 10px var(--neon-purple);
+}
+
+.markdown-body strong {
+    color: #fff !important;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+}
+
+.markdown-body a {
+    color: var(--neon-purple) !important;
+    border-bottom: 1px dashed var(--neon-purple);
+}
+
+.markdown-body a:hover {
+    color: #fff !important;
+    text-shadow: 0 0 5px var(--neon-purple);
+    border-bottom-style: solid;
+}
+
+/* --- UI OVERRIDES --- */
+#sidebar,
+#mobile-toc-sidebar {
+    background-color: var(--bg-sidebar) !important;
+    backdrop-filter: blur(10px);
+}
+
+.nav-link.active {
+    background-color: rgba(19, 175, 240, 0.2) !important;
+    border-left-color: var(--neon-blue) !important;
+    color: var(--neon-blue) !important;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--neon-blue), #000) !important;
+    border: 1px solid var(--neon-blue);
+}

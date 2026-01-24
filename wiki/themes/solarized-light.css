@@ -1,0 +1,30 @@
+:root {
+    --bg-body: #fdf6e3;
+    --bg-sidebar: #eee8d5;
+    --border-color: #d5c4a1;
+    --text-main: #657b83;
+    --text-heading: #073642;
+    --accent-green: #859900;
+    --accent-dim: rgba(133, 153, 0, 0.1);
+    --code-bg: #eee8d5;
+}
+
+/* Solarized Light specific overrides */
+.markdown-body a {
+    color: #268bd2;
+}
+
+.markdown-body blockquote {
+    background: #eee8d5;
+    border-left-color: #859900;
+}
+
+.nav-link.active {
+    background-color: rgba(133, 153, 0, 0.1) !important;
+    border-left-color: #859900 !important;
+    color: #859900 !important;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #93a1a1 !important;
+}

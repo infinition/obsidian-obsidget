@@ -1,0 +1,25 @@
+:root {
+    --bg-body: #e8f1f2;
+    --bg-sidebar: #d1e3e5;
+    --border-color: #b8d0d2;
+    --text-main: #2d4a4d;
+    --text-heading: #1a3033;
+    --accent-green: #0081a7;
+    --accent-dim: rgba(0, 129, 167, 0.1);
+    --code-bg: #d9e8ea;
+}
+
+/* Cool Paper specific overrides */
+.markdown-body a {
+    color: #0081a7;
+}
+
+.nav-link.active {
+    background-color: rgba(0, 129, 167, 0.1) !important;
+    border-left-color: #0081a7 !important;
+    color: #2d4a4d !important;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #b8d0d2 !important;
+}

@@ -1,0 +1,32 @@
+:root {
+    --bg-body: #1E293B;
+    /* Slate 800 */
+    --bg-sidebar: #0F172A;
+    /* Slate 900 */
+    --border-color: #334155;
+    /* Slate 700 */
+    --text-main: #94A3B8;
+    /* Slate 400 */
+    --text-heading: #F1F5F9;
+    /* Slate 100 */
+    --accent-green: #10B981;
+    /* Emerald 500 */
+    --accent-dim: rgba(16, 185, 129, 0.1);
+    --code-bg: #020617;
+    /* Slate 950 */
+}
+
+/* Compatibility with tailwind colors if needed */
+.dark {
+    --accent-green: #10B981;
+}
+
+/* Specific overrides for Dim mode to ensure readability */
+.markdown-body blockquote {
+    background: rgba(16, 185, 129, 0.05) !important;
+    border-left-color: #10B981 !important;
+}
+
+.text-hack-green {
+    color: #10B981 !important;
+}

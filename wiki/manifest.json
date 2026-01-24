@@ -1,0 +1,35 @@
+{
+    "name": "BJORN WIKI",
+    "short_name": "BjornWiki",
+    "description": "Official Documentation and Wiki for BJORN Cyber Viking",
+    "start_url": "./index.html",
+    "display": "standalone",
+    "background_color": "#0B0C0E",
+    "theme_color": "#22c55e",
+    "orientation": "any",
+    "icons": [
+        {
+            "src": "assets/bjorn.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "assets/bjorn.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Search Wiki",
+            "url": "./index.html?search=true",
+            "icons": [
+                {
+                    "src": "assets/bjorn.png",
+                    "sizes": "192x192"
+                }
+            ]
+        }
+    ]
+}

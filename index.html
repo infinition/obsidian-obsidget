@@ -1,0 +1,2744 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self' https:; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' https:; connect-src 'self' https:;">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title id="site-title">BJORN // WIKI NODE</title>
+    <meta name="description" id="meta-description" content="Official Documentation and Wiki for BJORN Cyber Viking">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" id="og-url" content="">
+    <meta property="og:title" id="og-title" content="BJORN // WIKI NODE">
+    <meta property="og:description" id="og-desc" content="Official Documentation and Wiki for BJORN Cyber Viking">
+    <meta property="og:image" id="og-image" content="assets/bjorn.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" id="tw-url" content="">
+    <meta property="twitter:title" id="tw-title" content="BJORN // WIKI NODE">
+    <meta property="twitter:description" id="tw-desc" content="Official Documentation and Wiki for BJORN Cyber Viking">
+    <meta property="twitter:image" id="tw-image" content="assets/bjorn.png">
+
+    <!-- Favicon -->
+    <link rel="icon" id="favicon-32" type="image/png" sizes="32x32" href="assets/bjorn.png">
+    <link rel="icon" id="favicon-16" type="image/png" sizes="16x16" href="assets/bjorn.png">
+    <link rel="apple-touch-icon" id="apple-icon" sizes="180x180" href="assets/bjorn.png">
+    <link rel="mask-icon" id="mask-icon" href="assets/bjorn.png" color="#22c55e">
+    <meta name="apple-mobile-web-app-title" id="apple-title" content="BjornWiki">
+    <meta name="application-name" id="app-name" content="BjornWiki">
+    <meta name="msapplication-TileColor" id="ms-tile-color" content="#0B0C0E">
+    <meta name="theme-color" id="theme-color-meta" content="#0B0C0E">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" id="manifest-link" href="manifest.json">
+
+    <!-- Configuration -->
+    <script src="wiki/config.js"></script>
+
+    <!-- Dynamic Theme -->
+    <link id="theme-link" rel="stylesheet" href="">
+
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Icons: Lucide -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Markdown Parser: Marked -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <!-- Sanitizer: DOMPurify -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
+
+    <!-- Syntax Highlighting: Highlight.js -->
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+    <!-- Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+
+    <style>
+        /* --- THEME ENGINE (CSS Variables) --- */
+        /* Variables are now loaded from themes/*.css */
+
+
+        /* Base Settings */
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            -webkit-tap-highlight-color: transparent;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-body);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-green);
+        }
+
+        /* --- GLASSMORPHISM & UI --- */
+        .bg-hack-sidebar {
+            background-color: var(--bg-sidebar);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .sidebar-mobile {
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* --- SEARCH MODAL --- */
+        #search-modal {
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        #search-modal.hidden {
+            opacity: 0;
+            visibility: hidden;
+            transform: scale(0.95);
+        }
+
+        #search-modal:not(.hidden) {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
+        }
+
+        .search-result-item {
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .search-result-item:hover {
+            background-color: var(--accent-dim);
+            border-color: var(--border-color);
+            transform: translateX(4px);
+        }
+
+        .search-result-item.active {
+            background-color: var(--accent-dim);
+            border-color: var(--accent-green);
+            transform: translateX(4px);
+        }
+
+        /* --- MICRO-INTERACTIONS --- */
+        .nav-link,
+        .section-header,
+        .copy-btn,
+        .toc-link,
+        .search-result-item,
+        #menu-btn,
+        #theme-toggle-desktop,
+        #theme-toggle-mobile,
+        .badge-sm,
+        .pagination-card,
+        #toc-btn-mobile,
+        #toc-btn-desktop {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-link::after,
+        .section-header::after,
+        .copy-btn::after,
+        .search-result-item::after,
+        #menu-btn::after,
+        #theme-toggle-desktop::after,
+        #theme-toggle-mobile::after,
+        .badge-sm::after,
+        .pagination-card::after,
+        #toc-btn-mobile::after,
+        #toc-btn-desktop::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), rgba(34, 197, 94, 0.2) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .nav-link:hover::after,
+        .section-header:hover::after,
+        .copy-btn:hover::after,
+        .search-result-item:hover::after,
+        #menu-btn:hover::after,
+        #theme-toggle-desktop:hover::after,
+        #theme-toggle-mobile:hover::after,
+        .badge-sm:hover::after,
+        .pagination-card:hover::after,
+        #toc-btn-mobile:hover::after,
+        #toc-btn-desktop:hover::after {
+            opacity: 1;
+        }
+
+        #page-nav button {
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        #page-nav button:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.3);
+            background-color: var(--accent-dim);
+        }
+
+        /* --- SKELETON SCREENS --- */
+        .skeleton {
+            background: linear-gradient(90deg, var(--bg-sidebar) 25%, var(--border-color) 50%, var(--bg-sidebar) 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+            border-radius: 4px;
+        }
+
+        @keyframes skeleton-loading {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        /* --- MARKDOWN STYLES --- */
+        .markdown-body h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--text-heading);
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .markdown-body h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-heading);
+            margin-top: 3rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            scroll-margin-top: 80px;
+        }
+
+        .markdown-body h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-heading);
+            margin-top: 2rem;
+            margin-bottom: 0.75rem;
+            scroll-margin-top: 80px;
+        }
+
+        /* Anchor Links (#) */
+        .anchor-link {
+            margin-left: 0.5rem;
+            color: var(--accent-green);
+            opacity: 0;
+            transition: opacity 0.2s;
+            cursor: pointer;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8em;
+            text-decoration: none;
+            user-select: none;
+        }
+
+        h2:hover .anchor-link,
+        h3:hover .anchor-link {
+            opacity: 1;
+        }
+
+        .markdown-body p {
+            /* margin-bottom: 1.25rem; */
+            line-height: 1.7;
+        }
+
+        .markdown-body ul {
+            list-style: none;
+            margin-bottom: 1.25rem;
+            padding-left: 1rem;
+        }
+
+        .markdown-body li {
+            margin-bottom: 0.5rem;
+            position: relative;
+            padding-left: 1.5rem;
+        }
+
+        .markdown-body li::before {
+            content: "›";
+            color: var(--accent-green);
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+
+        /* Code Blocks */
+        .markdown-body pre {
+            background-color: var(--code-bg) !important;
+            padding: 0 !important;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        .markdown-body pre code.hljs {
+            padding: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            background-color: transparent;
+            display: block;
+            overflow-x: auto;
+        }
+
+        /* Inline Code */
+        .markdown-body :not(pre)>code {
+            background-color: var(--accent-dim);
+            padding: 0.2em 0.4em;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875em;
+            color: var(--accent-green);
+            border: 1px solid var(--border-color);
+        }
+
+        .markdown-body a {
+            color: var(--accent-green);
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.2s;
+            font-weight: 500;
+        }
+
+        .markdown-body a:hover {
+            border-bottom-color: var(--accent-green);
+        }
+
+        .markdown-body blockquote {
+            border-left: 4px solid var(--accent-green);
+            padding-left: 1rem;
+            margin-left: 0;
+            font-style: italic;
+            background: var(--accent-dim);
+            padding: 1rem;
+            border-radius: 0 4px 4px 0;
+            color: var(--text-heading);
+            margin-bottom: 1.5rem;
+        }
+
+        .markdown-body strong {
+            color: var(--text-heading);
+            font-weight: 700;
+        }
+
+        /* Images & Lightbox */
+        .markdown-body img {
+            max-width: 100%;
+            border-radius: 8px;
+            cursor: zoom-in;
+            transition: transform 0.2s;
+        }
+
+        .markdown-body img:hover {
+            border-color: var(--accent-green);
+        }
+
+        #lightbox {
+            transition: opacity 0.3s ease, visibility 0.3s;
+        }
+
+        #lightbox.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        #lightbox img {
+            max-height: 90vh;
+            max-width: 90vw;
+            object-fit: contain;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+        }
+
+        /* UI Elements */
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.7rem;
+            font-family: 'JetBrains Mono', monospace;
+            cursor: pointer;
+            opacity: 0;
+            transition: all 0.2s;
+            z-index: 10;
+        }
+
+        .markdown-body pre:hover .copy-btn {
+            opacity: 1;
+        }
+
+        .copy-btn:hover {
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        /* Reading Progress Bar */
+        #reading-progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background-color: var(--accent-green);
+            width: 0%;
+            z-index: 100;
+            transition: width 0.1s;
+            pointer-events: none;
+        }
+
+        /* Navigation */
+        .nav-list {
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+
+        .nav-list.collapsed {
+            max-height: 0;
+        }
+
+        .nav-list.expanded {
+            max-height: 1000px;
+        }
+
+        .section-arrow {
+            transition: transform 0.2s;
+        }
+
+        .section-header.active .section-arrow {
+            transform: rotate(90deg);
+        }
+
+        .nav-link.active {
+            background-color: var(--accent-dim);
+            color: var(--accent-green);
+            padding-left: 0.5rem !important;
+        }
+
+        .nav-link.active span {
+            background-color: var(--accent-green) !important;
+        }
+
+        /* TOC & Scroll */
+        .toc-link.active {
+            color: var(--accent-green);
+        }
+
+        #toc-svg {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: visible;
+            z-index: 10;
+        }
+
+        #toc-path {
+            transition: d 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            opacity: 0;
+        }
+
+        #toc-path.active {
+            opacity: 1;
+        }
+
+        #scroll-top-btn {
+            transition: opacity 0.3s, transform 0.3s;
+        }
+
+        #scroll-top-btn.hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(20px);
+        }
+
+        /* Animations */
+        @keyframes pulse-green {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .version-loading {
+            animation: pulse-green 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        /* Focus & Inputs */
+        input {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            border-color: var(--border-color);
+        }
+
+        input:focus {
+            border-color: var(--accent-green);
+            outline: none;
+        }
+
+        *:focus-visible {
+            outline: 2px solid var(--accent-green);
+            outline-offset: 2px;
+        }
+
+        .badge-sm {
+            width: 100%;
+            display: block;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .badge-sm:hover {
+            filter: brightness(1.1);
+            transition: filter .15s ease;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--accent-green), var(--border-color));
+        }
+
+        /* --- PRINT STYLESHEET --- */
+        @media print {
+            body {
+                background-color: white !important;
+                color: black !important;
+                display: block;
+            }
+
+            #sidebar,
+            #mobile-toc-sidebar,
+            header,
+            #theme-toggle-desktop,
+            #scroll-top-btn,
+            #reading-progress-bar,
+            #overlay,
+            .copy-btn,
+            .toc-container {
+                display: none !important;
+            }
+
+            .markdown-body,
+            #scroll-container,
+            .flex-1,
+            .h-screen {
+                height: auto !important;
+                overflow: visible !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                max-width: 100% !important;
+            }
+
+            .markdown-body pre {
+                border: 1px solid #ccc;
+                background-color: #f5f5f5 !important;
+                page-break-inside: avoid;
+            }
+
+            .markdown-body a {
+                color: black !important;
+                text-decoration: underline;
+                border: none;
+            }
+
+            #breadcrumbs {
+                color: black !important;
+                border-bottom: 1px solid #ccc;
+                padding-bottom: 10px;
+                margin-bottom: 20px;
+            }
+        }
+
+        /* Hide scrollbar for breadcrumbs */
+        #breadcrumbs {
+            -ms-overflow-style: none;
+            /* IE and Edge */
+            scrollbar-width: none;
+            /* Firefox */
+        }
+
+        #breadcrumbs::-webkit-scrollbar {
+            display: none;
+            /* Chrome, Safari and Opera */
+        }
+
+        /* Toast Notification */
+        #toast-container {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background-color: var(--bg-sidebar);
+            color: var(--accent-green);
+            border: 1px solid var(--accent-green);
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            z-index: 200;
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s;
+            opacity: 0;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        #toast-container.active {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        /* --- PAGE TRANSITIONS --- */
+        .content-transition-area {
+            view-transition-name: content-transition;
+        }
+
+        ::view-transition-old(content-transition) {
+            animation: blur-scale-fade-out 0.3s cubic-bezier(0.455, 0.03, 0.515, 0.955) forwards;
+        }
+
+        ::view-transition-new(content-transition) {
+            animation: blur-scale-fade-in 0.5s cubic-bezier(0.455, 0.03, 0.515, 0.955) forwards;
+        }
+
+        @keyframes blur-scale-fade-out {
+            from {
+                filter: blur(0);
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            to {
+                filter: blur(4px);
+                transform: scale(1.05);
+                opacity: 0;
+            }
+        }
+
+        @keyframes blur-scale-fade-in {
+            from {
+                filter: blur(4px);
+                transform: scale(0.95);
+                opacity: 0;
+            }
+
+            to {
+                filter: blur(0);
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* --- STICKY BREADCRUMBS BUBBLE --- */
+        .breadcrumb-sticky-container {
+            position: relative;
+            top: 0.75rem;
+            z-index: 45;
+            margin-bottom: 2rem;
+            width: 100%;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .breadcrumb-sticky-container.is-sticky {
+            position: sticky;
+        }
+
+        .breadcrumb-sticky-container::before {
+            content: '';
+            position: absolute;
+            /* Default state: slightly smaller and invisible */
+            inset: 0;
+            background-color: var(--bg-sidebar);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            transform: scale(0.98);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .breadcrumb-sticky-container.stuck::before {
+            opacity: 1;
+            transform: scale(1);
+            /* Grow outward to create padding effect without shifting text */
+            inset: -0.6rem -1rem;
+        }
+
+        .breadcrumb-sticky-container.stuck {
+            transform: translateY(0.25rem);
+        }
+
+        .breadcrumb-sticky-container.stuck .breadcrumb-inner {
+            margin-bottom: 0;
+        }
+
+        /* --- MOBILE SAFE AREAS (iOS Notch/Home Indicator) --- */
+        header {
+            padding-top: env(safe-area-inset-top);
+            height: calc(4rem + env(safe-area-inset-top));
+        }
+
+        #sidebar {
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        #mobile-toc-sidebar {
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        #toast-container {
+            margin-bottom: env(safe-area-inset-bottom);
+        }
+
+        /* Adjust scroll container for safe areas if needed */
+        @media (max-width: 768px) {
+            #scroll-container {
+                padding-bottom: env(safe-area-inset-bottom);
+            }
+        }
+    </style>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        hack: {
+                            green: 'var(--accent-green)',
+                            bg: 'var(--bg-body)',
+                            sidebar: 'var(--bg-sidebar)',
+                            border: 'var(--border-color)'
+                        }
+                    },
+                    fontFamily: {
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                        sans: ['"Inter"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="font-sans antialiased h-screen flex flex-col md:flex-row overflow-hidden transition-colors duration-300">
+
+    <div id="reading-progress-bar"></div>
+
+    <!-- Toast Notification -->
+    <div id="toast-container">
+        <i data-lucide="check-circle" class="w-4 h-4"></i>
+        <span id="toast-message"></span>
+    </div>
+
+    <!-- Lightbox -->
+    <div id="lightbox"
+        class="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex items-center justify-center opacity-0 invisible cursor-zoom-out"
+        onclick="closeLightbox()">
+        <img id="lightbox-img" src="" alt="Full view"
+            class="rounded-lg border border-hack-border transform scale-95 transition-transform duration-300">
+    </div>
+
+    <!-- Mobile Header -->
+    <header
+        class="md:hidden flex-none bg-hack-sidebar border-b border-hack-border h-16 flex items-center justify-between px-4 z-[60] relative shadow-lg">
+        <div class="flex items-center gap-3 cursor-pointer" onclick="loadDefault()">
+            <div class="w-10 h-10">
+                <img id="mobile-logo" src="assets/bjorn.png"
+                    onerror="this.src='https://placehold.co/40x40/111214/22c55e?text=B'" alt="Logo"
+                    class="w-full h-full object-contain drop-shadow-[0_0_5px_rgba(34,197,94,0.3)]">
+            </div>
+            <span class="font-bold text-hack-heading tracking-wide flex items-center gap-2">
+                <span id="mobile-project-name">BJORN</span> <span
+                    class="version-display text-hack-green text-[10px] font-mono opacity-80 pt-1">...</span>
+            </span>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <button id="theme-toggle-mobile"
+                class="text-gray-300 dark:text-gray-200 hover:text-hack-green p-2 transition-colors"
+                title="Switch Theme" aria-label="Switch Theme">
+                <i data-lucide="palette" class="w-5 h-5"></i>
+            </button>
+            <button id="menu-btn"
+                class="flex items-center gap-2 px-3 py-1.5 rounded bg-hack-bg border border-hack-border text-hack-heading active:bg-hack-greenDim transition-colors"
+                aria-label="Open Menu">
+                <span id="label-menu" class="text-xs font-mono font-bold uppercase tracking-wider">Menu</span>
+                <i data-lucide="menu" class="w-5 h-5 text-hack-green"></i>
+            </button>
+            <button id="toc-btn-mobile" class="text-gray-400 hover:text-hack-green p-2 transition-colors"
+                aria-label="Toggle Table of Contents">
+                <i data-lucide="hash" class="w-5 h-5"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Overlay -->
+    <div id="overlay" class="fixed inset-0 bg-black/80 backdrop-blur-[2px] z-[65] hidden transition-opacity opacity-0">
+    </div>
+
+    <!-- Mobile Sidebar (Left - Menu) -->
+    <aside id="sidebar"
+        class="sidebar-mobile fixed top-0 bottom-0 left-0 z-[70] w-[280px] bg-hack-sidebar border-r border-hack-border transform -translate-x-full md:translate-x-0 md:static md:h-full flex flex-col shadow-2xl md:shadow-none transition-transform duration-300">
+
+        <div class="p-5 border-b border-hack-border relative flex-none">
+            <button id="close-sidebar-btn" class="md:hidden absolute top-4 right-4 text-gray-400 hover:text-white"
+                aria-label="Close Menu">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-3 cursor-pointer" onclick="loadDefault()">
+                    <div class="w-12 h-12 shrink-0">
+                        <img id="sidebar-logo" src="assets/bjorn.png"
+                            onerror="this.src='https://placehold.co/48x48/111214/22c55e?text=B'" alt="Logo"
+                            class="w-full h-full object-contain drop-shadow-[0_0_8px_rgba(34,197,94,0.4)]">
+                    </div>
+                    <div>
+                        <h1 id="sidebar-project-name" class="font-bold text-hack-heading leading-none text-lg">BJORN
+                        </h1>
+                        <p class="version-display text-[10px] text-gray-500 font-mono mt-1 flex items-center gap-2">
+                            <span class="version-loading">checking...</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 relative group cursor-pointer" onclick="openSearch()">
+                <i data-lucide="search" class="absolute left-2.5 top-2.5 w-4 h-4 text-gray-500"></i>
+                <div
+                    class="w-full border border-hack-border rounded py-1.5 pl-8 pr-3 text-xs text-gray-500 bg-hack-bg/50 flex justify-between items-center">
+                    <span>Search...</span>
+                    <span class="text-[10px] opacity-50 border border-hack-border px-1 rounded">Ctrl+K</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto flex flex-col" role="navigation" aria-label="Main Navigation">
+            <div id="custom-links-top" class="px-3 pt-2 space-y-1"></div>
+            <div class="px-3 pt-4">
+                <div class="nav-group mb-1">
+                    <button id="btn-versions"
+                        class="w-full text-left px-2 py-2 flex items-center justify-between text-gray-500 hover:text-hack-heading transition-colors cursor-pointer group rounded hover:bg-hack-bg focus:bg-hack-bg outline-none"
+                        onclick="toggleVersionsPage(this)" tabindex="0">
+                        <div
+                            class="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest font-mono text-hack-green">
+                            <i data-lucide="history" class="w-3 h-3"></i> <span id="label-changelog">Changelog</span>
+                        </div>
+                        <i data-lucide="chevron-right"
+                            class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                    </button>
+                </div>
+                <div class="nav-group mb-1">
+                    <button id="btn-root-readme"
+                        class="w-full text-left px-2 py-2 flex items-center justify-between text-gray-500 hover:text-hack-heading transition-colors cursor-pointer group rounded hover:bg-hack-bg focus:bg-hack-bg outline-none"
+                        onclick="loadContent('', CONFIG.ui.rootReadmeTitle, 'README.md', true, true)" tabindex="0">
+                        <div
+                            class="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest font-mono text-hack-green">
+                            <i data-lucide="home" class="w-3 h-3"></i> <span id="label-root-readme">Project Home</span>
+                        </div>
+                        <i data-lucide="chevron-right"
+                            class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                    </button>
+                </div>
+            </div>
+
+            <nav class="pb-4 px-3 space-y-2 flex-none" id="nav-container">
+                <div class="text-center text-xs text-gray-500 mt-4 p-4">
+                    <div
+                        class="w-4 h-4 border-2 border-hack-green border-t-transparent rounded-full animate-spin mx-auto mb-2">
+                    </div>
+                    <span id="label-initializing">Initializing...</span>
+                </div>
+            </nav>
+
+            <div id="custom-links-bottom" class="px-3 pb-4 space-y-1"></div>
+        </div>
+
+        <div id="social-section" class="p-4 border-t border-hack-border bg-hack-bg/30 flex-none">
+            <div id="search-results-msg" class="hidden px-4 py-2 text-xs text-red-400 text-center italic">
+                No results found.
+            </div>
+            <div class="text-center">
+                <strong id="label-join-us" class="text-gray-500 text-sm block mb-3 font-mono tracking-wide">:: JOIN
+                    US ::</strong>
+                <div id="social-links" class="flex flex-col gap-2">
+                    <!-- Social links will be injected by JS -->
+                </div>
+            </div>
+        </div>
+
+        <div id="sidebar-footer"
+            class="p-4 border-t border-hack-border bg-hack-bg/50 text-[10px] text-gray-500 font-mono text-center">
+            <!-- Footer text will be injected by JS -->
+        </div>
+
+    </aside>
+
+    <!-- Mobile Sidebar (Right - TOC) -->
+    <aside id="mobile-toc-sidebar"
+        class="sidebar-mobile fixed top-0 bottom-0 right-0 z-[70] w-[280px] bg-hack-sidebar border-l border-hack-border transform translate-x-full flex flex-col shadow-2xl transition-transform duration-300">
+        <div class="p-4 border-b border-hack-border flex justify-between items-center bg-hack-bg/50">
+            <div id="label-mobile-toc"
+                class="text-[10px] font-bold text-hack-green uppercase tracking-widest px-3 py-1 bg-hack-greenDim border border-hack-border rounded-full font-mono truncate max-w-[200px]">
+            </div>
+            <button id="close-toc-btn" class="text-gray-400 hover:text-white" aria-label="Close Table of Contents">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+        <div class="flex-1 overflow-y-auto p-4">
+            <ul id="mobile-toc-list" class="space-y-3 text-sm"></ul>
+        </div>
+    </aside>
+
+    <div class="flex-1 flex flex-col h-full overflow-hidden relative">
+        <main class="flex-1 overflow-y-auto bg-hack-bg scroll-smooth relative w-full" id="scroll-container">
+            <div class="max-w-6xl mx-auto px-5 py-8 md:py-12 md:px-10 flex gap-10">
+                <div class="flex-1 min-w-0 content-transition-area">
+                    <div id="breadcrumb-sticky-container" class="breadcrumb-sticky-container">
+                        <div
+                            class="breadcrumb-inner flex flex-col md:flex-row md:items-center justify-between mb-4 gap-2 transition-all duration-300">
+                            <div class="flex items-center gap-2 text-xs font-mono text-gray-500 overflow-x-auto whitespace-nowrap md:pb-0"
+                                id="breadcrumbs"></div>
+
+                            <div class="flex items-center gap-4">
+                                <div
+                                    class="flex items-center gap-4 text-[10px] font-mono text-gray-500 uppercase tracking-wider shrink-0">
+                                    <span id="reading-time" class="hidden md:block"></span>
+                                    <span id="last-updated" class="hidden md:block text-hack-green opacity-80"></span>
+                                </div>
+
+                                <button id="theme-toggle-desktop"
+                                    class="text-gray-500 hover:text-hack-green transition-colors hidden md:block bg-hack-sidebar border border-hack-border rounded p-1.5"
+                                    title="Switch Theme" aria-label="Switch Theme">
+                                    <i data-lucide="palette" class="w-4 h-4"></i>
+                                </button>
+
+                                <button id="toc-btn-desktop"
+                                    class="text-gray-500 hover:text-hack-green transition-colors hidden md:block xl:hidden bg-hack-sidebar border border-hack-border rounded p-1.5"
+                                    title="Table of Contents" aria-label="Toggle Table of Contents">
+                                    <i data-lucide="hash" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="markdown-viewer" class="markdown-body min-h-[50vh]"></div>
+                    <div id="page-nav"
+                        class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-12 pt-8 border-t border-hack-border empty:hidden">
+                    </div>
+                    <div class="h-20"></div>
+                </div>
+
+                <aside class="hidden xl:block w-64 shrink-0">
+                    <div class="sticky top-6">
+                        <div class="mb-6">
+                            <button id="label-on-this-page"
+                                class="text-[10px] font-bold text-hack-green uppercase tracking-widest px-3 py-1.5 bg-hack-greenDim border border-hack-border rounded-full transition-all hover:bg-hack-green hover:text-white text-left max-w-full truncate"
+                                onclick="document.getElementById('scroll-container').scrollTo({top: 0, behavior: 'smooth'})">
+                            </button>
+                        </div>
+                        <div class="relative">
+                            <svg id="toc-svg">
+                                <path id="toc-path" fill="none" stroke="var(--accent-green)" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            <ul id="toc-container" class="space-y-2 text-xs pl-3"></ul>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </main>
+
+        <button id="scroll-top-btn"
+            class="absolute bottom-6 right-6 p-3 rounded-full bg-hack-greenDim border border-hack-border text-hack-green hover:bg-hack-green hover:text-white shadow-lg hidden z-30"
+            title="Back to Top" aria-label="Back to Top">
+            <i data-lucide="arrow-up" class="w-5 h-5"></i>
+        </button>
+    </div>
+
+    <!-- Search Modal -->
+    <div id="search-modal-overlay"
+        class="fixed inset-0 z-[150] bg-black/60 backdrop-blur-md hidden transition-opacity duration-300 opacity-0"
+        onclick="closeSearch()">
+        <div class="flex items-start justify-center pt-[10vh] px-4 h-full">
+            <div id="search-modal"
+                class="bg-hack-sidebar border border-hack-border w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[70vh] hidden"
+                onclick="event.stopPropagation()">
+                <div class="p-4 border-b border-hack-border flex items-center gap-3 bg-hack-bg/30">
+                    <i data-lucide="search" class="w-5 h-5 text-hack-green"></i>
+                    <input type="text" id="modal-search-input" placeholder="Search documentation..."
+                        class="flex-1 bg-transparent border-none outline-none text-lg text-hack-heading placeholder-gray-500"
+                        aria-label="Search documentation" role="searchbox">
+                    <kbd
+                        class="hidden md:block px-2 py-1 rounded bg-hack-bg border border-hack-border text-[10px] text-gray-500 font-mono">ESC</kbd>
+                </div>
+                <div id="modal-search-results" class="flex-1 overflow-y-auto p-2 space-y-1 min-h-[100px]">
+                    <div class="text-center py-10 text-gray-500 text-sm">Type to start searching...</div>
+                </div>
+                <div
+                    class="p-3 border-t border-hack-border bg-hack-bg/20 flex items-center justify-between text-[10px] text-gray-500 font-mono uppercase tracking-widest">
+                    <div class="flex gap-4">
+                        <span class="flex items-center gap-1"><i data-lucide="arrow-down-up" class="w-3 h-3"></i>
+                            Navigate</span>
+                        <span class="flex items-center gap-1"><i data-lucide="corner-down-left" class="w-3 h-3"></i>
+                            Select</span>
+                    </div>
+                    <div id="search-count" class="text-hack-green"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. CONFIG & STATE ---
+        const renderer = new marked.Renderer();
+
+        // Debug Logger
+        function debugLog(...args) {
+            if (CONFIG.features.debug) {
+                console.log(...args);
+            }
+        }
+
+        // --- FIXED IMAGE RENDERER (Handles Marked 5.0+ Object Token) ---
+        renderer.image = function (href, title, text) {
+            if (typeof href === 'object' && href !== null) {
+                const token = href;
+                href = token.href;
+                title = token.title;
+                text = token.text;
+            }
+            return `<img src="${href}" alt="${text || ''}" title="${title || ''}" loading="lazy" class="rounded-lg border border-hack-border bg-black/20">`;
+        };
+
+        renderer.table = function (header, body) {
+            return `<div class="overflow-x-auto my-4 border border-hack-border rounded-lg"><table class="w-full text-left text-sm border-collapse"><thead>${header}</thead><tbody>${body}</tbody></table></div>`;
+        };
+
+        marked.use({ renderer });
+        marked.setOptions({ breaks: false, gfm: true });
+        const STATE = {
+            wikiData: {},
+            contentCache: {},
+            searchIndex: [],
+            expandedSections: new Set(),
+            repo: CONFIG.repo,
+            branch: CONFIG.branch,
+            currentTitle: "",
+            currentFolder: "",
+            currentFilename: ""
+        };
+
+        // --- 1.5 INITIALIZE CONFIG ---
+        function applyConfig() {
+            document.getElementById('site-title').innerText = `${CONFIG.projectName} // ${CONFIG.projectSubtitle}`;
+            document.getElementById('meta-description').setAttribute('content', CONFIG.description);
+
+            const mobileLogo = document.getElementById('mobile-logo');
+            mobileLogo.src = CONFIG.logoPath;
+            mobileLogo.onerror = () => mobileLogo.src = CONFIG.logoPlaceholder;
+
+            const sidebarLogo = document.getElementById('sidebar-logo');
+            sidebarLogo.src = CONFIG.logoPath;
+            sidebarLogo.onerror = () => sidebarLogo.src = CONFIG.logoPlaceholder;
+
+            document.getElementById('mobile-project-name').innerText = CONFIG.projectName;
+            document.getElementById('sidebar-project-name').innerText = CONFIG.projectName;
+
+            // UI Strings
+            const modalSearchInput = document.getElementById('modal-search-input');
+            if (modalSearchInput) modalSearchInput.placeholder = CONFIG.ui.searchPlaceholder;
+
+            document.getElementById('label-changelog').innerText = CONFIG.ui.changelogTitle;
+            document.getElementById('label-root-readme').innerText = CONFIG.ui.rootReadmeTitle;
+            document.getElementById('label-initializing').innerText = CONFIG.ui.initializingText;
+            document.getElementById('label-join-us').innerText = CONFIG.ui.joinUsTitle;
+            document.getElementById('label-on-this-page').innerText = CONFIG.ui.onThisPageTitle;
+            document.getElementById('label-mobile-toc').innerText = CONFIG.ui.onThisPageMobile || CONFIG.ui.onThisPageTitle;
+            document.getElementById('label-menu').innerText = CONFIG.ui.menuText || "Menu";
+
+            const versionLoading = document.querySelector('.version-loading');
+            if (versionLoading) versionLoading.innerText = CONFIG.ui.checkingVersionText;
+
+            // Feature Toggles
+            const changelogBtn = document.getElementById('btn-versions');
+            if (changelogBtn) {
+                changelogBtn.style.display = CONFIG.features.showChangelog ? 'flex' : 'none';
+            }
+
+            const rootReadmeBtn = document.getElementById('btn-root-readme');
+            if (rootReadmeBtn) {
+                rootReadmeBtn.style.display = CONFIG.features.showRootReadme ? 'flex' : 'none';
+            }
+
+            const searchTrigger = document.querySelector('[onclick="openSearch()"]');
+            if (searchTrigger) {
+                searchTrigger.style.display = CONFIG.features.showSearch ? 'block' : 'none';
+            }
+
+            const socialSection = document.getElementById('social-section');
+            if (socialSection) {
+                socialSection.style.display = CONFIG.features.showSocialBadges ? 'block' : 'none';
+            }
+
+            const themeToggles = [
+                document.getElementById('theme-toggle-mobile'),
+                document.getElementById('theme-toggle-desktop')
+            ];
+            themeToggles.forEach(btn => {
+                if (btn) btn.style.display = CONFIG.features.showThemeToggle ? '' : 'none';
+            });
+
+            const breadcrumbContainer = document.getElementById('breadcrumb-sticky-container');
+            if (breadcrumbContainer) {
+                if (CONFIG.features.stickyBreadcrumbs) {
+                    breadcrumbContainer.classList.add('is-sticky');
+                } else {
+                    breadcrumbContainer.classList.remove('is-sticky');
+                }
+            }
+
+            // SEO & PWA Dynamic Updates
+            const fullTitle = `${CONFIG.projectName} // ${CONFIG.projectSubtitle}`;
+            document.getElementById('og-title').content = fullTitle;
+            document.getElementById('tw-title').content = fullTitle;
+            document.getElementById('og-url').content = window.location.href;
+            document.getElementById('tw-url').content = window.location.href;
+            document.getElementById('og-image').content = CONFIG.logoPath;
+            document.getElementById('tw-image').content = CONFIG.logoPath;
+            document.getElementById('og-desc').content = CONFIG.description;
+            document.getElementById('tw-desc').content = CONFIG.description;
+
+            document.getElementById('favicon-32').href = CONFIG.logoPath;
+            document.getElementById('favicon-16').href = CONFIG.logoPath;
+            document.getElementById('apple-icon').href = CONFIG.logoPath;
+
+            const maskIcon = document.getElementById('mask-icon');
+            maskIcon.href = CONFIG.logoPath;
+            maskIcon.setAttribute('color', CONFIG.accentColor || '#22c55e');
+
+            document.getElementById('apple-title').content = CONFIG.projectName;
+            document.getElementById('app-name').content = CONFIG.projectName;
+            document.getElementById('ms-tile-color').content = CONFIG.themeColor || '#0B0C0E';
+            document.getElementById('theme-color-meta').content = CONFIG.themeColor || '#0B0C0E';
+            document.getElementById('manifest-link').href = CONFIG.manifestPath || 'manifest.json';
+
+            renderCustomLinks();
+            renderFooter();
+            renderSocialLinks();
+        }
+
+        function renderCustomLinks() {
+            const render = (containerId, links) => {
+                const container = document.getElementById(containerId);
+                if (!container) return;
+                container.innerHTML = '';
+                if (!links || links.length === 0) return;
+
+                links.forEach(link => {
+                    container.innerHTML += `
+                        <a href="${link.url}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 px-2 py-1.5 text-xs text-gray-400 hover:text-hack-green hover:bg-hack-bg rounded transition-colors group">
+                            <i data-lucide="${link.icon || 'link'}" class="w-3.5 h-3.5"></i>
+                            <span>${link.name}</span>
+                        </a>`;
+                });
+                lucide.createIcons();
+            };
+
+            render('custom-links-top', CONFIG.links.top);
+            render('custom-links-bottom', CONFIG.links.bottom);
+        }
+
+        function renderFooter() {
+            const footer = document.getElementById('sidebar-footer');
+            if (footer) {
+                footer.innerText = CONFIG.footerText || "";
+                footer.style.display = CONFIG.footerText ? 'block' : 'none';
+            }
+        }
+
+        // --- 1.6 TOAST SYSTEM ---
+        let toastTimeout;
+        function showToast(message) {
+            const toast = document.getElementById('toast-container');
+            const msgSpan = document.getElementById('toast-message');
+
+            clearTimeout(toastTimeout);
+            msgSpan.innerText = message;
+            toast.classList.add('active');
+
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('active');
+            }, 3000);
+        }
+
+        function renderSocialLinks() {
+            const container = document.getElementById('social-links');
+            container.innerHTML = '';
+
+            if (CONFIG.social.discord) {
+                const inviteCode = CONFIG.social.discord.split('/').pop();
+                container.innerHTML += `
+                    <a href="${CONFIG.social.discord}" target="_blank" rel="noopener noreferrer" class="hover:opacity-80 transition-opacity block">
+                        <img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fdiscord.com%2Fapi%2Finvites%2F${inviteCode}%3Fwith_counts%3Dtrue&query=%24.approximate_member_count&logo=discord&logoColor=white&style=for-the-badge&label=${CONFIG.badges.discordLabel}&color=5865F2&labelColor=2A2E35"
+                            alt="Discord" class="w-full badge-sm" />
+                    </a>`;
+            }
+
+            if (CONFIG.social.reddit) {
+                const subreddit = CONFIG.social.reddit.split('/r/').pop().replace(/\/$/, '');
+                container.innerHTML += `
+                    <a href="${CONFIG.social.reddit}" target="_blank" rel="noopener noreferrer" class="hover:opacity-80 transition-opacity block">
+                        <img src="https://img.shields.io/reddit/subreddit-subscribers/${subreddit}?style=for-the-badge&logo=reddit&label=${CONFIG.badges.redditLabel}&color=FF4500&labelColor=2A2E35&logoColor=white"
+                            alt="Reddit" class="w-full badge-sm" />
+                    </a>`;
+            }
+
+            if (CONFIG.social.github) {
+                const repoPath = CONFIG.social.github.replace('https://github.com/', '');
+                container.innerHTML += `
+                    <a href="${CONFIG.social.github}" target="_blank" rel="noopener noreferrer" class="hover:opacity-80 transition-opacity block">
+                        <img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.github.com%2Frepos%2F${repoPath}&query=%24.stargazers_count&style=for-the-badge&logo=github&color=0B0C0E&labelColor=2A2E35&label=${CONFIG.badges.githubLabel}&logoColor=white"
+                            alt="GitHub" class="w-full badge-sm" />
+                    </a>`;
+            }
+
+            if (CONFIG.social.buyMeACoffee) {
+                container.innerHTML += `
+                    <a href="${CONFIG.social.buyMeACoffee}" target="_blank" rel="noopener noreferrer" class="hover:opacity-80 transition-opacity block pt-4 border-t border-hack-border mt-4">
+                        <img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-ffdd00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black"
+                            alt="Buy Me A Coffee" class="w-full badge-sm" />
+                    </a>`;
+            }
+        }
+
+        // --- 2. THEME ENGINE ---
+        function initTheme() {
+            const savedThemeId = localStorage.getItem('theme-id') || CONFIG.defaultTheme;
+            applyTheme(savedThemeId);
+        }
+
+        function applyTheme(themeId) {
+            const theme = CONFIG.themes.find(t => t.id === themeId) || CONFIG.themes[0];
+            const html = document.documentElement;
+            const themeLink = document.getElementById('theme-link');
+
+            themeLink.href = theme.file;
+
+            if (theme.isDark) {
+                html.classList.add('dark');
+                html.classList.remove('light');
+            } else {
+                html.classList.add('light');
+                html.classList.remove('dark');
+            }
+
+            localStorage.setItem('theme-id', theme.id);
+            lucide.createIcons();
+
+            // Notify user (except on initial load)
+            if (STATE && STATE.wikiData && Object.keys(STATE.wikiData).length > 0) {
+                showToast(`${CONFIG.ui.themeChangedText}${theme.name}`);
+            }
+        }
+
+        function cycleTheme() {
+            const currentThemeId = localStorage.getItem('theme-id') || CONFIG.defaultTheme;
+            const currentIndex = CONFIG.themes.findIndex(t => t.id === currentThemeId);
+            const nextIndex = (currentIndex + 1) % CONFIG.themes.length;
+            const nextTheme = CONFIG.themes[nextIndex];
+
+            applyTheme(nextTheme.id);
+        }
+
+        document.getElementById('theme-toggle-desktop').onclick = cycleTheme;
+        document.getElementById('theme-toggle-mobile').onclick = cycleTheme;
+        initTheme();
+
+        // --- 3. FETCH DATA (GitHub API) ---
+        async function fetchLatestVersion() {
+            if (CONFIG.versioning.type === 'local') {
+                updateVersionUI(CONFIG.versioning.manualVersion, true);
+                return;
+            }
+
+            const CACHE_KEY = 'bjorn_ver_data';
+            const now = Date.now();
+            const ONE_HOUR = 3600 * 1000;
+
+            const cached = localStorage.getItem(CACHE_KEY);
+            if (cached) {
+                const { timestamp, version } = JSON.parse(cached);
+                if (now - timestamp < ONE_HOUR) {
+                    updateVersionUI(version, true);
+                    return;
+                }
+            }
+
+            try {
+                let ver = "v2.0";
+                let res = await fetch(`https://api.github.com/repos/${STATE.repo}/releases/latest`);
+
+                if (res.ok) {
+                    const data = await res.json();
+                    ver = data.tag_name;
+                } else {
+                    res = await fetch(`https://api.github.com/repos/${STATE.repo}/tags`);
+                    if (res.ok) {
+                        const tags = await res.json();
+                        if (tags.length > 0) ver = tags[0].name;
+                    }
+                }
+
+                localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: now, version: ver }));
+                updateVersionUI(ver, true);
+            } catch (e) {
+                console.warn("GitHub API Limit or Network Error", e);
+                if (cached) updateVersionUI(JSON.parse(cached).version, true);
+                else updateVersionUI("v2.0", false);
+            }
+        }
+
+        function updateVersionUI(ver, success) {
+            document.querySelectorAll('.version-display').forEach(el => {
+                el.innerHTML = ver;
+                if (success) el.classList.add('text-hack-green');
+            });
+        }
+
+        // --- 4. WIKI CORE ---
+        async function initWiki() {
+            try {
+                debugLog('[AcidWiki] 🚀 Initializing wiki...');
+
+                // Try GitHub API first for production
+                let structure = await fetchWikiStructureFromAPI();
+
+                // If API fails, try local filesystem scanning (for local HTTP servers)
+                if (!structure) {
+                    debugLog('[AcidWiki] 🔄 Trying local filesystem scan...');
+                    structure = await scanLocalFilesystem();
+                }
+
+                if (!structure || Object.keys(structure).length === 0) {
+                    if (CONFIG.features.showRootReadme) {
+                        debugLog('[AcidWiki] ℹ️ No docs found, but root README is enabled. Proceeding...');
+                        structure = {}; // Empty but valid
+                    } else {
+                        console.error('[AcidWiki] ❌ No wiki content found!');
+                        throw new Error("No wiki content found. Please add .md files to wiki/docs/");
+                    }
+                }
+
+                debugLog('[AcidWiki] ✅ Wiki structure loaded successfully');
+                STATE.wikiData = structure;
+
+                const firstFolder = Object.keys(STATE.wikiData)[0];
+                if (firstFolder) STATE.expandedSections.add(firstFolder);
+
+                renderSidebar();
+                buildSearchIndex();
+
+                window.onpopstate = (event) => {
+                    if (event.state) {
+                        if (event.state.page === 'versions') toggleVersionsPage(null, false);
+                        else loadContent(event.state.folder, event.state.title, event.state.filename, false);
+                    } else {
+                        handleInitialRoute();
+                    }
+                };
+
+                handleInitialRoute();
+
+            } catch (e) {
+                console.error(e);
+                showErrorState(e.message);
+            }
+        }
+
+        async function fetchWikiStructureFromAPI() {
+            if (CONFIG.versioning.type === 'local' || !STATE.repo) {
+                debugLog('[AcidWiki] ⏭️ Skipping GitHub API (local mode or no repo configured)');
+                return null;
+            }
+
+            const branchesToTry = [CONFIG.branch, 'main', 'master'];
+            for (const branch of branchesToTry) {
+                if (!branch) continue;
+                debugLog(`[AcidWiki] 🌐 Fetching structure from GitHub API: ${STATE.repo}/${branch}`);
+                try {
+                    const res = await fetch(`https://api.github.com/repos/${STATE.repo}/git/trees/${branch}?recursive=1`);
+                    if (!res.ok) {
+                        debugLog(`[AcidWiki] ⚠️ Branch "${branch}" failed (${res.status})`);
+                        continue;
+                    }
+
+                    debugLog(`[AcidWiki] ✅ GitHub API response received for branch: ${branch}`);
+                    const data = await res.json();
+                    const structure = {};
+                    let fileCount = 0;
+
+                    data.tree.forEach(item => {
+                        if (item.path.startsWith('wiki/docs/') && item.type === 'blob' && item.path.endsWith('.md')) {
+                            const relativePath = item.path.replace('wiki/docs/', '');
+                            const parts = relativePath.split('/');
+
+                            let currentLevel = structure;
+                            for (let i = 0; i < parts.length - 1; i++) {
+                                const folder = parts[i];
+                                if (!currentLevel[folder]) currentLevel[folder] = {};
+                                currentLevel = currentLevel[folder];
+                            }
+
+                            const filename = parts[parts.length - 1];
+                            const title = decodeURIComponent(filename.replace(/\.md$/, '').replace(/_/g, ' '));
+                            currentLevel[title] = filename;
+                            fileCount++;
+                        }
+                    });
+
+                    // Sort folders and files recursively
+                    function sortStructure(obj) {
+                        const sorted = {};
+                        Object.keys(obj).sort().forEach(key => {
+                            if (typeof obj[key] === 'object' && obj[key] !== null) {
+                                sorted[key] = sortStructure(obj[key]);
+                            } else {
+                                sorted[key] = obj[key];
+                            }
+                        });
+                        return sorted;
+                    }
+
+                    const sortedStructure = sortStructure(structure);
+                    debugLog(`[AcidWiki] ✅ GitHub discovery complete: Found ${fileCount} files`);
+                    return Object.keys(sortedStructure).length > 0 ? sortedStructure : null;
+                } catch (e) {
+                    debugLog(`[AcidWiki] ❌ Error fetching branch "${branch}":`, e);
+                }
+            }
+            return null;
+        }
+
+        async function scanLocalFilesystem() {
+            debugLog('[AcidWiki] 🔍 Starting local filesystem scan...');
+            try {
+                // Try to fetch the wiki/docs/ directory listing
+                const res = await fetch('./wiki/docs/');
+                if (!res.ok) {
+                    debugLog('[AcidWiki] ❌ Cannot access wiki/docs/ directory');
+                    return null;
+                }
+
+                debugLog('[AcidWiki] ✅ Successfully accessed wiki/docs/');
+                const structure = {};
+
+                // Recursive function to scan a folder
+                async function scanFolder(path = '', parentStructure = structure) {
+                    debugLog(`[AcidWiki] 📂 Scanning folder: wiki/docs/${path || '(root)'}`);
+
+                    const folderUrl = path ? `./wiki/docs/${path}/` : './wiki/docs/';
+                    const folderRes = await fetch(folderUrl);
+                    if (!folderRes.ok) return;
+
+                    const folderHtml = await folderRes.text();
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(folderHtml, 'text/html');
+                    const links = doc.querySelectorAll('a');
+
+                    let filesFound = 0;
+                    let foldersFound = 0;
+
+                    debugLog(`[AcidWiki] 🔎 Found ${links.length} links in HTML`);
+
+                    for (const link of links) {
+                        const href = link.getAttribute('href');
+                        const linkText = link.textContent.trim();
+
+                        if (!href || href === '../' || href.startsWith('?')) continue;
+
+                        // Skip navigation links
+                        if (linkText === '..' || linkText === '~') {
+                            debugLog(`[AcidWiki] ⏭️ Skipped navigation link: "${linkText}"`);
+                            continue;
+                        }
+
+                        // Build expected URL prefix for files in the current folder
+                        // When scanning wiki/docs/, we expect links like /...path.../wiki/docs/file.md or /...path.../wiki/docs/folder/
+                        // When scanning wiki/docs/01_General/, we expect /...path.../wiki/docs/01_General/file.md
+                        const baseDocsPath = '/wiki/docs/';
+
+                        // Only process links that contain wiki/docs in their path
+                        if (!href.includes(baseDocsPath)) {
+                            debugLog(`[AcidWiki] ⏭️ Skipped (not in wiki/docs): "${href}"`);
+                            continue;
+                        }
+
+                        // Extract the part after /wiki/docs/
+                        const afterDocs = href.split(baseDocsPath)[1];
+                        if (!afterDocs) {
+                            debugLog(`[AcidWiki] ⏭️ Skipped (invalid path after wiki/docs): "${href}"`);
+                            continue;
+                        }
+
+                        // Check if this is a direct child of our current folder
+                        // If we're scanning root (path=''), afterDocs should be like 'file.md' or 'folder/'
+                        // If we're scanning '01_General', afterDocs should start with '01_General/' and next segment is the child
+                        const expectedPrefix = path ? `${path}/` : '';
+                        if (path && !afterDocs.startsWith(expectedPrefix)) {
+                            debugLog(`[AcidWiki] ⏭️ Skipped (not in current path "${path}"): afterDocs="${afterDocs}"`);
+                            continue;
+                        }
+
+                        // Get the relative part (after our current path)
+                        const relativePart = path ? afterDocs.substring(expectedPrefix.length) : afterDocs;
+
+                        // Only accept direct children: should not contain additional slashes (except trailing for folders)
+                        const withoutTrailingSlash = relativePart.endsWith('/') ? relativePart.slice(0, -1) : relativePart;
+                        if (withoutTrailingSlash.includes('/')) {
+                            debugLog(`[AcidWiki] ⏭️ Skipped (not a direct child): relativePart="${relativePart}"`);
+                            continue;
+                        }
+
+                        // Determine if it's a folder or file
+                        const isMarkdownFile = href.endsWith('.md');
+                        const hasTrailingSlash = href.endsWith('/');
+
+                        // It's a markdown file
+                        if (isMarkdownFile) {
+                            let fileName = href;
+                            if (fileName.includes('/')) {
+                                fileName = fileName.split('/').pop();
+                            }
+
+                            const title = decodeURIComponent(fileName.replace(/\.md$/, '').replace(/_/g, ' '));
+                            parentStructure[title] = fileName;
+                            filesFound++;
+                        }
+                        // It's a subdirectory (has trailing slash AND not a file extension)
+                        else if (hasTrailingSlash || (!href.includes('.') && !isMarkdownFile)) {
+                            let folderName = hasTrailingSlash ? href.slice(0, -1) : href;
+                            if (folderName.includes('/')) {
+                                folderName = folderName.split('/').pop();
+                            }
+
+                            if (!folderName || folderName.trim() === '' || folderName === '..') {
+                                debugLog(`[AcidWiki] ⏭️ Skipping invalid folder name: "${folderName}"`);
+                                continue;
+                            }
+
+                            const fullPath = path ? `${path}/${folderName}` : folderName;
+
+                            debugLog(`[AcidWiki] 📁 Found folder: ${folderName} (${fullPath})`);
+                            foldersFound++;
+
+                            if (!parentStructure[folderName]) {
+                                parentStructure[folderName] = {};
+                            }
+
+                            try {
+                                await scanFolder(fullPath, parentStructure[folderName]);
+                            } catch (e) {
+                                console.warn(`[AcidWiki] ⚠️ Failed to scan subfolder ${fullPath}:`, e);
+                            }
+                        } else {
+                            debugLog(`[AcidWiki] ⏭️ Skipped non-markdown file: "${href}"`);
+                        }
+                    }
+
+                    debugLog(`[AcidWiki] ✓ Folder scan complete: ${filesFound} files, ${foldersFound} subfolders`);
+                    debugLog(`[AcidWiki] 📊 Structure for "${path || 'root'}":`, Object.keys(parentStructure));
+                }
+
+                // Start recursive scanning from root
+                await scanFolder();
+
+                // Sort folders and files recursively
+                function sortStructure(obj) {
+                    const sorted = {};
+                    Object.keys(obj).sort().forEach(key => {
+                        if (typeof obj[key] === 'object' && !obj[key].endsWith) {
+                            sorted[key] = sortStructure(obj[key]);
+                        } else {
+                            sorted[key] = obj[key];
+                        }
+                    });
+                    return sorted;
+                }
+
+                const sortedStructure = sortStructure(structure);
+
+                const totalItems = JSON.stringify(sortedStructure).split('.md').length - 1;
+                debugLog(`[AcidWiki] ✅ Scan complete! Found ${totalItems} markdown files`);
+                debugLog('[AcidWiki] 📊 Structure:', sortedStructure);
+
+                return Object.keys(sortedStructure).length > 0 ? sortedStructure : null;
+            } catch (e) {
+                console.error('[AcidWiki] ❌ Local filesystem scan failed:', e);
+                return null;
+            }
+        }
+
+        function handleInitialRoute() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const pageParam = urlParams.get('page');
+
+            if (pageParam === 'changelog') {
+                toggleVersionsPage(null, false);
+            } else if (pageParam) {
+                const flatList = getFlatPageList();
+                const found = flatList.find(item => `${item.folder}/${item.file}` === pageParam || item.file === pageParam);
+
+                if (found) {
+                    loadContent(found.folder, found.title, found.file, false);
+                    // Expand all parent folders
+                    const parts = found.folder.split('/');
+                    let current = "";
+                    parts.forEach(p => {
+                        if (p) {
+                            current = current ? `${current}/${p}` : p;
+                            STATE.expandedSections.add(current);
+                        }
+                    });
+                    renderSidebar();
+                } else {
+                    loadDefault();
+                }
+            } else {
+                loadDefault();
+            }
+        }
+
+        async function buildSearchIndex() {
+            const promises = [];
+
+            function indexRecursive(data, currentPath = '') {
+                for (const [key, value] of Object.entries(data)) {
+                    if (typeof value === 'object' && value !== null) {
+                        const folderPath = currentPath ? `${currentPath}/${key}` : key;
+                        indexRecursive(value, folderPath);
+                    } else if (typeof value === 'string' && value.endsWith('.md')) {
+                        const filename = value;
+                        const title = key;
+                        const folder = currentPath;
+
+                        promises.push(
+                            fetch(`./wiki/docs/${folder}/${filename}`)
+                                .then(res => { if (!res.ok) return ''; return res.text(); })
+                                .then(text => {
+                                    if (!text) return;
+                                    STATE.searchIndex.push({
+                                        folder, title, filename,
+                                        content: text.toLowerCase(),
+                                        titleLower: title.toLowerCase()
+                                    });
+                                })
+                                .catch(err => debugLog("Indexing skip:", filename))
+                        );
+                    }
+                }
+            }
+
+            indexRecursive(STATE.wikiData);
+            await Promise.all(promises);
+        }
+
+        function getFlatPageList() {
+            const flatList = [];
+            function traverse(data, currentPath = '') {
+                for (const [key, value] of Object.entries(data)) {
+                    if (typeof value === 'object' && value !== null) {
+                        const folderPath = currentPath ? `${currentPath}/${key}` : key;
+                        traverse(value, folderPath);
+                    } else if (typeof value === 'string' && value.endsWith('.md')) {
+                        flatList.push({ folder: currentPath, title: key, file: value });
+                    }
+                }
+            }
+            traverse(STATE.wikiData);
+            return flatList;
+        }
+
+        function loadDefault() {
+            if (CONFIG.features.showRootReadme) {
+                loadContent('', CONFIG.ui.rootReadmeTitle, 'README.md', true, true);
+                return;
+            }
+            const flatList = getFlatPageList();
+            if (flatList.length === 0) return;
+            const first = flatList[0];
+            loadContent(first.folder, first.title, first.file, true);
+        }
+
+        function showErrorState(msg) {
+            document.getElementById('nav-container').innerHTML = `
+                <div class="p-4 text-xs text-red-400 border border-red-900 bg-red-900/10 rounded m-2 font-mono">
+                    <strong>[!] CONFIG ERROR</strong><br>${msg}
+                </div>`;
+
+            document.getElementById('markdown-viewer').innerHTML = `
+                <h1>Wiki Setup Guide</h1>
+                <p>Welcome to your new Wiki Node. To enable content, please ensure your repository structure matches the config.</p>
+            `;
+            hljs.highlightAll();
+        }
+
+        // --- 5. CONTENT LOADER (PERSISTENT CACHE OPTIMIZED) ---
+        async function loadContent(folder, title, filename, pushHistory = true, isRoot = false) {
+            if (CONFIG.features.pageTransitions && document.startViewTransition) {
+                document.startViewTransition(() => performLoadContent(folder, title, filename, pushHistory, isRoot));
+            } else {
+                performLoadContent(folder, title, filename, pushHistory, isRoot);
+            }
+        }
+
+        async function performLoadContent(folder, title, filename, pushHistory = true, isRoot = false) {
+            const viewer = document.getElementById('markdown-viewer');
+            const pageNav = document.getElementById('page-nav');
+            const scrollContainer = document.getElementById('scroll-container');
+
+            STATE.currentTitle = title;
+            STATE.currentFolder = folder;
+            STATE.currentFilename = filename;
+            document.getElementById('label-on-this-page').innerText = title;
+            document.getElementById('label-mobile-toc').innerText = title;
+
+            const flatList = getFlatPageList();
+            const idx = flatList.findIndex(item => item.folder === folder && item.title === title);
+            const prev = idx > 0 ? flatList[idx - 1] : null;
+            const next = idx < flatList.length - 1 ? flatList[idx + 1] : null;
+
+            const segments = folder.split('/').filter(s => s).map(s => s.replace(/^\d+_/, '').replace(/_/g, ' '));
+            const breadcrumbs = document.getElementById('breadcrumbs');
+
+            let breadcrumbParts = [];
+            breadcrumbParts.push(`<span class="hover:text-hack-heading cursor-pointer" onclick="loadDefault()">wiki</span>`);
+
+            let currentPath = "";
+            const folderParts = folder.split('/').filter(s => s);
+
+            segments.forEach((seg, i) => {
+                const partKey = folderParts[i];
+                currentPath = currentPath ? `${currentPath}/${partKey}` : partKey;
+
+                // Find first page in this specific folder level to make the folder clickable
+                const folderData = currentPath.split('/').reduce((obj, key) => obj[key], STATE.wikiData);
+                const firstPage = Object.entries(folderData).find(([k, v]) => typeof v === 'string');
+
+                if (firstPage) {
+                    breadcrumbParts.push(`<span class="hover:text-hack-heading cursor-pointer" onclick="loadContent('${currentPath}', '${firstPage[0]}', '${firstPage[1]}')">${seg}</span>`);
+                } else {
+                    breadcrumbParts.push(`<span>${seg}</span>`);
+                }
+            });
+            breadcrumbParts.push(`<span class="text-hack-green font-bold">${title}</span>`);
+
+            // Truncate if too long (keep root + last 2 segments)
+            if (breadcrumbParts.length > 4) {
+                const first = breadcrumbParts[0];
+                const lastTwo = breadcrumbParts.slice(-2);
+                breadcrumbParts = [first, '<span class="opacity-50">...</span>', ...lastTwo];
+            }
+
+            breadcrumbs.innerHTML = `
+                ${prev ? `<button onclick="loadContent('${prev.folder}', '${prev.title}', '${prev.file}')" class="hover:text-hack-green transition-colors mr-1" title="Previous: ${prev.title}"><i data-lucide="chevron-left" class="w-3.5 h-3.5"></i></button>` : ''}
+                ${breadcrumbParts.join(' <span class="opacity-30">/</span> ')}
+                ${next ? `<button onclick="loadContent('${next.folder}', '${next.title}', '${next.file}')" class="hover:text-hack-green transition-colors ml-1" title="Next: ${next.title}"><i data-lucide="chevron-right" class="w-3.5 h-3.5"></i></button>` : ''}
+            `;
+            lucide.createIcons();
+
+            // Only show loader if not in RAM cache
+            if (!STATE.contentCache[`${folder}/${filename}`]) {
+                viewer.innerHTML = `
+                    <div class="space-y-6 pt-4">
+                        <div class="skeleton h-10 w-2/3 mb-8"></div>
+                        <div class="space-y-3">
+                            <div class="skeleton h-4 w-full"></div>
+                            <div class="skeleton h-4 w-11/12"></div>
+                            <div class="skeleton h-4 w-full"></div>
+                            <div class="skeleton h-4 w-4/5"></div>
+                        </div>
+                        <div class="skeleton h-48 w-full mt-10"></div>
+                        <div class="space-y-3 mt-10">
+                            <div class="skeleton h-4 w-full"></div>
+                            <div class="skeleton h-4 w-5/6"></div>
+                        </div>
+                    </div>`;
+            }
+            pageNav.innerHTML = '';
+            document.getElementById('reading-time').innerText = '';
+            document.getElementById('last-updated').innerText = '';
+
+            try {
+                let text;
+                const cacheKey = `${folder}/${filename}`;
+                const storageKey = `bjorn_content_${cacheKey}`;
+                const now = Date.now();
+                const TTL = 3600 * 1000 * 24; // 24 Hours Cache
+
+                // 1. Check RAM (Fastest)
+                if (STATE.contentCache[cacheKey]) {
+                    text = STATE.contentCache[cacheKey];
+                }
+
+                // 2. Check LocalStorage (Persistence)
+                if (!text) {
+                    const stored = localStorage.getItem(storageKey);
+                    if (stored) {
+                        try {
+                            const data = JSON.parse(stored);
+                            if (now - data.ts < TTL) {
+                                text = data.content;
+                                STATE.contentCache[cacheKey] = text; // Restore to RAM
+                            }
+                        } catch (e) { localStorage.removeItem(storageKey); }
+                    }
+                }
+
+                // 3. Network Fetch (Fallback)
+                if (!text) {
+                    try {
+                        let path;
+                        if (isRoot) {
+                            path = `./${filename}`;
+                        } else {
+                            path = folder ? `./wiki/docs/${folder}/${filename}` : `./wiki/docs/${filename}`;
+                        }
+
+                        const res = await fetch(path);
+                        if (res.ok) {
+                            text = await res.text();
+                        } else {
+                            throw new Error("404");
+                        }
+                    } catch (e) {
+                        // Try fallback if not root
+                        if (!isRoot) {
+                            const path2 = `./wiki/docs/${filename}`;
+                            const res2 = await fetch(path2);
+                            if (res2.ok) {
+                                text = await res2.text();
+                            } else {
+                                throw new Error(`Content not found.`);
+                            }
+                        } else {
+                            throw e;
+                        }
+                    }
+
+                    // Save to caches
+                    STATE.contentCache[cacheKey] = text;
+                    try {
+                        localStorage.setItem(storageKey, JSON.stringify({
+                            ts: now,
+                            content: text
+                        }));
+                    } catch (e) { console.warn("LocalStorage full"); }
+                }
+
+                const cleanHTML = DOMPurify.sanitize(marked.parse(text));
+                viewer.innerHTML = cleanHTML;
+
+                // Update SEO Tags
+                const fullTitle = `${title} | ${CONFIG.projectName}`;
+                document.title = fullTitle;
+                document.getElementById('og-title').content = fullTitle;
+                document.getElementById('tw-title').content = fullTitle;
+                document.getElementById('og-url').content = window.location.href;
+                document.getElementById('tw-url').content = window.location.href;
+
+                const wordCount = text.replace(/[#*`]/g, '').split(/\s+/).length;
+                document.getElementById('reading-time').textContent = `${CONFIG.ui.readingTimePrefix}${Math.ceil(wordCount / 200)} ${CONFIG.ui.readingTimeSuffix}`;
+                fetchLastUpdated(folder, filename);
+
+                enhanceMarkdownContent();
+                generateTOC();
+                renderPagination(folder, title);
+
+                if (pushHistory) {
+                    const newUrl = `?page=${folder}/${filename}`;
+                    window.history.pushState({ folder, title, filename }, "", newUrl);
+                }
+
+                if (CONFIG.features.autoCollapseSidebar) {
+                    STATE.expandedSections = new Set([folder]);
+                } else {
+                    STATE.expandedSections.add(folder);
+                }
+                renderSidebar();
+                if (window.location.hash) {
+                    const el = document.getElementById(window.location.hash.substring(1));
+                    if (el) el.scrollIntoView();
+                } else {
+                    scrollContainer.scrollTop = 0;
+                }
+
+                if (window.innerWidth < 768) closeMenu();
+
+                preloadAdjacent(folder, title);
+
+            } catch (e) {
+                console.error("Load failed", e);
+                const cleanError = e.message.replace(/\n/g, '<br>');
+                viewer.innerHTML = `
+                    <h1 class="text-red-500 mb-2">Page Not Found</h1>
+                    <div class="p-4 bg-red-900/20 border border-red-900 rounded text-sm font-mono text-red-300">
+                        <strong>Error Details:</strong><br>${cleanError}
+                    </div>`;
+
+                document.getElementById('breadcrumbs').innerHTML = `<span class="hover:text-hack-heading cursor-pointer" onclick="loadDefault()">wiki</span> <span>/</span> <span class="text-red-500">Error</span>`;
+            }
+        }
+
+        async function fetchLastUpdated(folder, filename) {
+            if (CONFIG.versioning.type === 'local') {
+                document.getElementById('last-updated').textContent = `${CONFIG.ui.lastUpdatedText}: ${CONFIG.versioning.manualDate}`;
+                return;
+            }
+
+            const CACHE_KEY = `bjorn_upd_${folder}_${filename}`;
+            const now = Date.now();
+
+            const cached = localStorage.getItem(CACHE_KEY);
+            if (cached) {
+                const data = JSON.parse(cached);
+                if (now - data.ts < 86400000) {
+                    document.getElementById('last-updated').textContent = `${CONFIG.ui.lastUpdatedText}: ${data.date}`;
+                    return;
+                }
+            }
+
+            try {
+                const path = `wiki/docs/${folder}/${filename}`;
+                const res = await fetch(`https://api.github.com/repos/${STATE.repo}/commits?path=${path}&page=1&per_page=1`);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.length > 0) {
+                        const date = new Date(data[0].commit.committer.date).toLocaleDateString();
+                        document.getElementById('last-updated').textContent = `${CONFIG.ui.lastUpdatedText}: ${date}`;
+                        localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: now, date }));
+                    }
+                }
+            } catch (e) { }
+        }
+
+        function preloadAdjacent(currentFolder, currentTitle) {
+            const flatList = getFlatPageList();
+            const idx = flatList.findIndex(item => item.folder === currentFolder && item.title === currentTitle);
+
+            [idx - 1, idx + 1].forEach(i => {
+                if (flatList[i]) {
+                    const url = `./wiki/docs/${flatList[i].folder}/${flatList[i].file}`;
+                    const cacheKey = `${flatList[i].folder}/${flatList[i].file}`;
+
+                    // Check persistent cache first to avoid fetch
+                    const storageKey = `bjorn_content_${cacheKey}`;
+                    if (localStorage.getItem(storageKey)) return;
+
+                    fetch(url).then(r => r.text()).then(t => {
+                        STATE.contentCache[cacheKey] = t;
+                    }).catch(() => { });
+                }
+            });
+        }
+
+        function enhanceMarkdownContent() {
+            document.querySelectorAll('#markdown-viewer h1, #markdown-viewer h2, #markdown-viewer h3').forEach(h => {
+                if (!h.id) h.id = h.textContent.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+                const anchor = document.createElement('a');
+                anchor.className = 'anchor-link';
+                anchor.innerHTML = '#';
+                anchor.onclick = (e) => {
+                    e.preventDefault();
+                    navigator.clipboard.writeText(window.location.href.split('#')[0] + '#' + h.id);
+                    anchor.innerHTML = 'copied!';
+                    setTimeout(() => anchor.innerHTML = '#', 1500);
+                    history.replaceState(null, null, `#${h.id}`);
+                };
+                h.appendChild(anchor);
+            });
+
+            document.querySelectorAll('#markdown-viewer a[href^="#"]').forEach(link => {
+                if (link.classList.contains('anchor-link')) return;
+
+                link.onclick = (e) => {
+                    e.preventDefault();
+                    closeTOC(); // Close mobile TOC if open
+                    const hash = link.getAttribute('href').substring(1);
+                    let target = document.getElementById(hash);
+                    if (!target) {
+                        const cleanHash = hash.replace(/^-+/, '');
+                        target = document.getElementById(cleanHash);
+                    }
+
+                    if (target) {
+                        target.scrollIntoView({ behavior: 'smooth' });
+                        history.pushState(null, null, `#${hash}`);
+                    }
+                };
+            });
+
+            document.querySelectorAll('pre code').forEach((el) => hljs.highlightElement(el));
+
+            document.querySelectorAll('pre').forEach(pre => {
+                if (pre.querySelector('.copy-btn')) return;
+                const btn = document.createElement('button');
+                btn.className = 'copy-btn';
+                btn.textContent = 'Copy';
+                btn.setAttribute('aria-label', 'Copy code to clipboard');
+                btn.onclick = () => {
+                    navigator.clipboard.writeText(pre.querySelector('code').innerText);
+                    btn.textContent = 'Copied!';
+                    btn.style.color = 'var(--accent-green)';
+                    setTimeout(() => { btn.textContent = 'Copy'; btn.style.color = ''; }, 2000);
+                }
+                pre.appendChild(btn);
+            });
+
+            document.querySelectorAll('#markdown-viewer img').forEach(img => {
+                img.onclick = () => openLightbox(img.src);
+            });
+
+            document.querySelectorAll('#markdown-viewer a').forEach(a => {
+                if (
+                    a.hostname !== window.location.hostname &&
+                    !a.classList.contains('anchor-link') &&
+                    a.getAttribute('href') &&
+                    !a.getAttribute('href').startsWith('#') &&
+                    !a.querySelector('img')
+                ) {
+                    a.target = '_blank';
+                    a.rel = 'noopener noreferrer';
+                    a.innerHTML +=
+                        ' <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block opacity-50"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>';
+                }
+            });
+
+        }
+
+        function renderPagination(currentFolder, currentTitle) {
+            const navContainer = document.getElementById('page-nav');
+            const flatList = getFlatPageList();
+
+            const idx = flatList.findIndex(item => item.folder === currentFolder && item.title === currentTitle);
+            if (idx === -1) return;
+
+            if (idx > 0) {
+                const prev = flatList[idx - 1];
+                const btn = document.createElement('button');
+                btn.className = "pagination-card text-left p-4 rounded border border-hack-border hover:border-hack-green group transition-colors bg-hack-sidebar/50 hover:bg-hack-sidebar w-full flex flex-col items-start";
+                btn.innerHTML = `<span class="text-[10px] text-gray-500 uppercase tracking-widest mb-1 group-hover:text-hack-green">Previous</span><span class="font-bold text-sm truncate text-hack-heading w-full">« ${prev.title}</span>`;
+                btn.onclick = () => loadContent(prev.folder, prev.title, prev.file);
+                navContainer.appendChild(btn);
+            } else { navContainer.appendChild(document.createElement('div')); }
+
+            if (idx < flatList.length - 1) {
+                const next = flatList[idx + 1];
+                const btn = document.createElement('button');
+                btn.className = "pagination-card text-right p-4 rounded border border-hack-border hover:border-hack-green group transition-colors bg-hack-sidebar/50 hover:bg-hack-sidebar w-full flex flex-col items-end";
+                btn.innerHTML = `<span class="text-[10px] text-gray-500 uppercase tracking-widest mb-1 group-hover:text-hack-green">Next</span><span class="font-bold text-sm truncate text-hack-heading w-full">${next.title} »</span>`;
+                btn.onclick = () => loadContent(next.folder, next.title, next.file);
+                navContainer.appendChild(btn);
+            }
+        }
+
+        function generateTOC() {
+            const desktopToc = document.getElementById('toc-container');
+            const mobileToc = document.getElementById('mobile-toc-list');
+            const headings = document.querySelectorAll('#markdown-viewer h1, #markdown-viewer h2, #markdown-viewer h3');
+
+            const createTOCItem = (h, isMobile) => {
+                const li = document.createElement('li');
+                const link = document.createElement('a');
+
+                // Extract text content excluding anchor links and other UI elements
+                let text = "";
+                h.childNodes.forEach(node => {
+                    if (node.nodeType === Node.TEXT_NODE) {
+                        text += node.textContent;
+                    } else if (node.nodeType === Node.ELEMENT_NODE && !node.classList.contains('anchor-link')) {
+                        text += node.innerText || node.textContent;
+                    }
+                });
+                link.textContent = text.trim();
+                link.href = h.id ? `#${h.id}` : '#';
+
+                // Indentation based on tag
+                let indentClass = '';
+                if (h.tagName === 'H2') indentClass = 'ml-3';
+                if (h.tagName === 'H3') indentClass = 'ml-6';
+
+                if (isMobile) {
+                    link.className = `block py-2 text-gray-400 hover:text-hack-green border-l-2 border-transparent pl-3 transition-colors ${indentClass} ${h.tagName !== 'H1' ? 'text-xs' : 'font-medium'}`;
+                } else {
+                    link.className = `toc-link block py-1 pl-2 border-l-2 border-transparent hover:text-hack-green transition-colors truncate ${indentClass} ${h.tagName !== 'H1' ? 'opacity-80' : ''}`;
+                }
+
+                link.onclick = (e) => {
+                    e.preventDefault();
+                    if (isMobile) closeTOC();
+                    if (h.id) {
+                        document.getElementById(h.id).scrollIntoView({ behavior: 'smooth' });
+                        history.pushState(null, null, `#${h.id}`);
+                    } else {
+                        document.getElementById('scroll-container').scrollTo({ top: 0, behavior: 'smooth' });
+                        history.pushState(null, null, window.location.pathname + window.location.search);
+                    }
+                };
+                li.appendChild(link);
+                return li;
+            };
+
+            // Reset
+            desktopToc.innerHTML = '';
+            mobileToc.innerHTML = '';
+
+            if (headings.length === 0) {
+                desktopToc.innerHTML = `<li class="text-gray-600 italic">${CONFIG.ui.noSectionsText}</li>`;
+                mobileToc.innerHTML = `<li class="text-gray-600 italic text-center py-4">${CONFIG.ui.noSectionsText}</li>`;
+                return;
+            }
+
+            headings.forEach(h => {
+                desktopToc.appendChild(createTOCItem(h, false));
+                mobileToc.appendChild(createTOCItem(h, true));
+            });
+
+            // Initial active state update
+            setTimeout(updateTOCActiveState, 100);
+        }
+
+        function updateTOCActiveState() {
+            const scrollContainer = document.getElementById('scroll-container');
+            const headings = Array.from(document.querySelectorAll('#markdown-viewer h1, #markdown-viewer h2, #markdown-viewer h3'));
+            const tocLinks = Array.from(document.querySelectorAll('.toc-link'));
+            const path = document.getElementById('toc-path');
+
+            if (!headings.length || !tocLinks.length || !path) return;
+
+            const containerRect = scrollContainer.getBoundingClientRect();
+            const buffer = 10; // Very small buffer for precision
+
+            // Find headings that are visible in the viewport
+            let activeHeadings = headings.filter(h => {
+                const rect = h.getBoundingClientRect();
+                const relativeTop = rect.top - containerRect.top;
+                const relativeBottom = rect.bottom - containerRect.top;
+                return (relativeTop < containerRect.height - buffer) && (relativeBottom > buffer);
+            });
+
+            // Fallback: if no heading is in view, use the last one that passed the top
+            if (activeHeadings.length === 0) {
+                const scrollPos = scrollContainer.scrollTop;
+                for (let i = headings.length - 1; i >= 0; i--) {
+                    if (headings[i].offsetTop <= scrollPos + 100) {
+                        activeHeadings.push(headings[i]);
+                        break;
+                    }
+                }
+            }
+            if (activeHeadings.length === 0) activeHeadings.push(headings[0]);
+
+            const activeIds = new Set(activeHeadings.map(h => h.id));
+            const activeLinks = [];
+
+            tocLinks.forEach(link => {
+                const id = link.getAttribute('href').substring(1);
+                if (activeIds.has(id)) {
+                    link.classList.add('active');
+                    activeLinks.push(link);
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+
+            if (activeLinks.length > 0) {
+                let d = "";
+                let lastIndex = -2;
+
+                activeLinks.forEach((link, index) => {
+                    const id = link.getAttribute('href').substring(1);
+                    const heading = document.getElementById(id);
+                    const linkIndex = tocLinks.indexOf(link);
+
+                    // X position based on indentation (relative to TOC container left border)
+                    let x = -1; // Default for H1 (aligned with the left border)
+                    if (heading.tagName === 'H2') x = 11;   // H2 indented with ml-3 (12px)
+                    else if (heading.tagName === 'H3') x = 23; // H3 indented with ml-6 (24px)
+
+                    const yTop = link.offsetTop;
+                    const yBottom = yTop + link.offsetHeight;
+
+                    // If not contiguous with previous active link, start a new path segment
+                    if (linkIndex !== lastIndex + 1) {
+                        d += ` M ${x} ${yTop} L ${x} ${yBottom}`;
+                    } else {
+                        d += ` L ${x} ${yTop} L ${x} ${yBottom}`;
+                    }
+                    lastIndex = linkIndex;
+                });
+
+                path.setAttribute('d', d);
+                path.classList.add('active');
+            } else {
+                path.classList.remove('active');
+            }
+        }
+
+        // --- 6. SIDEBAR ---
+        function renderSidebar(searchResults = null) {
+            const container = document.getElementById('nav-container');
+            const noResults = document.getElementById('search-results-msg');
+            container.innerHTML = '';
+            let hasContent = false;
+
+            function renderRecursive(data, parentContainer, currentPath = '', level = 0) {
+                Object.keys(data).forEach(key => {
+                    const value = data[key];
+                    const isFolder = typeof value === 'object' && value !== null;
+                    const cleanName = key.replace(/^\d+_/, '').replace(/_/g, ' ');
+
+                    if (isFolder) {
+                        const folderPath = currentPath ? `${currentPath}/${key}` : key;
+                        if (searchResults && !searchResults[key]) return;
+
+                        const group = document.createElement('div');
+                        group.className = `nav-group mb-1 ${level > 0 ? 'ml-2' : ''}`;
+
+                        const btn = document.createElement('button');
+                        const isExpanded = STATE.expandedSections.has(folderPath) || searchResults;
+                        btn.className = `section-header w-full flex items-center justify-between px-2 py-2 text-gray-500 hover:text-hack-heading transition-colors rounded hover:bg-hack-bg focus:outline-none focus:bg-hack-bg ${isExpanded ? 'active' : ''}`;
+                        btn.innerHTML = `
+                            <span class="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest font-mono"><i data-lucide="${level === 0 ? 'folder' : 'folder-open'}" class="w-3 h-3"></i> ${cleanName}</span>
+                            <i data-lucide="chevron-right" class="section-arrow w-3 h-3 transition-transform"></i>
+                        `;
+                        btn.onclick = () => {
+                            if (STATE.expandedSections.has(folderPath)) STATE.expandedSections.delete(folderPath);
+                            else STATE.expandedSections.add(folderPath);
+                            renderSidebar(searchResults);
+                        };
+
+                        const list = document.createElement('div');
+                        list.className = `nav-list ${isExpanded ? 'expanded' : 'collapsed'}`;
+
+                        renderRecursive(value, list, folderPath, level + 1);
+
+                        group.appendChild(btn);
+                        group.appendChild(list);
+                        parentContainer.appendChild(group);
+                    } else {
+                        if (searchResults && !searchResults[currentPath]?.[key]) return;
+                        hasContent = true;
+                        const filename = value;
+                        const link = document.createElement('a');
+                        const fullPath = currentPath ? `${currentPath}/${filename}` : filename;
+                        link.href = `?page=${fullPath}`;
+
+                        const isActive = STATE.currentFolder === currentPath && STATE.currentFilename === filename;
+                        link.className = `nav-link group flex items-center gap-3 px-2 py-1.5 rounded-md text-sm font-medium text-gray-400 hover:text-hack-heading hover:bg-hack-bg transition-all outline-none focus:bg-hack-bg ${isActive ? 'active' : ''}`;
+
+                        link.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-hack-border group-hover:bg-hack-green flex-shrink-0 transition-colors"></span> ${key}`;
+                        link.onclick = (e) => {
+                            e.preventDefault();
+                            loadContent(currentPath, key, filename);
+                            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                            link.classList.add('active');
+                        };
+                        parentContainer.appendChild(link);
+                    }
+                });
+            }
+
+            renderRecursive(STATE.wikiData, container);
+
+            if (!hasContent && searchResults) {
+                if (noResults) noResults.classList.remove('hidden');
+            } else {
+                if (noResults) noResults.classList.add('hidden');
+            }
+
+            lucide.createIcons();
+        }
+
+        // --- 7. SEARCH (MODAL VERSION) ---
+        const searchModalOverlay = document.getElementById('search-modal-overlay');
+        const searchModal = document.getElementById('search-modal');
+        const modalSearchInput = document.getElementById('modal-search-input');
+        const modalSearchResults = document.getElementById('modal-search-results');
+        const searchCount = document.getElementById('search-count');
+        let selectedResultIndex = -1;
+
+        function openSearch() {
+            searchModalOverlay.classList.remove('hidden');
+            setTimeout(() => {
+                searchModalOverlay.classList.remove('opacity-0');
+                searchModal.classList.remove('hidden');
+                modalSearchInput.focus();
+            }, 10);
+        }
+
+        function closeSearch() {
+            searchModalOverlay.classList.add('opacity-0');
+            searchModal.classList.add('hidden');
+            setTimeout(() => {
+                searchModalOverlay.classList.add('hidden');
+                modalSearchInput.value = '';
+                modalSearchResults.innerHTML = '<div class="text-center py-10 text-gray-500 text-sm">Type to start searching...</div>';
+                searchCount.innerText = '';
+            }, 300);
+        }
+
+        modalSearchInput.addEventListener('input', (e) => {
+            const q = e.target.value.toLowerCase().trim();
+            if (!q) {
+                modalSearchResults.innerHTML = '<div class="text-center py-10 text-gray-500 text-sm">Type to start searching...</div>';
+                searchCount.innerText = '';
+                return;
+            }
+
+            const results = [];
+            STATE.searchIndex.forEach(item => {
+                const titleMatch = item.titleLower.indexOf(q);
+                const contentMatch = item.content.indexOf(q);
+
+                if (titleMatch !== -1 || contentMatch !== -1) {
+                    // Calculate a simple score: title match is better
+                    const score = (titleMatch !== -1 ? 100 : 0) + (contentMatch !== -1 ? 10 : 0);
+
+                    // Extract snippet
+                    let snippet = "";
+                    if (contentMatch !== -1) {
+                        const start = Math.max(0, contentMatch - 40);
+                        const end = Math.min(item.content.length, contentMatch + 80);
+                        let rawSnippet = item.content.substring(start, end);
+
+                        // Sanitize first to prevent XSS, then highlight
+                        const safeSnippet = DOMPurify.sanitize(rawSnippet);
+                        snippet = safeSnippet.replace(new RegExp(q, 'gi'), (m) => `<mark class="bg-hack-green/30 text-hack-green rounded px-0.5">${m}</mark>`);
+
+                        if (start > 0) snippet = "..." + snippet;
+                        if (end < item.content.length) snippet = snippet + "...";
+                    }
+
+                    results.push({ ...item, score, snippet });
+                }
+            });
+
+            results.sort((a, b) => b.score - a.score);
+            renderSearchResults(results.slice(0, 10)); // Top 10
+        });
+
+        function renderSearchResults(results) {
+            if (results.length === 0) {
+                modalSearchResults.innerHTML = '<div class="text-center py-10 text-red-400/60 text-sm italic">No results found for your query.</div>';
+                searchCount.innerText = '0 results';
+                return;
+            }
+
+            searchCount.innerText = `${results.length} results`;
+            modalSearchResults.innerHTML = results.map((res, i) => `
+                <div class="search-result-item p-3 rounded-xl cursor-pointer flex flex-col gap-1" onclick="selectSearchResult(${i})" data-index="${i}">
+                    <div class="flex items-center justify-between">
+                        <span class="text-hack-heading font-bold text-sm">${res.title}</span>
+                        <span class="text-[10px] text-gray-500 font-mono opacity-50 uppercase">${res.folder.replace(/_/g, ' ')}</span>
+                    </div>
+                    ${res.snippet ? `<div class="text-xs text-gray-400 line-clamp-2 font-sans leading-relaxed">${res.snippet}</div>` : ''}
+                </div>
+            `).join('');
+
+            selectedResultIndex = 0;
+            updateSelectedResult();
+
+            // Store results for keyboard nav
+            window.currentSearchResults = results;
+        }
+
+        function updateSelectedResult() {
+            const items = modalSearchResults.querySelectorAll('.search-result-item');
+            items.forEach((item, i) => {
+                if (i === selectedResultIndex) {
+                    item.classList.add('active');
+                    item.scrollIntoView({ block: 'nearest' });
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        }
+
+        function selectSearchResult(index) {
+            const res = window.currentSearchResults[index];
+            if (res) {
+                loadContent(res.folder, res.title, res.filename);
+                closeSearch();
+            }
+        }
+
+        modalSearchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                selectedResultIndex = (selectedResultIndex + 1) % (window.currentSearchResults?.length || 1);
+                updateSelectedResult();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                selectedResultIndex = (selectedResultIndex - 1 + (window.currentSearchResults?.length || 1)) % (window.currentSearchResults?.length || 1);
+                updateSelectedResult();
+            } else if (e.key === 'Enter') {
+                if (selectedResultIndex !== -1) selectSearchResult(selectedResultIndex);
+            }
+        });
+
+        // --- 8. CHANGELOG ---
+        async function toggleVersionsPage(btn, pushHistory = true) {
+            if (CONFIG.features.pageTransitions && document.startViewTransition) {
+                document.startViewTransition(() => performToggleVersionsPage(btn, pushHistory));
+            } else {
+                performToggleVersionsPage(btn, pushHistory);
+            }
+        }
+
+        async function performToggleVersionsPage(btn, pushHistory = true) {
+            const viewer = document.getElementById('markdown-viewer');
+
+            // Update state and UI labels
+            STATE.currentFolder = "";
+            STATE.currentFilename = "";
+            STATE.currentTitle = CONFIG.ui.changelogTitle;
+            document.getElementById('label-on-this-page').innerText = CONFIG.ui.changelogTitle;
+            document.getElementById('label-mobile-toc').innerText = CONFIG.ui.changelogTitle;
+
+            document.getElementById('breadcrumbs').innerHTML = `<span class="hover:text-hack-heading cursor-pointer" onclick="loadDefault()">${CONFIG.projectName}</span> <span>/</span> <span class="text-hack-green font-bold">${CONFIG.ui.changelogTitle}</span>`;
+            document.getElementById('page-nav').innerHTML = '';
+            document.getElementById('reading-time').innerHTML = '';
+            document.getElementById('last-updated').innerHTML = '';
+
+            viewer.innerHTML = `<h1>${CONFIG.ui.changelogTitle}</h1><div id="versions-list" class="space-y-4 mt-6"><div class="animate-pulse text-hack-green">${CONFIG.ui.fetchingReleasesText}</div></div>`;
+
+            // Update TOC with initial H1
+            enhanceMarkdownContent();
+            generateTOC();
+            // Update sidebar to clear active links
+            renderSidebar();
+
+            if (pushHistory) window.history.pushState({ page: 'versions' }, "", "?page=changelog");
+            if (window.innerWidth < 768) closeMenu();
+
+            try {
+                const res = await fetch(`https://api.github.com/repos/${STATE.repo}/releases`);
+                if (!res.ok) throw new Error("API Limit");
+                const data = await res.json();
+                const list = document.getElementById('versions-list');
+                list.innerHTML = '';
+
+                if (data.length === 0) list.innerHTML = '<p>No releases found.</p>';
+
+                data.forEach(r => {
+                    const div = document.createElement('div');
+                    div.className = 'border-b border-hack-border pb-4 mb-4';
+                    const body = DOMPurify.sanitize(marked.parse(r.body || 'No description'));
+                    div.innerHTML = `
+                        <div class="flex items-center justify-between mb-2">
+                            <h2 class="text-xl font-bold !mt-0 !mb-0 flex items-center gap-2 text-hack-green">${r.tag_name}</h2>
+                            <span class="text-xs font-mono text-gray-500">${new Date(r.published_at).toLocaleDateString()}</span>
+                        </div>
+                        <div class="markdown-body text-sm pl-2 border-l-2 border-hack-border/50">${body}</div>
+                        <a href="${r.html_url}" target="_blank" rel="noopener noreferrer" class="text-xs mt-2 inline-block opacity-50 hover:opacity-100">View on GitHub &rarr;</a>
+                    `;
+                    list.appendChild(div);
+                });
+
+                // Update TOC with new H2s
+                enhanceMarkdownContent();
+                generateTOC();
+
+            } catch (e) {
+                document.getElementById('versions-list').innerHTML = `<p class="text-red-400">Unable to load changelog. Check back later.</p>`;
+                enhanceMarkdownContent();
+                generateTOC();
+            }
+        }
+
+        // --- 9. UTILS ---
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+        function openLightbox(src) {
+            lightboxImg.src = src;
+            lightbox.classList.add('active');
+            lightboxImg.classList.remove('scale-95');
+            lightboxImg.classList.add('scale-100');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeLightbox() {
+            lightbox.classList.remove('active');
+            lightboxImg.classList.remove('scale-100');
+            lightboxImg.classList.add('scale-95');
+            document.body.style.overflow = '';
+        }
+
+        // Mobile Menu & TOC Logic
+        const sidebar = document.getElementById('sidebar');
+        const tocSidebar = document.getElementById('mobile-toc-sidebar');
+        const overlay = document.getElementById('overlay');
+
+        function openMenu() {
+            sidebar.classList.remove('-translate-x-full');
+            closeTOC(); // Close TOC if open
+            overlay.classList.remove('hidden');
+            setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+        }
+        function closeMenu() {
+            sidebar.classList.add('-translate-x-full');
+            checkOverlay();
+        }
+
+        function openTOC() {
+            // Only open if TOC has items
+            const list = document.getElementById('mobile-toc-list');
+            if (!list.hasChildNodes() || list.innerHTML.includes('No sections')) return;
+
+            tocSidebar.classList.remove('translate-x-full');
+            closeMenu(); // Close Menu if open
+            overlay.classList.remove('hidden');
+            setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+        }
+        function closeTOC() {
+            tocSidebar.classList.add('translate-x-full');
+            checkOverlay();
+        }
+
+        function checkOverlay() {
+            // Hide overlay only if both panels are closed
+            if (sidebar.classList.contains('-translate-x-full') && tocSidebar.classList.contains('translate-x-full')) {
+                overlay.classList.add('opacity-0');
+                setTimeout(() => overlay.classList.add('hidden'), 300);
+            }
+        }
+
+        document.getElementById('menu-btn').onclick = openMenu;
+        document.getElementById('close-sidebar-btn').onclick = closeMenu;
+        document.getElementById('close-toc-btn').onclick = closeTOC;
+        document.getElementById('toc-btn-mobile').onclick = openTOC;
+        document.getElementById('toc-btn-desktop').onclick = openTOC;
+
+        // Unified overlay click closes whichever is open
+        overlay.onclick = () => {
+            closeMenu();
+            closeTOC();
+        };
+
+        // Events
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                openSearch();
+            }
+            if (e.key === 'Escape') {
+                if (!searchModalOverlay.classList.contains('hidden')) closeSearch();
+                else if (lightbox.classList.contains('active')) closeLightbox();
+                else {
+                    closeMenu();
+                    closeTOC();
+                }
+            }
+        });
+
+        // Initialize UI Logic (Scroll Bar) immediately
+        function initUI() {
+            const scrollContainer = document.getElementById('scroll-container');
+            const progressBar = document.getElementById('reading-progress-bar');
+            const scrollBtn = document.getElementById('scroll-top-btn');
+
+            if (scrollContainer && progressBar) {
+                const breadcrumbContainer = document.getElementById('breadcrumb-sticky-container');
+                scrollContainer.addEventListener('scroll', () => {
+                    const scrollTop = scrollContainer.scrollTop;
+                    const scrollHeight = scrollContainer.scrollHeight - scrollContainer.clientHeight;
+                    const scrollPercent = (scrollHeight > 0) ? (scrollTop / scrollHeight) * 100 : 0;
+                    progressBar.style.width = scrollPercent + '%';
+
+                    if (scrollTop > 300) scrollBtn.classList.remove('hidden');
+                    else scrollBtn.classList.add('hidden');
+
+                    if (breadcrumbContainer && CONFIG.features.stickyBreadcrumbs) {
+                        // Use a small threshold and requestAnimationFrame for smoothness
+                        if (scrollTop > 20) {
+                            breadcrumbContainer.classList.add('stuck');
+                        } else {
+                            breadcrumbContainer.classList.remove('stuck');
+                        }
+                    } else if (breadcrumbContainer) {
+                        breadcrumbContainer.classList.remove('stuck');
+                    }
+
+                    updateTOCActiveState();
+                });
+            }
+            if (scrollBtn) {
+                scrollBtn.onclick = () => scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+        // --- MOBILE SWIPE GESTURES ---
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchEndX = 0;
+        let touchEndY = 0;
+        let scrollableElement = null;
+
+        const MIN_SWIPE_DISTANCE = 50;
+        const MAX_VERTICAL_DRIFT = 80;
+        const EDGE_ZONE_LEFT = 200; // Swipe from left triggers Menu
+        const EDGE_ZONE_RIGHT = 100; // Distance from right edge to likely trigger TOC
+
+        // Helper function to check if element has horizontal scroll
+        function hasHorizontalScroll(el) {
+            if (!el) return false;
+            return el.scrollWidth > el.clientWidth;
+        }
+
+        // Find closest scrollable parent
+        function findScrollableParent(el) {
+            while (el && el !== document.body) {
+                if (hasHorizontalScroll(el)) {
+                    return el;
+                }
+                el = el.parentElement;
+            }
+            return null;
+        }
+
+        document.addEventListener("touchstart", (e) => {
+            const t = e.changedTouches[0];
+            touchStartX = t.clientX;
+            touchStartY = t.clientY;
+            touchEndX = t.clientX;
+            touchEndY = t.clientY;
+
+            // Check if touch started on a horizontally scrollable element
+            scrollableElement = findScrollableParent(e.target);
+        });
+
+        document.addEventListener("touchmove", (e) => {
+            const t = e.changedTouches[0];
+            touchEndX = t.clientX;
+            touchEndY = t.clientY;
+        });
+
+        document.addEventListener("touchend", () => {
+            // If we're in a scrollable element, don't trigger swipe gestures
+            if (scrollableElement) {
+                scrollableElement = null;
+                return;
+            }
+
+            const dx = touchEndX - touchStartX;
+            const dy = Math.abs(touchEndY - touchStartY);
+            const screenW = window.innerWidth;
+
+            // 1. SWIPE LEFT -> RIGHT (Open Menu or Close TOC)
+            if (dx > MIN_SWIPE_DISTANCE && dy < MAX_VERTICAL_DRIFT) {
+                // If TOC is open, close it
+                if (!tocSidebar.classList.contains('translate-x-full')) {
+                    closeTOC();
+                }
+                // Else if swipe starts near left edge, open Menu
+                else if (touchStartX < EDGE_ZONE_LEFT) {
+                    openMenu();
+                }
+            }
+
+            // 2. SWIPE RIGHT -> LEFT (Open TOC or Close Menu)
+            if (dx < -MIN_SWIPE_DISTANCE && dy < MAX_VERTICAL_DRIFT) {
+                // If Menu is open, close it
+                if (!sidebar.classList.contains('-translate-x-full')) {
+                    closeMenu();
+                }
+                // Else if swipe starts anywhere (or strictly right side if preferred), open TOC
+                // User asked for "swipe right to left" generally, but preventing conflict with horizontal scroll tables is good
+                else {
+                    openTOC();
+                }
+            }
+        });
+
+        // INIT
+        window.onload = () => {
+            applyConfig();
+            initUI();
+            fetchLatestVersion();
+            initWiki();
+            lucide.createIcons();
+
+            // Register Service Worker
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('./sw.js').catch(() => { });
+            }
+
+            // Mouse tracking for glow effects
+            document.addEventListener('mousemove', (e) => {
+                const target = e.target.closest('.nav-link, .section-header, .copy-btn, .search-result-item, #menu-btn, #theme-toggle-desktop, #theme-toggle-mobile, .badge-sm, .pagination-card, #toc-btn-mobile, #toc-btn-desktop');
+                if (target) {
+                    const rect = target.getBoundingClientRect();
+                    const x = ((e.clientX - rect.left) / rect.width) * 100;
+                    const y = ((e.clientY - rect.top) / rect.height) * 100;
+                    target.style.setProperty('--x', `${x}%`);
+                    target.style.setProperty('--y', `${y}%`);
+                }
+            });
+        };
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,25 @@
+:root {
+    --bg-body: #e3d5b8;
+    --bg-sidebar: #d4c3a1;
+    --border-color: #c4b28f;
+    --text-main: #4a3a2a;
+    --text-heading: #2d241a;
+    --accent-green: #8b5e34;
+    --accent-dim: rgba(139, 94, 52, 0.1);
+    --code-bg: #dcd0b0;
+}
+
+/* Sepia Paper specific overrides */
+.markdown-body a {
+    color: #8b5e34;
+}
+
+.nav-link.active {
+    background-color: rgba(139, 94, 52, 0.1) !important;
+    border-left-color: #8b5e34 !important;
+    color: #4a3a2a !important;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c4b28f !important;
+}

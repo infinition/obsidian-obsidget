@@ -1,0 +1,52 @@
+:root {
+    --bg-body: #f7f3e9;
+    --bg-sidebar: #e8e1d1;
+    --border-color: #d1c7b1;
+    --text-main: #3e442b;
+    --text-heading: #2d3319;
+    --accent-green: #606c38;
+    --accent-dim: rgba(96, 108, 56, 0.1);
+    --code-bg: #fefae0;
+}
+
+/* Nature theme specific overrides */
+body {
+    background-color: var(--bg-body);
+    color: var(--text-main);
+}
+
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3 {
+    color: #283618;
+    font-weight: 700;
+}
+
+.markdown-body a {
+    color: #bc6c25;
+}
+
+.markdown-body a:hover {
+    border-bottom-color: #dda15e;
+}
+
+#sidebar,
+#mobile-toc-sidebar {
+    background-color: #e8e1d1 !important;
+    border-right: 1px solid #d1c7b1;
+}
+
+.nav-link.active {
+    background-color: rgba(96, 108, 56, 0.15) !important;
+    border-left-color: #606c38 !important;
+    color: #283618 !important;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #dda15e !important;
+}
+
+.markdown-body blockquote {
+    background: #fefae0;
+    border-left-color: #606c38;
+}

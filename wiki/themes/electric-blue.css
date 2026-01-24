@@ -1,0 +1,28 @@
+:root {
+    --bg-body: #050A15;
+    --bg-sidebar: #0A1225;
+    --border-color: #1E2D4A;
+    --text-main: #94A3B8;
+    --text-heading: #F8FAFC;
+    --accent-green: #38BDF8;
+    /* Electric Blue */
+    --accent-dim: rgba(56, 189, 248, 0.1);
+    --code-bg: #0F172A;
+}
+
+/* Override scrollbar and other elements to use blue */
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #38BDF8, var(--border-color)) !important;
+}
+
+.text-hack-green {
+    color: #38BDF8 !important;
+}
+
+.bg-hack-greenDim {
+    background-color: rgba(56, 189, 248, 0.1) !important;
+}
+
+.border-hack-green {
+    border-color: #38BDF8 !important;
+}

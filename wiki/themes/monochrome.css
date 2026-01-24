@@ -1,0 +1,27 @@
+:root {
+    --bg-body: #121212;
+    --bg-sidebar: #1E1E1E;
+    --border-color: #333333;
+    --text-main: #BBBBBB;
+    --text-heading: #FFFFFF;
+    --accent-green: #FFFFFF;
+    --accent-dim: rgba(255, 255, 255, 0.1);
+    --code-bg: #000000;
+}
+
+/* Override scrollbar and other elements */
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #FFFFFF, var(--border-color)) !important;
+}
+
+.text-hack-green {
+    color: #FFFFFF !important;
+}
+
+.bg-hack-greenDim {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.border-hack-green {
+    border-color: #FFFFFF !important;
+}

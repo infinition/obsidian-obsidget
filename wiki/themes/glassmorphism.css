@@ -1,0 +1,55 @@
+:root {
+    --bg-body: #0f172a;
+    --bg-sidebar: rgba(30, 41, 59, 0.7);
+    --border-color: rgba(255, 255, 255, 0.1);
+    --text-main: #e2e8f0;
+    --text-heading: #f8fafc;
+    --accent-green: #38bdf8;
+    --accent-dim: rgba(56, 189, 248, 0.1);
+    --code-bg: rgba(15, 23, 42, 0.8);
+}
+
+/* Glassmorphism theme specific overrides */
+body {
+    background: radial-gradient(circle at top left, #1e293b, #0f172a);
+    background-attachment: fixed;
+}
+
+#sidebar,
+#mobile-toc-sidebar {
+    background: rgba(30, 41, 59, 0.6) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#markdown-viewer {
+    background: rgba(30, 41, 59, 0.4);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.nav-link.active {
+    background: rgba(56, 189, 248, 0.2) !important;
+    border-left: 4px solid #38bdf8 !important;
+    color: #38bdf8 !important;
+    box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+}
+
+.markdown-body a {
+    color: #38bdf8;
+    text-shadow: 0 0 8px rgba(56, 189, 248, 0.5);
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+}

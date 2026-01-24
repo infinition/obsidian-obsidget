@@ -1,0 +1,15 @@
+:root {
+    --bg-body: #0B0C0E;
+    --bg-sidebar: #111214;
+    --border-color: #2A2E35;
+    --text-main: #A0AAB8;
+    --text-heading: #E2E8F0;
+    --accent-green: #22c55e;
+    --accent-dim: rgba(34, 197, 94, 0.1);
+    --code-bg: #1e1e1e;
+}
+
+/* Compatibility with tailwind colors if needed */
+.dark {
+    --accent-green: #22c55e;
+}

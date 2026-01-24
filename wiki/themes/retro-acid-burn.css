@@ -1,0 +1,106 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+
+:root {
+    --bg-body: #000000;
+    --bg-sidebar: #050505;
+    --border-color: #00ff41;
+    --text-main: #00ff41;
+    --text-heading: #d4ff00;
+    --accent-green: #00ff41;
+    --accent-dim: rgba(0, 255, 65, 0.1);
+    --code-bg: #0a0a0a;
+
+    /* Acid Burn Specific */
+    --acid-yellow: #d4ff00;
+    --acid-green: #00ff41;
+}
+
+/* --- PHOSPHOR GLOW --- */
+body {
+    font-family: 'JetBrains Mono', monospace !important;
+    background-color: #000 !important;
+    color: var(--text-main) !important;
+    text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
+}
+
+/* --- SCANLINES (Static but intense) --- */
+body::after {
+    content: " ";
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+    z-index: 9999;
+    background-size: 100% 4px;
+    pointer-events: none;
+    opacity: 0.3;
+}
+
+/* --- TYPOGRAPHY --- */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: var(--acid-yellow) !important;
+    text-shadow: 0 0 10px var(--acid-yellow);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.markdown-body h1 {
+    border-bottom-color: var(--acid-yellow) !important;
+}
+
+.markdown-body strong {
+    color: #fff !important;
+    text-shadow: 0 0 8px #fff;
+}
+
+.markdown-body a {
+    color: var(--acid-yellow) !important;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+.markdown-body a:hover {
+    color: #fff !important;
+    text-shadow: 0 0 10px var(--acid-yellow);
+}
+
+/* --- UI OVERRIDES --- */
+#sidebar,
+#mobile-toc-sidebar {
+    background-color: #050505 !important;
+    border-right: 2px solid var(--accent-green);
+}
+
+.nav-link.active {
+    background-color: rgba(0, 255, 65, 0.2) !important;
+    border-left: 4px solid var(--accent-green) !important;
+    color: #fff !important;
+}
+
+.nav-link:hover {
+    color: #fff !important;
+    background-color: rgba(0, 255, 65, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--accent-green) !important;
+    box-shadow: 0 0 10px var(--accent-green);
+}
+
+/* --- CODE BLOCKS --- */
+.markdown-body pre {
+    border: 1px solid var(--accent-green) !important;
+    box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
+}
+
+.markdown-body code {
+    color: var(--acid-yellow) !important;
+}
