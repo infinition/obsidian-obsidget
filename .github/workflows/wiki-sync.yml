@@ -1,0 +1,20 @@
+name: Wiki Sync
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'wiki/**'
+      - 'acidwiki.json'             # Important: Relance le sync si on change le JSON
+      - '.github/workflows/wiki-sync.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  deploy-wiki:
+    # Appelle le script stocké sur AcidWiki
+    uses: infinition/AcidWiki/.github/workflows/reusable-wiki-sync.yml@main
