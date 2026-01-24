@@ -1,13 +1,20 @@
 name: Wiki Sync
 
 on:
+  # 1. Déclenchement manuel quand tu pushes sur ce repo
   push:
     branches: [ main ]
     paths:
       - 'wiki/**'
-      - 'acidwiki.json'             # Important: Relance le sync si on change le JSON
+      - 'acidwiki.json'
       - '.github/workflows/wiki-sync.yml'
+  
+  # 2. Bouton manuel dans l'interface Actions
   workflow_dispatch:
+
+  # 3. AUTOMATIQUE : Tous les jours à 4h00 du matin (UTC)
+  schedule:
+    - cron: '0 4 * * *'
 
 permissions:
   contents: write
@@ -17,4 +24,5 @@ permissions:
 jobs:
   deploy-wiki:
     # Appelle le script stocké sur AcidWiki
+    # "@main" signifie qu'il prendra TOUJOURS la dernière version du workflow maître
     uses: infinition/AcidWiki/.github/workflows/reusable-wiki-sync.yml@main
