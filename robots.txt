@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# Sitemaps (Optionnel, à mettre à jour avec votre URL réelle)
+# Sitemap: https://votre-url-wiki.com/sitemap.xml
