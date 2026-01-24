@@ -1,9 +1,0 @@
-{
-    "id": "obsidian-obsidget",
-    "name": "ObsidGet",
-    "version": "1.0.0",
-    "minAppVersion": "0.15.0",
-    "description": "Create, manage, and reuse interactive HTML/CSS/JS widgets in Obsidian.",
-    "author": "infinition",
-    "isDesktopOnly": false
-}
