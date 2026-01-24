@@ -10,10 +10,9 @@ const CONFIG = {
     description: "Official Documentation and Wiki for obsidian-obsidget",
 
     // Versioning Settings
-    // Le workflow forcera "local" et injectera la version détectée (Tag)
     versioning: {
         type: "local",
-        manualVersion: "", // Sera remplacé par le Tag (ex: v1.0.0) ou vide
+        manualVersion: "v1.0.0",
         manualDate: "2026-01-24"
     },
 
@@ -53,17 +52,16 @@ const CONFIG = {
         autoCollapseSidebar: false,
         stickyBreadcrumbs: true,
         showRootReadme: true,
-        debug: false
+        debug: true
     },
 
-    // Custom Navigation Links
-    // Vides par défaut (Le script les laisse vides pour désactiver Main Site/Store)
+    // Custom Navigation Links (Vides par défaut)
     links: {
         top: [],
         bottom: []
     },
 
-    // Footer Customization (Sera remplacé dynamiquement)
+    // Footer
     footerText: "© 2026 OBSIDIAN-OBSIDGET WIKI - All rights reserved",
 
     // UI Strings
@@ -93,14 +91,13 @@ const CONFIG = {
     // PWA & SEO Settings
     themeColor: "#0B0C0E",
     accentColor: "#22c55e",
-    manifestPath: "wiki/manifest.json",
+    manifestPath: "manifest.json",
 
     // Social Links
-    // "null" par défaut pour désactiver si aucun acidwiki.json n'est trouvé
     social: {
         discord: null,
         reddit: null,
-        github: "https://github.com/infinition/obsidian-obsidget",,, // Sera mis à jour vers le repo courant
+        github: "https://github.com/infinition/obsidian-obsidget", // Virgule respectée par le script
         buyMeACoffee: "https://buymeacoffee.com/infinition"
     },
 
@@ -108,6 +105,6 @@ const CONFIG = {
     badges: {
         discordLabel: "COMMUNITY",
         redditLabel: "REDDIT",
-        githubLabel: "SOURCE CODE"
+        githubLabel: "OBSIDIAN-OBSIDGET"
     }
 };
