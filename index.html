@@ -33,7 +33,7 @@
     <meta name="msapplication-TileColor" id="ms-tile-color" content="#0B0C0E">
     <meta name="theme-color" id="theme-color-meta" content="#0B0C0E">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="manifest" id="manifest-link" href="wiki/manifest.json">
+    <link rel="manifest" id="manifest-link" href="wiki/manifest.pwa.json">
 
     <script src="wiki/config.js"></script>
 
@@ -1219,7 +1219,7 @@
             document.getElementById('app-name').content = CONFIG.projectName;
             document.getElementById('ms-tile-color').content = CONFIG.themeColor || '#0B0C0E';
             document.getElementById('theme-color-meta').content = CONFIG.themeColor || '#0B0C0E';
-            document.getElementById('manifest-link').href = CONFIG.manifestPath || 'manifest.json';
+            document.getElementById('manifest-link').href = CONFIG.manifestPath || 'manifest.pwa.json';
 
             renderCustomLinks();
             renderFooter();
