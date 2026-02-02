@@ -1057,22 +1057,30 @@ export default class WidgetPlugin extends Plugin {
             await this.ensureDirectory(this.settings.galleryPath);
 
             for (const file of files) {
-                if (file.name.endsWith('.json')) {
-                    const id = file.name.replace(/\.json$/, '');
-                    const existsLocally = await this.getGalleryFilePath(id);
+                // Support both .tsx and .ts
+                if (file.name.endsWith('.tsx') || file.name.endsWith('.ts')) {
+                    const fileName = file.name;
+                    // id logic: trim extension
+                    const id = fileName.replace(/\.(tsx?)$/, '');
+                    
+                    const localPath = normalizePath(`${this.settings.galleryPath}/${fileName}`);
+                    // Only download if not exists (or you can force overwrite logic here if desired)
+                    // For now, let's keep check if exists to avoid overwriting user edits unless specific update logic needed
+                    // But typically gallery sync might want to update. 
+                    // Let's check existence using the helper which checks both extensions, but here we know the specific extension
+                    
+                    const exists = await this.app.vault.adapter.exists(localPath);
 
-                    if (!existsLocally) {
+                    if (!exists) {
                         console.log("ObsidGet: Downloading new widget:", file.name);
                         const fileResponse = await requestUrl({ url: file.download_url });
                         if (fileResponse.status === 200) {
                             try {
-                                const template = JSON.parse(fileResponse.text) as WidgetTemplate;
-                                if (template.id) {
-                                    await this.saveToGallery(template);
-                                    addedCount++;
-                                }
+                                // DIRECT WRITE: No JSON parsing, write raw TSX content
+                                await this.app.vault.adapter.write(localPath, fileResponse.text);
+                                addedCount++;
                             } catch (e) {
-                                console.error(`ObsidGet: Failed to parse ${file.name}:`, e);
+                                console.error(`ObsidGet: Failed to write ${file.name}:`, e);
                             }
                         } else {
                             console.error(`ObsidGet: Failed to download ${file.name}:`, fileResponse.status);
@@ -1585,9 +1593,14 @@ class WidgetGalleryModal extends Modal {
 
         // Preview (non-interactive)
         const preview = card.createDiv({ cls: 'widget-preview' });
+        // Set explicit minimum height for the container
+        preview.style.minHeight = '300px';
+        
         const shadow = preview.attachShadow({ mode: 'open' });
         const style = document.createElement('style');
-        style.textContent = `:host { display: block; padding: 4px; width: 100%; max-width: 100%; overflow: hidden; pointer-events: none; user-select: none; box-sizing: border-box; } * { pointer-events: none !important; max-width: 100%; box-sizing: border-box; } img, video, iframe { max-width: 100%; height: auto; } ${template.css}`;
+        
+        // CSS injected: Added min-height to :host
+        style.textContent = `:host { display: block; padding: 4px; width: 100%; min-height: 300px; max-width: 100%; overflow: hidden; pointer-events: none; user-select: none; box-sizing: border-box; } * { pointer-events: none !important; max-width: 100%; box-sizing: border-box; } img, video, iframe { max-width: 100%; height: auto; } ${template.css}`;
         shadow.appendChild(style);
 
         const innerWrap = document.createElement('div');
