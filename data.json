@@ -4,5 +4,6 @@
   "githubUrl": "https://github.com/infinition/obsidian-obsidget",
   "maxWidthValue": 100,
   "maxWidthUnit": "percent",
-  "maxWidthPercent": 30
+  "firstRun": false,
+  "showDataFiles": true
 }

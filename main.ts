@@ -34,6 +34,12 @@ interface WidgetTemplate {
     authorUrl?: string;
     createdDate?: number;
     lastModifiedDate?: number;
+    /** Default grid columns when added to Nova desktop (optional). Does not affect embedding in .md. */
+    cols?: number;
+    /** Default grid rows when added to Nova desktop (optional). Does not affect embedding in .md. */
+    rows?: number;
+    /** Preferred size in px (hint only; Nova uses cols/rows). Use Nova debug to get cols/rows from this size. */
+    defaultSizePx?: { width: number; height: number };
 }
 
 export default class WidgetPlugin extends Plugin {
@@ -77,7 +83,179 @@ export default class WidgetPlugin extends Plugin {
         return sections;
     }
 
+    /** Parse "export default { ... };" from .ts/.tsx content (JSON object). */
+    private parseTsTsxExport(content: string): WidgetTemplate | null {
+        const idx = content.indexOf('export default');
+        if (idx === -1) return null;
+        const start = content.indexOf('{', idx);
+        if (start === -1) return null;
+        let depth = 1;
+        let i = start + 1;
+        while (i < content.length && depth > 0) {
+            const c = content[i];
+            if (c === '\\') { i += 2; continue; }
+            if (c === '`') {
+                i++;
+                while (i < content.length) {
+                    if (content[i] === '\\') { i += 2; continue; }
+                    if (content[i] === '`') break;
+                    i++;
+                }
+                i++;
+                continue;
+            }
+            if (c === '"' || c === "'") {
+                const q = c;
+                i++;
+                while (i < content.length) {
+                    if (content[i] === '\\') { i += 2; continue; }
+                    if (content[i] === q) break;
+                    i++;
+                }
+                i++;
+                continue;
+            }
+            if (c === '{') depth++;
+            else if (c === '}') depth--;
+            i++;
+        }
+        if (depth !== 0) return null;
+        try {
+            const raw = content.slice(start, i);
+            const noTemplates = this.templateLiteralsToJsonStrings(raw);
+            const jsonSafe = this.escapeNewlinesInJsonStrings(noTemplates);
+            return JSON.parse(jsonSafe) as WidgetTemplate;
+        } catch (e) {
+            console.error('ObsidGet parseTsTsxExport failed:', e);
+            return null;
+        }
+    }
 
+    /** Convert template literals (backticks) to double-quoted JSON strings so JSON.parse() accepts the object. */
+    private templateLiteralsToJsonStrings(raw: string): string {
+        const isSpace = (ch: string) => ch === ' ' || ch === '\t' || ch === '\n' || ch === '\r';
+        let out = '';
+        let i = 0;
+        while (i < raw.length) {
+            if (raw[i] === '`') {
+                let j = i - 1;
+                while (j >= 0 && isSpace(raw[j])) j--;
+                if (j >= 0 && raw[j] === ':') {
+                    j--;
+                    while (j >= 0 && isSpace(raw[j])) j--;
+                    if (j >= 0 && raw[j] === '"') {
+                        out += '"';
+                        i++;
+                        while (i < raw.length) {
+                            const d = raw[i];
+                            if (d === '\\') {
+                                const next = raw[i + 1] ?? '';
+                                if (next === '"') {
+                                    out += '\\"';
+                                    i += 2;
+                                    continue;
+                                }
+                                if (next === '`' || next === '\\') {
+                                    out += '\\\\' + next;
+                                    i += 2;
+                                    continue;
+                                }
+                                out += '\\\\';
+                                out += next;
+                                i += 2;
+                                continue;
+                            }
+                            if (d === '`') break;
+                            if (d === '"') {
+                                out += '\\"';
+                                i++;
+                                continue;
+                            }
+                            if (d === '\r' && raw[i + 1] === '\n') {
+                                out += '\\n';
+                                i += 2;
+                                continue;
+                            }
+                            if (d === '\n' || d === '\r') {
+                                out += '\\n';
+                                i++;
+                                continue;
+                            }
+                            out += d;
+                            i++;
+                        }
+                        out += '"';
+                        i++;
+                        continue;
+                    }
+                }
+            }
+            out += raw[i];
+            i++;
+        }
+        return out;
+    }
+
+    /** Replace literal newlines inside double-quoted strings with \\n so JSON.parse() accepts the object. */
+    private escapeNewlinesInJsonStrings(raw: string): string {
+        let out = '';
+        let i = 0;
+        while (i < raw.length) {
+            const c = raw[i];
+            if (c === '"') {
+                out += c;
+                i++;
+                while (i < raw.length) {
+                    const d = raw[i];
+                    if (d === '\\') {
+                        out += raw[i];
+                        out += raw[i + 1] ?? '';
+                        i += 2;
+                        continue;
+                    }
+                    if (d === '"') break;
+                    if (d === '\r' && raw[i + 1] === '\n') {
+                        out += '\\n';
+                        i += 2;
+                        continue;
+                    }
+                    if (d === '\n' || d === '\r') {
+                        out += '\\n';
+                        i++;
+                        continue;
+                    }
+                    out += d;
+                    i++;
+                }
+                if (i < raw.length) out += raw[i++];
+                continue;
+            }
+            out += c;
+            i++;
+        }
+        return out;
+    }
+
+    /** Get gallery file path for widget id (.tsx preferred, then .ts). */
+    private async getGalleryFilePath(id: string): Promise<string | null> {
+        const base = normalizePath(`${this.settings.galleryPath}/${id}`);
+        if (await this.app.vault.adapter.exists(base + '.tsx')) return base + '.tsx';
+        if (await this.app.vault.adapter.exists(base + '.ts')) return base + '.ts';
+        return null;
+    }
+
+    /** Load template from gallery by id (reads .tsx or .ts and parses export default). */
+    private async loadTemplateFromGallery(widgetId: string): Promise<WidgetTemplate | null> {
+        const path = await this.getGalleryFilePath(widgetId);
+        if (!path) return null;
+        try {
+            const content = await this.app.vault.adapter.read(path);
+            return this.parseTsTsxExport(content);
+        } catch (e) {
+            console.error(`Error loading widget "${widgetId}":`, e);
+            return null;
+        }
+    }
 
     async onload() {
         await this.loadSettings();
@@ -196,16 +374,8 @@ export default class WidgetPlugin extends Plugin {
                 let template = this.templateCache.get(widgetId);
 
                 if (!template) {
-                    const galleryPath = normalizePath(`${this.settings.galleryPath}/${widgetId}.json`);
-                    try {
-                        if (await this.app.vault.adapter.exists(galleryPath)) {
-                            const content = await this.app.vault.adapter.read(galleryPath);
-                            template = JSON.parse(content);
-                            this.templateCache.set(widgetId, template!);
-                        }
-                    } catch (e) {
-                        console.error(`Error loading widget "${widgetId}":`, e);
-                    }
+                    template = await this.loadTemplateFromGallery(widgetId);
+                    if (template) this.templateCache.set(widgetId, template);
                 }
 
                 if (template) {
@@ -274,12 +444,8 @@ export default class WidgetPlugin extends Plugin {
                 createBtn('✏️', 'Edit this widget in gallery', async () => {
                     let template = this.templateCache.get(widgetId);
                     if (!template || !template.css || !template.js) {
-                        const galleryPath = normalizePath(`${this.settings.galleryPath}/${widgetId}.json`);
-                        if (await this.app.vault.adapter.exists(galleryPath)) {
-                            const content = await this.app.vault.adapter.read(galleryPath);
-                            template = JSON.parse(content);
-                            if (template) this.templateCache.set(widgetId, template);
-                        }
+                        template = await this.loadTemplateFromGallery(widgetId) ?? undefined;
+                        if (template) this.templateCache.set(widgetId, template);
                     }
 
                     if (template) {
@@ -371,8 +537,8 @@ export default class WidgetPlugin extends Plugin {
                         return;
                     }
 
-                    const galleryPath = normalizePath(`${this.settings.galleryPath}/${widgetId}.json`);
-                    if (!(await this.app.vault.adapter.exists(galleryPath))) {
+                    const galleryPath = await this.getGalleryFilePath(widgetId);
+                    if (!galleryPath) {
                         new Notice(`Widget "${widgetId}" not found in gallery. Please save it first.`);
                         return;
                     }
@@ -653,7 +819,7 @@ export default class WidgetPlugin extends Plugin {
                     if (extension) {
                         files = files.filter(f => f.extension === extension.replace('.', ''));
                     }
-                    return files.map(f => f.path);
+                    return Promise.resolve(files.map(f => f.path));
                 },
                 readFile: async (path: string) => {
                     const normalizedPath = normalizePath(path);
@@ -812,7 +978,7 @@ export default class WidgetPlugin extends Plugin {
         this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
 
         // Migration from old name
-        if (this.settings.galleryPath === '.obsidian/plugins/obsidian-widget-css/gallery') {
+        if (this.settings.galleryPath === '.obsidian/plugins/obsidian-widget-css/gallery' || this.settings.galleryPath === '.obsidian/plugins/obsidian-obsidget/gallery') {
             this.settings.galleryPath = '.obsidian/plugins/obsidian-obsidget/gallery';
             await this.saveSettings();
         }
@@ -828,15 +994,23 @@ export default class WidgetPlugin extends Plugin {
 
         const files = await this.app.vault.adapter.list(this.settings.galleryPath);
         const templates: WidgetTemplate[] = [];
+        const seenIds = new Set<string>();
 
         for (const filePath of files.files) {
-            if (filePath.endsWith('.json')) {
-                const content = await this.app.vault.adapter.read(filePath);
-                try {
-                    templates.push(JSON.parse(content));
-                } catch (e) {
-                    console.error(`Failed to parse gallery item: ${filePath}`, e);
-                }
+            if (!filePath.endsWith('.tsx') && !filePath.endsWith('.ts')) continue;
+            const baseName = filePath.includes('/') ? filePath.split('/').pop()! : filePath;
+            const id = baseName.replace(/\.(tsx?)$/, '');
+            if (seenIds.has(id)) continue;
+            seenIds.add(id);
+            const fullPath = filePath.startsWith('.') || filePath.includes('/')
+                ? filePath
+                : normalizePath(`${this.settings.galleryPath}/${filePath}`);
+            try {
+                const content = await this.app.vault.adapter.read(fullPath);
+                const t = this.parseTsTsxExport(content);
+                if (t && t.id) templates.push(t);
+            } catch (e) {
+                console.error(`Failed to parse gallery item: ${fullPath}`, e);
             }
         }
         return templates;
@@ -847,15 +1021,16 @@ export default class WidgetPlugin extends Plugin {
         if (!template.createdDate) {
             template.createdDate = Date.now();
         }
-        const filePath = normalizePath(`${this.settings.galleryPath}/${template.id}.json`);
-        await this.app.vault.adapter.write(filePath, JSON.stringify(template, null, 2));
+        const filePath = normalizePath(`${this.settings.galleryPath}/${template.id}.tsx`);
+        const content = `export default ${JSON.stringify(template, null, 2)};\n`;
+        await this.app.vault.adapter.write(filePath, content);
     }
 
     async deleteFromGallery(id: string) {
-        const filePath = normalizePath(`${this.settings.galleryPath}/${id}.json`);
-        if (await this.app.vault.adapter.exists(filePath)) {
-            await this.app.vault.adapter.remove(filePath);
-        }
+        const pathTsx = normalizePath(`${this.settings.galleryPath}/${id}.tsx`);
+        const pathTs = normalizePath(`${this.settings.galleryPath}/${id}.ts`);
+        if (await this.app.vault.adapter.exists(pathTsx)) await this.app.vault.adapter.remove(pathTsx);
+        if (await this.app.vault.adapter.exists(pathTs)) await this.app.vault.adapter.remove(pathTs);
     }
 
     async syncGallery() {
@@ -883,15 +1058,22 @@ export default class WidgetPlugin extends Plugin {
 
             for (const file of files) {
                 if (file.name.endsWith('.json')) {
-                    const localPath = normalizePath(`${this.settings.galleryPath}/${file.name}`);
-                    const existsLocally = await this.app.vault.adapter.exists(localPath);
+                    const id = file.name.replace(/\.json$/, '');
+                    const existsLocally = await this.getGalleryFilePath(id);
 
                     if (!existsLocally) {
                         console.log("ObsidGet: Downloading new widget:", file.name);
                         const fileResponse = await requestUrl({ url: file.download_url });
                         if (fileResponse.status === 200) {
-                            await this.app.vault.adapter.write(localPath, fileResponse.text);
-                            addedCount++;
+                            try {
+                                const template = JSON.parse(fileResponse.text) as WidgetTemplate;
+                                if (template.id) {
+                                    await this.saveToGallery(template);
+                                    addedCount++;
+                                }
+                            } catch (e) {
+                                console.error(`ObsidGet: Failed to parse ${file.name}:`, e);
+                            }
                         } else {
                             console.error(`ObsidGet: Failed to download ${file.name}:`, fileResponse.status);
                         }
@@ -926,7 +1108,7 @@ export default class WidgetPlugin extends Plugin {
 
             if (response.status !== 200) {
                 if (!quiet) throw new Error(`GitHub API returned ${response.status}`);
-                return;
+                return false;
             }
 
             const release = response.json;
@@ -948,8 +1130,11 @@ export default class WidgetPlugin extends Plugin {
                 return false;
             }
         } catch (e: any) {
-            console.error('ObsidGet: Update check failed:', e);
-            if (!quiet) new Notice(`Update check failed: ${e.message}`);
+            // En mode silencieux (au chargement), ne pas polluer la console ni afficher de notice si le dépôt n'existe pas (404)
+            if (!quiet) {
+                console.error('ObsidGet: Update check failed:', e);
+                new Notice(`Update check failed: ${e.message}`);
+            }
             return false;
         }
     }
@@ -1695,7 +1880,7 @@ class WidgetEditorModal extends Modal {
 
             // Check for overwrite if ID changed or if it's a new widget
             if (this.template.id !== this.originalId) {
-                const exists = await this.plugin.app.vault.adapter.exists(normalizePath(`${this.plugin.settings.galleryPath}/${this.template.id}.json`));
+                const exists = await this.plugin.getGalleryFilePath(this.template.id);
                 if (exists) {
                     const confirm = window.confirm(`A widget with ID "${this.template.id}" already exists in the gallery. Overwrite?`);
                     if (!confirm) return;

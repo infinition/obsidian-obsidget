@@ -10,19 +10,8 @@
         "resolveJsonModule": true,
         "outDir": ".",
         "baseUrl": ".",
-        "lib": [
-            "ES2020",
-            "DOM"
-        ]
+        "lib": ["ES2020", "DOM"]
     },
-    "include": [
-        "main.ts",
-        "i18n.ts",
-        "**/*.ts"
-    ],
-    "exclude": [
-        "node_modules",
-        "dist",
-        "main.js"
-    ]
+    "include": ["main.ts", "i18n.ts", "**/*.ts"],
+    "exclude": ["node_modules", "dist", "main.js"]
 }
