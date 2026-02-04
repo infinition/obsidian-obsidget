@@ -43,7 +43,7 @@
 
     <script src="https://unpkg.com/lucide@latest"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
 
@@ -174,9 +174,12 @@
         #theme-toggle-mobile,
         .badge-sm,
         .pagination-card,
-        #toc-btn-mobile,
         #toc-btn-desktop,
-        #clear-highlight-btn {
+        #search-btn-mobile,
+        #clear-highlight-btn,
+        .kb-mobile-toggle,
+        .kb-mobile-toc-toggle,
+        .kb-scroll-top-btn {
             position: relative;
             overflow: hidden;
         }
@@ -190,9 +193,12 @@
         #theme-toggle-mobile::after,
         .badge-sm::after,
         .pagination-card::after,
-        #toc-btn-mobile::after,
         #toc-btn-desktop::after,
-        #clear-highlight-btn::after {
+        #search-btn-mobile::after,
+        #clear-highlight-btn::after,
+        .kb-mobile-toggle::after,
+        .kb-mobile-toc-toggle::after,
+        .kb-scroll-top-btn::after {
             content: '';
             position: absolute;
             inset: 0;
@@ -211,9 +217,12 @@
         #theme-toggle-mobile:hover::after,
         .badge-sm:hover::after,
         .pagination-card:hover::after,
-        #toc-btn-mobile:hover::after,
         #toc-btn-desktop:hover::after,
-        #clear-highlight-btn:hover::after {
+        #search-btn-mobile:hover::after,
+        #clear-highlight-btn:hover::after,
+        .kb-mobile-toggle:hover::after,
+        .kb-mobile-toc-toggle:hover::after,
+        .kb-scroll-top-btn:hover::after {
             opacity: 1;
         }
 
@@ -374,6 +383,26 @@
             font-weight: 700;
         }
 
+        .markdown-body table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+        .markdown-body table th,
+        .markdown-body table td {
+            border: 1px solid var(--border-color);
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+        }
+        .markdown-body table th {
+            font-weight: 600;
+            background: var(--accent-dim);
+            color: var(--text-heading);
+        }
+        .markdown-body table tr:hover td {
+            background: var(--accent-dim);
+        }
+
         .markdown-body img {
             max-width: 100%;
             border-radius: 8px;
@@ -496,14 +525,100 @@
             opacity: 1;
         }
 
-        #scroll-top-btn {
+        /* Bottom bar: Menu | Scroll to top (center) | TOC — aligne les 3 boutons à la même hauteur */
+        .kb-bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 1rem 1.5rem;
+            padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+            padding-left: calc(1.5rem + env(safe-area-inset-left, 0px));
+            padding-right: calc(1.5rem + env(safe-area-inset-right, 0px));
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 80;
+            pointer-events: none;
+        }
+        .kb-bottom-bar-cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 50px;
+            height: 50px;
+            pointer-events: auto;
+        }
+        .kb-bottom-bar-left { justify-content: flex-start; }
+        .kb-bottom-bar-center { flex: 1; justify-content: center; }
+        .kb-bottom-bar-right { justify-content: flex-end; }
+
+        .kb-bottom-bar-btn {
+            width: 50px;
+            height: 50px;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            background: var(--bg-sidebar);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .kb-bottom-bar-btn:hover {
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+        .kb-bottom-bar-btn.kb-bottom-bar-btn-hidden {
+            visibility: hidden;
+            pointer-events: none;
+            opacity: 0;
+        }
+        .kb-scroll-top-btn {
             transition: opacity 0.3s, transform 0.3s;
         }
-
-        #scroll-top-btn.hidden {
+        #scroll-top-btn:not(.visible) {
             opacity: 0;
             pointer-events: none;
-            transform: translateY(20px);
+            transform: translateY(8px);
+        }
+        #scroll-top-btn.visible {
+            opacity: 0.9;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+        /* Menu (gauche) : visible uniquement en mobile (sidebar masquée) */
+        .kb-mobile-toggle {
+            display: flex;
+        }
+        @media (min-width: 769px) {
+            .kb-bottom-bar-left .kb-mobile-toggle {
+                display: none !important;
+            }
+            .kb-bottom-bar-left {
+                min-width: 0;
+                width: 0;
+                overflow: hidden;
+            }
+        }
+        /* TOC (droite) : visible en mobile et quand la TOC sidebar n'est pas affichée (< xl) */
+        .kb-mobile-toc-toggle {
+            display: flex;
+        }
+        @media (min-width: 1280px) {
+            .kb-bottom-bar-right .kb-mobile-toc-toggle {
+                display: none !important;
+            }
+            .kb-bottom-bar-right {
+                min-width: 0;
+                width: 0;
+                overflow: hidden;
+            }
         }
 
         /* --- CLEAR HIGHLIGHT BTN (NEW) --- */
@@ -582,7 +697,7 @@
             #mobile-toc-sidebar,
             header,
             #theme-toggle-desktop,
-            #scroll-top-btn,
+            #kb-bottom-bar,
             #reading-progress-bar,
             #overlay,
             .copy-btn,
@@ -852,14 +967,33 @@
                 <span id="label-menu" class="text-xs font-mono font-bold uppercase tracking-wider">Menu</span>
                 <i data-lucide="menu" class="w-5 h-5 text-hack-green"></i>
             </button>
-            <button id="toc-btn-mobile" class="text-gray-400 hover:text-hack-green p-2 transition-colors"
-                aria-label="Toggle Table of Contents">
-                <i data-lucide="hash" class="w-5 h-5"></i>
+            <button id="search-btn-mobile" type="button" class="text-gray-400 hover:text-hack-green p-2 transition-colors"
+                title="Search (Ctrl+K)" aria-label="Search" onclick="openSearch()">
+                <i data-lucide="search" class="w-5 h-5"></i>
             </button>
         </div>
     </header>
 
     <div id="overlay" class="fixed inset-0 bg-black/80 backdrop-blur-[2px] z-[65] hidden transition-opacity opacity-0">
+    </div>
+
+    <!-- Bottom bar: Menu (left) | Scroll to top (center) | TOC (right) -->
+    <div id="kb-bottom-bar" class="kb-bottom-bar">
+        <div class="kb-bottom-bar-cell kb-bottom-bar-left">
+            <button id="kb-mobile-toggle" type="button" class="kb-bottom-bar-btn kb-mobile-toggle" title="Menu" aria-label="Open Menu">
+                <i data-lucide="menu" class="w-5 h-5"></i>
+            </button>
+        </div>
+        <div class="kb-bottom-bar-cell kb-bottom-bar-center">
+            <button id="scroll-top-btn" type="button" class="kb-bottom-bar-btn kb-scroll-top-btn p-3 rounded-full bg-hack-greenDim border border-hack-border text-hack-green hover:bg-hack-green hover:text-white shadow-lg" title="Back to Top" aria-label="Back to Top">
+                <i data-lucide="arrow-up" class="w-5 h-5"></i>
+            </button>
+        </div>
+        <div class="kb-bottom-bar-cell kb-bottom-bar-right">
+            <button id="kb-mobile-toc-toggle" type="button" class="kb-bottom-bar-btn kb-mobile-toc-toggle" title="Table of Contents" aria-label="Toggle Table of Contents">
+                <i data-lucide="list" class="w-5 h-5"></i>
+            </button>
+        </div>
     </div>
 
     <aside id="sidebar"
@@ -908,18 +1042,6 @@
                         <div
                             class="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest font-mono text-hack-green">
                             <i data-lucide="history" class="w-3 h-3"></i> <span id="label-changelog">Changelog</span>
-                        </div>
-                        <i data-lucide="chevron-right"
-                            class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity"></i>
-                    </button>
-                </div>
-                <div class="nav-group mb-1">
-                    <button id="btn-root-readme"
-                        class="w-full text-left px-2 py-2 flex items-center justify-between text-gray-500 hover:text-hack-heading transition-colors cursor-pointer group rounded hover:bg-hack-bg focus:bg-hack-bg outline-none"
-                        onclick="loadContent('', CONFIG.ui.rootReadmeTitle, 'README.md', true, true)" tabindex="0">
-                        <div
-                            class="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest font-mono text-hack-green">
-                            <i data-lucide="home" class="w-3 h-3"></i> <span id="label-root-readme">Project Home</span>
                         </div>
                         <i data-lucide="chevron-right"
                             class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity"></i>
@@ -1036,12 +1158,6 @@
             title="Clear Search Highlights" aria-label="Clear Search Highlights">
             <i data-lucide="eraser" class="w-5 h-5"></i>
         </button>
-
-        <button id="scroll-top-btn"
-            class="absolute bottom-6 right-6 p-3 rounded-full bg-hack-greenDim border border-hack-border text-hack-green hover:bg-hack-green hover:text-white shadow-lg hidden z-30"
-            title="Back to Top" aria-label="Back to Top">
-            <i data-lucide="arrow-up" class="w-5 h-5"></i>
-        </button>
     </div>
 
     <div id="search-modal-overlay"
@@ -1098,8 +1214,18 @@
             return `<img src="${href}" alt="${text || ''}" title="${title || ''}" loading="lazy" class="rounded-lg border border-hack-border bg-black/20">`;
         };
 
+        // --- TABLE RENDERER (compatible marked 4.x ; en 5+ le token est un objet) ---
         renderer.table = function (header, body) {
-            return `<div class="overflow-x-auto my-4 border border-hack-border rounded-lg"><table class="w-full text-left text-sm border-collapse"><thead>${header}</thead><tbody>${body}</tbody></table></div>`;
+            const wrap = (html) => `<div class="overflow-x-auto my-4 border border-hack-border rounded-lg">${html}</div>`;
+            if (typeof header === 'object' && header !== null) {
+                const token = header;
+                const thead = (typeof token.header === 'string') ? token.header : (Array.isArray(token.rows) ? token.rows[0] || '' : '');
+                const rows = Array.isArray(token.rows) ? token.rows.slice(1).join('') : (typeof body === 'string' ? body : '');
+                return wrap(`<table class="w-full text-left text-sm border-collapse"><thead>${thead}</thead><tbody>${rows}</tbody></table>`);
+            }
+            const h = typeof header === 'string' ? header : '';
+            const b = typeof body === 'string' ? body : '';
+            return wrap(`<table class="w-full text-left text-sm border-collapse"><thead>${h}</thead><tbody>${b}</tbody></table>`);
         };
 
         marked.use({ renderer });
@@ -1108,6 +1234,8 @@
         // Safety check for CONFIG
         let STATE = {
             wikiData: {},
+            rootMdFiles: [],
+            wikiId: '',
             contentCache: {},
             searchIndex: [],
             expandedSections: new Set(),
@@ -1121,6 +1249,13 @@
         if (typeof CONFIG !== 'undefined') {
             STATE.repo = CONFIG.repo;
             STATE.branch = CONFIG.branch;
+            // Identifiant unique par repo pour éviter conflits de cache localStorage entre différentes GitHub Pages
+            const shortHash = (str) => {
+                let h = 0;
+                for (let i = 0; i < str.length; i++) { h = ((h << 5) - h) + str.charCodeAt(i); h |= 0; }
+                return Math.abs(h).toString(36).slice(0, 12);
+            };
+            STATE.wikiId = (CONFIG.repo && shortHash(CONFIG.repo)) || '';
         } else {
             console.error("CRITICAL: CONFIG not loaded from wiki/config.js");
         }
@@ -1148,7 +1283,8 @@
             if (modalSearchInput) modalSearchInput.placeholder = CONFIG.ui.searchPlaceholder;
 
             document.getElementById('label-changelog').innerText = CONFIG.ui.changelogTitle;
-            document.getElementById('label-root-readme').innerText = CONFIG.ui.rootReadmeTitle;
+            const labelRootReadme = document.getElementById('label-root-readme');
+            if (labelRootReadme) labelRootReadme.innerText = CONFIG.ui.rootReadmeTitle;
             document.getElementById('label-initializing').innerText = CONFIG.ui.initializingText;
             document.getElementById('label-join-us').innerText = CONFIG.ui.joinUsTitle;
             document.getElementById('label-on-this-page').innerText = CONFIG.ui.onThisPageTitle;
@@ -1164,14 +1300,13 @@
                 changelogBtn.style.display = CONFIG.features.showChangelog ? 'flex' : 'none';
             }
 
-            const rootReadmeBtn = document.getElementById('btn-root-readme');
-            if (rootReadmeBtn) {
-                rootReadmeBtn.style.display = CONFIG.features.showRootReadme ? 'flex' : 'none';
-            }
-
             const searchTrigger = document.querySelector('[onclick="openSearch()"]');
             if (searchTrigger) {
                 searchTrigger.style.display = CONFIG.features.showSearch ? 'block' : 'none';
+            }
+            const searchBtnMobile = document.getElementById('search-btn-mobile');
+            if (searchBtnMobile) {
+                searchBtnMobile.style.display = CONFIG.features.showSearch ? '' : 'none';
             }
 
             const socialSection = document.getElementById('social-section');
@@ -1410,29 +1545,43 @@
                 debugLog('[AcidWiki] 🚀 Initializing wiki...');
 
                 // Try GitHub API first for production
-                let structure = await fetchWikiStructureFromAPI();
+                let apiResult = await fetchWikiStructureFromAPI();
+                let structure = apiResult && (apiResult.structure ?? apiResult);
+                const rootMdFiles = (apiResult && apiResult.rootMdFiles) || [];
 
                 // If API fails, try local filesystem scanning (for local HTTP servers)
-                if (!structure) {
+                if (!structure && typeof structure !== 'object') {
                     debugLog('[AcidWiki] 🔄 Trying local filesystem scan...');
                     structure = await scanLocalFilesystem();
+                }
+                if (structure && typeof structure === 'object' && !Array.isArray(structure)) {
+                    // When from scanLocalFilesystem we don't have rootMdFiles; keep []
+                } else {
+                    structure = null;
                 }
 
                 if (!structure || Object.keys(structure).length === 0) {
                     if (CONFIG.features.showRootReadme) {
                         debugLog('[AcidWiki] ℹ️ No docs found, but root README is enabled. Proceeding...');
-                        structure = {}; // Empty but valid
+                        structure = {};
                     } else {
                         console.error('[AcidWiki] ❌ No wiki content found!');
                         throw new Error("No wiki content found. Please add .md files to wiki/docs/");
                     }
                 }
 
-                debugLog('[AcidWiki] ✅ Wiki structure loaded successfully');
-                STATE.wikiData = structure;
+                STATE.rootMdFiles = rootMdFiles.length > 0 ? rootMdFiles : (CONFIG.features.showRootReadme ? [{ title: 'README.md'.replace(/\.md$/, '').replace(/_/g, ' '), filename: 'README.md' }] : []);
+                if (STATE.rootMdFiles.length > 0) {
+                    const rootObj = Object.fromEntries(STATE.rootMdFiles.map(f => [f.title, f.filename]));
+                    STATE.wikiData = { __root__: rootObj, ...structure };
+                    STATE.expandedSections.add('__root__');
+                } else {
+                    STATE.wikiData = structure;
+                }
 
                 const firstFolder = Object.keys(STATE.wikiData)[0];
                 if (firstFolder) STATE.expandedSections.add(firstFolder);
+                debugLog('[AcidWiki] ✅ Wiki structure loaded successfully');
 
                 renderSidebar();
                 buildSearchIndex();
@@ -1440,7 +1589,7 @@
                 window.onpopstate = (event) => {
                     if (event.state) {
                         if (event.state.page === 'versions') toggleVersionsPage(null, false);
-                        else loadContent(event.state.folder, event.state.title, event.state.filename, false);
+                        else loadContent(event.state.folder, event.state.title, event.state.filename, false, event.state.folder === '');
                     } else {
                         handleInitialRoute();
                     }
@@ -1476,9 +1625,11 @@
                     const data = await res.json();
                     const structure = {};
                     let fileCount = 0;
+                    const rootMdFiles = [];
 
                     data.tree.forEach(item => {
-                        if (item.path.startsWith('wiki/docs/') && item.type === 'blob' && item.path.endsWith('.md')) {
+                        if (item.type !== 'blob' || !item.path.endsWith('.md')) return;
+                        if (item.path.startsWith('wiki/docs/')) {
                             const relativePath = item.path.replace('wiki/docs/', '');
                             const parts = relativePath.split('/');
 
@@ -1493,8 +1644,19 @@
                             const title = decodeURIComponent(filename.replace(/\.md$/, '').replace(/_/g, ' '));
                             currentLevel[title] = filename;
                             fileCount++;
+                        } else if (!item.path.includes('/')) {
+                            const filename = item.path;
+                            const title = decodeURIComponent(filename.replace(/\.md$/, '').replace(/_/g, ' '));
+                            rootMdFiles.push({ title, filename });
                         }
                     });
+
+                    rootMdFiles.sort((a, b) => {
+                        if (a.filename.toLowerCase() === 'readme.md') return -1;
+                        if (b.filename.toLowerCase() === 'readme.md') return 1;
+                        return a.filename.localeCompare(b.filename);
+                    });
+                    if (rootMdFiles.length) debugLog(`[AcidWiki] 📂 Root .md files: ${rootMdFiles.map(f => f.filename).join(', ')}`);
 
                     // Sort folders and files recursively
                     function sortStructure(obj) {
@@ -1511,7 +1673,10 @@
 
                     const sortedStructure = sortStructure(structure);
                     debugLog(`[AcidWiki] ✅ GitHub discovery complete: Found ${fileCount} files`);
-                    return Object.keys(sortedStructure).length > 0 ? sortedStructure : null;
+                    const hasStructure = Object.keys(sortedStructure).length > 0;
+                    const hasRoot = rootMdFiles.length > 0;
+                    if (!hasStructure && !hasRoot) return null;
+                    return { structure: hasStructure ? sortedStructure : {}, rootMdFiles };
                 } catch (e) {
                     debugLog(`[AcidWiki] ❌ Error fetching branch "${branch}":`, e);
                 }
@@ -1678,6 +1843,15 @@
             }
         }
 
+        /** Convertit une URL virtuelle ?page=README_ik5745.md en nom réel README.md pour la recherche.
+         *  Au rechargement (F5), le suffixe est toujours retiré si le format correspond, pour éviter "Page Not Found". */
+        function pageParamToRealForRoot(pageParam) {
+            if (!pageParam || !pageParam.endsWith('.md')) return pageParam;
+            const m = pageParam.match(/^(.+)_([a-z0-9]+)\.md$/);
+            if (m) return m[1] + '.md';
+            return pageParam;
+        }
+
         function handleInitialRoute() {
             const urlParams = new URLSearchParams(window.location.search);
             const pageParam = urlParams.get('page');
@@ -1686,18 +1860,20 @@
                 toggleVersionsPage(null, false);
             } else if (pageParam) {
                 const flatList = getFlatPageList();
-                const found = flatList.find(item => `${item.folder}/${item.file}` === pageParam || item.file === pageParam);
+                const paramForRoot = pageParamToRealForRoot(pageParam);
+                const found = flatList.find(item => {
+                    if (item.folder === '') return item.file === paramForRoot || item.file === pageParam;
+                    return `${item.folder}/${item.file}` === pageParam || item.file === pageParam;
+                });
 
                 if (found) {
                     loadContent(found.folder, found.title, found.file, false);
-                    // Expand all parent folders
-                    const parts = found.folder.split('/');
+                    if (found.folder === '') STATE.expandedSections.add('__root__');
+                    const parts = found.folder.split('/').filter(Boolean);
                     let current = "";
                     parts.forEach(p => {
-                        if (p) {
-                            current = current ? `${current}/${p}` : p;
-                            STATE.expandedSections.add(current);
-                        }
+                        current = current ? `${current}/${p}` : p;
+                        STATE.expandedSections.add(current);
                     });
                     renderSidebar();
                 } else {
@@ -1713,6 +1889,7 @@
 
             function indexRecursive(data, currentPath = '') {
                 for (const [key, value] of Object.entries(data)) {
+                    if (key === '__root__') continue;
                     if (typeof value === 'object' && value !== null) {
                         const folderPath = currentPath ? `${currentPath}/${key}` : key;
                         indexRecursive(value, folderPath);
@@ -1740,26 +1917,25 @@
 
             indexRecursive(STATE.wikiData);
 
-            // 2. --- MANUAL INDEXING OF ROOT README ---
-            if (CONFIG.features.showRootReadme) {
+            // 2. --- INDEXING ROOT .MD FILES (Project Home) ---
+            (STATE.rootMdFiles || []).forEach(({ title, filename }) => {
                 promises.push(
-                    fetch('README.md')
+                    fetch(filename)
                         .then(res => { if (!res.ok) return ''; return res.text(); })
                         .then(text => {
                             if (!text) return;
-                            // On l'ajoute manuellement à l'index
                             STATE.searchIndex.push({
-                                folder: '', // Racine
-                                title: CONFIG.ui.rootReadmeTitle || "Project Home",
-                                filename: 'README.md',
+                                folder: '',
+                                title,
+                                filename,
                                 content: text.toLowerCase(),
-                                titleLower: (CONFIG.ui.rootReadmeTitle || "Project Home").toLowerCase()
+                                titleLower: title.toLowerCase()
                             });
-                            debugLog("[AcidWiki] 🔍 Root README indexed.");
                         })
-                        .catch(e => console.warn("[AcidWiki] Failed to index README.md", e))
+                        .catch(() => {})
                 );
-            }
+            });
+            if (STATE.rootMdFiles && STATE.rootMdFiles.length) debugLog("[AcidWiki] 🔍 Root .md files indexed.");
 
             // 3. --- CHANGELOG INDEXING (API) ---
             if (CONFIG.features.showChangelog) {
@@ -1792,6 +1968,12 @@
             const flatList = [];
             function traverse(data, currentPath = '') {
                 for (const [key, value] of Object.entries(data)) {
+                    if (key === '__root__' && typeof value === 'object' && value !== null) {
+                        for (const [title, file] of Object.entries(value))
+                            if (typeof file === 'string' && file.endsWith('.md'))
+                                flatList.push({ folder: '', title, file });
+                        continue;
+                    }
                     if (typeof value === 'object' && value !== null) {
                         const folderPath = currentPath ? `${currentPath}/${key}` : key;
                         traverse(value, folderPath);
@@ -1805,14 +1987,10 @@
         }
 
         function loadDefault() {
-            if (CONFIG.features.showRootReadme) {
-                loadContent('', CONFIG.ui.rootReadmeTitle, 'README.md', true, true);
-                return;
-            }
             const flatList = getFlatPageList();
             if (flatList.length === 0) return;
             const first = flatList[0];
-            loadContent(first.folder, first.title, first.file, true);
+            loadContent(first.folder, first.title, first.file, true, first.folder === '');
         }
 
         function showErrorState(msg) {
@@ -1866,6 +2044,9 @@
             let currentPath = "";
             const folderParts = folder.split('/').filter(s => s);
 
+            if (folder === '' && (STATE.rootMdFiles || []).length > 0) {
+                breadcrumbParts.push(`<span class="hover:text-hack-heading cursor-pointer" onclick="loadDefault()">${CONFIG.ui.rootReadmeTitle || 'Project Home'}</span>`);
+            }
             segments.forEach((seg, i) => {
                 const partKey = folderParts[i];
                 currentPath = currentPath ? `${currentPath}/${partKey}` : partKey;
@@ -1920,8 +2101,8 @@
 
             try {
                 let text;
-                const cacheKey = `${folder}/${filename}`;
-                const storageKey = `bjorn_content_${cacheKey}`;
+                const cacheKey = (isRoot && STATE.wikiId) ? `__root__${STATE.wikiId}/${filename}` : `${folder}/${filename}`;
+                const storageKey = `bjorn_content_${cacheKey.replace(/\//g, '_')}`;
                 const now = Date.now();
                 const TTL = 3600 * 1000 * 24; // 24 Hours Cache
 
@@ -1960,18 +2141,38 @@
                         } else {
                             throw new Error("404");
                         }
-                    } catch (e) {
-                        // Try fallback if not root
-                        if (!isRoot) {
-                            const path2 = `./wiki/docs/${filename}`;
-                            const res2 = await fetch(path2);
-                            if (res2.ok) {
-                                text = await res2.text();
-                            } else {
-                                throw new Error(`Content not found.`);
+                        // Pour les fichiers racine : si vide ou HTML (ex. Jekyll sur GitHub Pages), charger via raw GitHub
+                        if (isRoot && (!text || !text.trim() || text.trim().startsWith('<')) && STATE.repo && STATE.branch) {
+                            const rawUrl = `https://raw.githubusercontent.com/${STATE.repo}/${STATE.branch}/${filename}`;
+                            const resRaw = await fetch(rawUrl);
+                            if (resRaw.ok) {
+                                const rawText = await resRaw.text();
+                                if (rawText && !rawText.trim().startsWith('<')) text = rawText;
                             }
-                        } else {
-                            throw e;
+                        }
+                    } catch (e) {
+                        // Pour les fichiers racine : repli sur raw GitHub
+                        if (isRoot && STATE.repo && STATE.branch) {
+                            try {
+                                const rawUrl = `https://raw.githubusercontent.com/${STATE.repo}/${STATE.branch}/${filename}`;
+                                const resRaw = await fetch(rawUrl);
+                                if (resRaw.ok) {
+                                    text = await resRaw.text();
+                                }
+                            } catch (e2) { /* ignore */ }
+                        }
+                        if (!text) {
+                            if (!isRoot) {
+                                const path2 = `./wiki/docs/${filename}`;
+                                const res2 = await fetch(path2);
+                                if (res2.ok) {
+                                    text = await res2.text();
+                                } else {
+                                    throw new Error(`Content not found.`);
+                                }
+                            } else {
+                                throw e;
+                            }
                         }
                     }
 
@@ -2005,14 +2206,16 @@
                 renderPagination(folder, title);
 
                 if (pushHistory) {
-                    const newUrl = `?page=${folder}/${filename}`;
+                    const newUrl = folder
+                        ? `?page=${folder}/${filename}`
+                        : (STATE.wikiId ? `?page=${filename.replace(/\.md$/, `_${STATE.wikiId}.md`)}` : `?page=${filename}`);
                     window.history.pushState({ folder, title, filename }, "", newUrl);
                 }
 
                 if (CONFIG.features.autoCollapseSidebar) {
-                    STATE.expandedSections = new Set([folder]);
+                    STATE.expandedSections = new Set([folder || '__root__']);
                 } else {
-                    STATE.expandedSections.add(folder);
+                    STATE.expandedSections.add(folder || '__root__');
                 }
                 renderSidebar();
 
@@ -2098,7 +2301,7 @@
                 return;
             }
 
-            const CACHE_KEY = `bjorn_upd_${folder}_${filename}`;
+            const CACHE_KEY = STATE.wikiId ? `bjorn_upd_${STATE.wikiId}_${folder}_${filename}`.replace(/\//g, '_') : `bjorn_upd_${folder}_${filename}`;
             const now = Date.now();
 
             const cached = localStorage.getItem(CACHE_KEY);
@@ -2129,18 +2332,16 @@
             const idx = flatList.findIndex(item => item.folder === currentFolder && item.title === currentTitle);
 
             [idx - 1, idx + 1].forEach(i => {
-                if (flatList[i]) {
-                    const url = `./wiki/docs/${flatList[i].folder}/${flatList[i].file}`;
-                    const cacheKey = `${flatList[i].folder}/${flatList[i].file}`;
-
-                    // Check persistent cache first to avoid fetch
-                    const storageKey = `bjorn_content_${cacheKey}`;
-                    if (localStorage.getItem(storageKey)) return;
-
-                    fetch(url).then(r => r.text()).then(t => {
-                        STATE.contentCache[cacheKey] = t;
-                    }).catch(() => { });
-                }
+                if (!flatList[i]) return;
+                const item = flatList[i];
+                const isRoot = item.folder === '';
+                const cacheKey = (isRoot && STATE.wikiId) ? `__root__${STATE.wikiId}/${item.file}` : `${item.folder}/${item.file}`;
+                const storageKey = `bjorn_content_${cacheKey.replace(/\//g, '_')}`;
+                if (localStorage.getItem(storageKey)) return;
+                const url = isRoot ? `./${item.file}` : `./wiki/docs/${item.folder}/${item.file}`;
+                fetch(url).then(r => r.text()).then(t => {
+                    STATE.contentCache[cacheKey] = t;
+                }).catch(() => { });
             });
         }
 
@@ -2231,7 +2432,7 @@
                 const btn = document.createElement('button');
                 btn.className = "pagination-card text-left p-4 rounded border border-hack-border hover:border-hack-green group transition-colors bg-hack-sidebar/50 hover:bg-hack-sidebar w-full flex flex-col items-start";
                 btn.innerHTML = `<span class="text-[10px] text-gray-500 uppercase tracking-widest mb-1 group-hover:text-hack-green">Previous</span><span class="font-bold text-sm truncate text-hack-heading w-full">« ${prev.title}</span>`;
-                btn.onclick = () => loadContent(prev.folder, prev.title, prev.file);
+                btn.onclick = () => loadContent(prev.folder, prev.title, prev.file, true, prev.folder === '');
                 navContainer.appendChild(btn);
             } else { navContainer.appendChild(document.createElement('div')); }
 
@@ -2240,7 +2441,7 @@
                 const btn = document.createElement('button');
                 btn.className = "pagination-card text-right p-4 rounded border border-hack-border hover:border-hack-green group transition-colors bg-hack-sidebar/50 hover:bg-hack-sidebar w-full flex flex-col items-end";
                 btn.innerHTML = `<span class="text-[10px] text-gray-500 uppercase tracking-widest mb-1 group-hover:text-hack-green">Next</span><span class="font-bold text-sm truncate text-hack-heading w-full">${next.title} »</span>`;
-                btn.onclick = () => loadContent(next.folder, next.title, next.file);
+                btn.onclick = () => loadContent(next.folder, next.title, next.file, true, next.folder === '');
                 navContainer.appendChild(btn);
             }
         }
@@ -2398,8 +2599,40 @@
             function renderRecursive(data, parentContainer, currentPath = '', level = 0) {
                 Object.keys(data).forEach(key => {
                     const value = data[key];
-                    const isFolder = typeof value === 'object' && value !== null;
-                    const cleanName = key.replace(/^\d+_/, '').replace(/_/g, ' ');
+                    const isRootSection = key === '__root__';
+                    const isFolder = (typeof value === 'object' && value !== null) && !isRootSection;
+                    const cleanName = isRootSection ? (CONFIG.ui.rootReadmeTitle || 'Project Home') : key.replace(/^\d+_/, '').replace(/_/g, ' ');
+
+                    if (isRootSection && typeof value === 'object' && value !== null) {
+                        const folderPath = '__root__';
+                        if (searchResults && !searchResults['__root__']) return;
+
+                        const group = document.createElement('div');
+                        group.className = `nav-group mb-1 ${level > 0 ? 'ml-2' : ''}`;
+
+                        const btn = document.createElement('button');
+                        const isExpanded = STATE.expandedSections.has(folderPath) || searchResults;
+                        btn.className = `section-header w-full flex items-center justify-between px-2 py-2 text-gray-500 hover:text-hack-heading transition-colors rounded hover:bg-hack-bg focus:outline-none focus:bg-hack-bg ${isExpanded ? 'active' : ''}`;
+                        btn.innerHTML = `
+                            <span class="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest font-mono text-hack-green"><i data-lucide="home" class="w-3 h-3"></i> ${cleanName}</span>
+                            <i data-lucide="chevron-right" class="section-arrow w-3 h-3 transition-transform"></i>
+                        `;
+                        btn.onclick = () => {
+                            if (STATE.expandedSections.has(folderPath)) STATE.expandedSections.delete(folderPath);
+                            else STATE.expandedSections.add(folderPath);
+                            renderSidebar(searchResults);
+                        };
+
+                        const list = document.createElement('div');
+                        list.className = `nav-list ${isExpanded ? 'expanded' : 'collapsed'}`;
+
+                        renderRecursive(value, list, folderPath, level + 1);
+
+                        group.appendChild(btn);
+                        group.appendChild(list);
+                        parentContainer.appendChild(group);
+                        return;
+                    }
 
                     if (isFolder) {
                         const folderPath = currentPath ? `${currentPath}/${key}` : key;
@@ -2434,16 +2667,20 @@
                         hasContent = true;
                         const filename = value;
                         const link = document.createElement('a');
-                        const fullPath = currentPath ? `${currentPath}/${filename}` : filename;
+                        const isRootFile = currentPath === '__root__';
+                        const fullPath = isRootFile
+                            ? (STATE.wikiId ? filename.replace(/\.md$/, `_${STATE.wikiId}.md`) : filename)
+                            : (currentPath ? `${currentPath}/${filename}` : filename);
                         link.href = `?page=${fullPath}`;
 
-                        const isActive = STATE.currentFolder === currentPath && STATE.currentFilename === filename;
+                        const linkFolder = isRootFile ? '' : currentPath;
+                        const isActive = STATE.currentFolder === linkFolder && STATE.currentFilename === filename;
                         link.className = `nav-link group flex items-center gap-3 px-2 py-1.5 rounded-md text-sm font-medium text-gray-400 hover:text-hack-heading hover:bg-hack-bg transition-all outline-none focus:bg-hack-bg ${isActive ? 'active' : ''}`;
 
                         link.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-hack-border group-hover:bg-hack-green flex-shrink-0 transition-colors"></span> ${key}`;
                         link.onclick = (e) => {
                             e.preventDefault();
-                            loadContent(currentPath, key, filename);
+                            loadContent(linkFolder, key, filename, true, isRootFile);
                             document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
                             link.classList.add('active');
                         };
@@ -2543,7 +2780,7 @@
                 <div class="search-result-item p-3 rounded-xl cursor-pointer flex flex-col gap-1" onclick="selectSearchResult(${i})" data-index="${i}">
                     <div class="flex items-center justify-between">
                         <span class="text-hack-heading font-bold text-sm">${res.title}</span>
-                        <span class="text-[10px] text-gray-500 font-mono opacity-50 uppercase">${res.folder.replace(/_/g, ' ')}</span>
+                        <span class="text-[10px] text-gray-500 font-mono opacity-50 uppercase">${(res.folder || (CONFIG.ui.rootReadmeTitle || 'Project Home')).replace(/_/g, ' ')}</span>
                     </div>
                     ${res.snippet ? `<div class="text-xs text-gray-400 line-clamp-2 font-sans leading-relaxed">${res.snippet}</div>` : ''}
                 </div>
@@ -2576,9 +2813,8 @@
                     toggleVersionsPage(null, true);
                 } else {
                     // Comportement normal avec HIGHLIGHT
-                    // On récupère la requête depuis l'input de recherche
                     const query = document.getElementById('modal-search-input').value.trim();
-                    loadContent(res.folder, res.title, res.filename, true, false, query);
+                    loadContent(res.folder, res.title, res.filename, true, res.folder === '', query);
                 }
                 closeSearch();
             }
@@ -2746,14 +2982,19 @@
         const tocSidebar = document.getElementById('mobile-toc-sidebar');
         const overlay = document.getElementById('overlay');
 
+        const kbMobileToggleBtn = document.getElementById('kb-mobile-toggle');
+        const kbMobileTocToggleBtn = document.getElementById('kb-mobile-toc-toggle');
+
         function openMenu() {
             sidebar.classList.remove('-translate-x-full');
             closeTOC(); // Close TOC if open
             overlay.classList.remove('hidden');
             setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+            kbMobileToggleBtn?.classList.add('kb-bottom-bar-btn-hidden');
         }
         function closeMenu() {
             sidebar.classList.add('-translate-x-full');
+            kbMobileToggleBtn?.classList.remove('kb-bottom-bar-btn-hidden');
             checkOverlay();
         }
 
@@ -2766,9 +3007,11 @@
             closeMenu(); // Close Menu if open
             overlay.classList.remove('hidden');
             setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+            kbMobileTocToggleBtn?.classList.add('kb-bottom-bar-btn-hidden');
         }
         function closeTOC() {
             tocSidebar.classList.add('translate-x-full');
+            kbMobileTocToggleBtn?.classList.remove('kb-bottom-bar-btn-hidden');
             checkOverlay();
         }
 
@@ -2783,8 +3026,9 @@
         document.getElementById('menu-btn').onclick = openMenu;
         document.getElementById('close-sidebar-btn').onclick = closeMenu;
         document.getElementById('close-toc-btn').onclick = closeTOC;
-        document.getElementById('toc-btn-mobile').onclick = openTOC;
-        document.getElementById('toc-btn-desktop').onclick = openTOC;
+        document.getElementById('toc-btn-desktop')?.addEventListener('click', openTOC);
+        document.getElementById('kb-mobile-toggle')?.addEventListener('click', openMenu);
+        document.getElementById('kb-mobile-toc-toggle')?.addEventListener('click', openTOC);
 
         // Unified overlay click closes whichever is open
         overlay.onclick = () => {
@@ -2814,32 +3058,27 @@
             const progressBar = document.getElementById('reading-progress-bar');
             const scrollBtn = document.getElementById('scroll-top-btn');
 
-            if (scrollContainer && progressBar) {
+            function updateScrollUI() {
+                if (!scrollContainer) return;
+                const scrollTop = scrollContainer.scrollTop;
+                const scrollHeight = scrollContainer.scrollHeight - scrollContainer.clientHeight;
+                const scrollPercent = (scrollHeight > 0) ? (scrollTop / scrollHeight) * 100 : 0;
+                if (progressBar) progressBar.style.width = scrollPercent + '%';
+                scrollBtn?.classList.toggle('visible', scrollTop > 200);
                 const breadcrumbContainer = document.getElementById('breadcrumb-sticky-container');
-                scrollContainer.addEventListener('scroll', () => {
-                    const scrollTop = scrollContainer.scrollTop;
-                    const scrollHeight = scrollContainer.scrollHeight - scrollContainer.clientHeight;
-                    const scrollPercent = (scrollHeight > 0) ? (scrollTop / scrollHeight) * 100 : 0;
-                    progressBar.style.width = scrollPercent + '%';
-
-                    if (scrollTop > 300) scrollBtn.classList.remove('hidden');
-                    else scrollBtn.classList.add('hidden');
-
-                    if (breadcrumbContainer && CONFIG.features.stickyBreadcrumbs) {
-                        // Use a small threshold and requestAnimationFrame for smoothness
-                        if (scrollTop > 20) {
-                            breadcrumbContainer.classList.add('stuck');
-                        } else {
-                            breadcrumbContainer.classList.remove('stuck');
-                        }
-                    } else if (breadcrumbContainer) {
-                        breadcrumbContainer.classList.remove('stuck');
-                    }
-
-                    updateTOCActiveState();
-                });
+                if (breadcrumbContainer && typeof CONFIG !== 'undefined' && CONFIG.features.stickyBreadcrumbs) {
+                    breadcrumbContainer.classList.toggle('stuck', scrollTop > 20);
+                } else if (breadcrumbContainer) {
+                    breadcrumbContainer.classList.remove('stuck');
+                }
+                if (typeof updateTOCActiveState === 'function') updateTOCActiveState();
             }
-            if (scrollBtn) {
+
+            if (scrollContainer) {
+                scrollContainer.addEventListener('scroll', updateScrollUI);
+                updateScrollUI();
+            }
+            if (scrollBtn && scrollContainer) {
                 scrollBtn.onclick = () => scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
             }
         }
@@ -2945,7 +3184,7 @@
 
             // Mouse tracking for glow effects
             document.addEventListener('mousemove', (e) => {
-                const target = e.target.closest('.nav-link, .section-header, .copy-btn, .search-result-item, #menu-btn, #theme-toggle-desktop, #theme-toggle-mobile, .badge-sm, .pagination-card, #toc-btn-mobile, #toc-btn-desktop, #clear-highlight-btn');
+                const target = e.target.closest('.nav-link, .section-header, .copy-btn, .search-result-item, #menu-btn, #theme-toggle-desktop, #theme-toggle-mobile, .badge-sm, .pagination-card, #toc-btn-desktop, #search-btn-mobile, #clear-highlight-btn, .kb-mobile-toggle, .kb-mobile-toc-toggle, .kb-scroll-top-btn');
                 if (target) {
                     const rect = target.getBoundingClientRect();
                     const x = ((e.clientX - rect.left) / rect.width) * 100;
