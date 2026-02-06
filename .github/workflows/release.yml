@@ -12,40 +12,45 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      # 1️⃣ Checkout
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
+      # 2️⃣ Node
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
           node-version: "18"
 
+      # 3️⃣ Install deps
       - name: Install Dependencies
         run: npm install
 
+      # 4️⃣ Build
       - name: Build Plugin
         run: npm run build
 
-      # ✅ AJOUT : génération des release notes
+      # 5️⃣ Generate release notes (robuste, sans EOF)
       - name: Generate release notes
         run: |
-          LAST_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          LAST_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || true)
+
           if [ -z "$LAST_TAG" ]; then
-            echo "RELEASE_NOTES=🚀 Initial release" >> $GITHUB_ENV
+            echo "## 📝 Changes" > release_notes.txt
+            echo "" >> release_notes.txt
+            echo "- 🚀 Initial release" >> release_notes.txt
           else
-            echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
-            git log $LAST_TAG..HEAD --pretty=format:"- %s" >> $GITHUB_ENV
-            echo "EOF" >> $GITHUB_ENV
+            echo "## 📝 Changes" > release_notes.txt
+            echo "" >> release_notes.txt
+            git log "$LAST_TAG"..HEAD --pretty=format:"- %s" >> release_notes.txt
           fi
 
+      # 6️⃣ Create GitHub Release
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          body: |
-            ## 📝 Changes
-
-            ${{ env.RELEASE_NOTES }}
+          body_path: release_notes.txt
           files: |
             main.js
             manifest.json
