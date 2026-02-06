@@ -1867,7 +1867,7 @@
                 });
 
                 if (found) {
-                    loadContent(found.folder, found.title, found.file, false);
+                    loadContent(found.folder, found.title, found.file, false, found.folder === '');
                     if (found.folder === '') STATE.expandedSections.add('__root__');
                     const parts = found.folder.split('/').filter(Boolean);
                     let current = "";
