@@ -1,4 +1,4 @@
-name: Release
+name: Release Obsidian Plugin
 
 on:
   push:
@@ -9,76 +9,40 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      # 1️⃣ Checkout repository
+      - name: Checkout
+        uses: actions/checkout@v3
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Clean previous build
+      # 2️⃣ Generate release notes
+      - name: Generate release notes
         run: |
-          rm -rf release obsidian-obsidget.zip
-          rm -f main.js
+          echo "Detecting previous tag..."
+          LAST_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
 
-      - name: Build plugin (TypeScript → JavaScript)
-        run: npm run build
-
-      - name: Verify build output
-        run: |
-          if [ ! -f main.js ]; then
-            echo "❌ main.js was not generated"
-            exit 1
-          fi
-          echo "✅ main.js generated"
-          ls -lh main.js
-
-      - name: Verify required files
-        run: |
-          for file in manifest.json styles.css; do
-            if [ ! -f "$file" ]; then
-              echo "❌ Missing $file"
-              exit 1
-            fi
-          done
-          echo "✅ manifest.json and styles.css found"
-
-      - name: Prepare release folder
-        run: |
-          mkdir -p release
-          cp main.js manifest.json styles.css release/
-
-          if [ -d gallery ]; then
-            cp -r gallery release/
-            echo "✅ gallery folder copied"
+          if [ -z "$LAST_TAG" ]; then
+            echo "RELEASE_NOTES=🚀 Initial release" >> $GITHUB_ENV
           else
-            echo "⚠️ gallery folder not found (skipped)"
+            echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
+            git log $LAST_TAG..HEAD --pretty=format:"- %s" >> $GITHUB_ENV
+            echo "EOF" >> $GITHUB_ENV
           fi
 
-      - name: Create release zip
-        run: |
-          cd release
-          zip -r ../obsidian-obsidget.zip .
-          cd ..
-
-      - name: Verify release contents
-        run: |
-          unzip -l obsidian-obsidget.zip
-
+      # 3️⃣ Create GitHub Release
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v1
         with:
+          name: ${{ github.ref_name }}
+          body: |
+            ## 📝 Changes
+
+            ${{ env.RELEASE_NOTES }}
           files: |
             main.js
             manifest.json
             styles.css
-            obsidian-obsidget.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
