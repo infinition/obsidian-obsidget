@@ -15,12 +15,28 @@ jobs:
     steps:
       # 1️⃣ Checkout repository
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      # 2️⃣ Generate release notes
+      # 2️⃣ Setup Node.js
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+
+      # 3️⃣ Install dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # 4️⃣ Build plugin (generates main.js)
+      - name: Build plugin
+        run: npm run build
+
+      # 5️⃣ Generate release notes
       - name: Generate release notes
         run: |
-          echo "Detecting previous tag..."
           LAST_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
 
           if [ -z "$LAST_TAG" ]; then
@@ -31,7 +47,7 @@ jobs:
             echo "EOF" >> $GITHUB_ENV
           fi
 
-      # 3️⃣ Create GitHub Release
+      # 6️⃣ Create GitHub Release
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
