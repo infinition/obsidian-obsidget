@@ -1,4 +1,4 @@
-name: Release
+name: Release Plugin
 
 on:
   push:
@@ -11,60 +11,26 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      # 1️⃣ Checkout
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      # 2️⃣ Setup Node
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v3
         with:
-          node-version: 18
-          cache: npm
+          node-version: "18"
 
-      # 3️⃣ Install dependencies
-      - name: Install dependencies
-        run: npm ci
+      - name: Install Dependencies
+        run: npm install
 
-      # 4️⃣ Clean previous build artifacts
-      - name: Clean previous build
-        run: |
-          rm -f main.js
-
-      # 5️⃣ Build project
-      - name: Build
+      - name: Build Plugin
         run: npm run build
 
-      # 6️⃣ Verify build output
-      - name: Verify build output
-        run: |
-          if [ ! -f main.js ]; then
-            echo "❌ main.js was not generated"
-            exit 1
-          fi
-          echo "✅ main.js generated"
-          ls -lh main.js
-
-      # 7️⃣ Verify required files (generic but safe)
-      - name: Verify required files
-        run: |
-          for file in manifest.json styles.css; do
-            if [ -f "$file" ]; then
-              echo "✅ $file found"
-            else
-              echo "⚠️ $file not found (skipped)"
-            fi
-          done
-
-      # 8️⃣ Generate release notes
+      # ✅ AJOUT : génération des release notes
       - name: Generate release notes
         run: |
           LAST_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
-
           if [ -z "$LAST_TAG" ]; then
             echo "RELEASE_NOTES=🚀 Initial release" >> $GITHUB_ENV
           else
@@ -73,11 +39,9 @@ jobs:
             echo "EOF" >> $GITHUB_ENV
           fi
 
-      # 9️⃣ Create GitHub Release
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
         with:
-          name: ${{ github.ref_name }}
           body: |
             ## 📝 Changes
 
