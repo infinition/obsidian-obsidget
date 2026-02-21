@@ -1,4 +1,4 @@
 Contact: https://github.com/infinition/obsidian-obsidget/issues
-Expires: 2027-02-20T05:16:59.000Z
+Expires: 2027-02-21T05:06:15.000Z
 Preferred-Languages: en, fr
 Policy: https://github.com/infinition/obsidian-obsidget/blob/wiki/SECURITY.md
