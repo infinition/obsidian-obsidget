@@ -51,6 +51,10 @@
         href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+
     <link
         href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap"
         rel="stylesheet">
@@ -412,6 +416,14 @@
 
         .markdown-body img:hover {
             border-color: var(--accent-green);
+        }
+
+        /* --- KATEX STYLES --- */
+        .katex-display {
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 1rem 0;
+            scrollbar-width: thin;
         }
 
         #lightbox {
@@ -977,7 +989,6 @@
     <div id="overlay" class="fixed inset-0 bg-black/80 backdrop-blur-[2px] z-[65] hidden transition-opacity opacity-0">
     </div>
 
-    <!-- Bottom bar: Menu (left) | Scroll to top (center) | TOC (right) -->
     <div id="kb-bottom-bar" class="kb-bottom-bar">
         <div class="kb-bottom-bar-cell kb-bottom-bar-left">
             <button id="kb-mobile-toggle" type="button" class="kb-bottom-bar-btn kb-mobile-toggle" title="Menu" aria-label="Open Menu">
@@ -1228,6 +1239,31 @@
             return wrap(`<table class="w-full text-left text-sm border-collapse"><thead>${h}</thead><tbody>${b}</tbody></table>`);
         };
 
+        // --- EXTENSION POUR PROTÉGER LE LATEX DANS MARKED ---
+        const mathExtension = {
+            name: 'math',
+            level: 'inline',
+            start(src) {
+                const match = src.match(/\$/);
+                return match ? match.index : -1;
+            },
+            tokenizer(src, tokens) {
+                const rule = /^(\$\$[\s\S]+?\$\$|\$[\s\S]+?\$)/;
+                const match = rule.exec(src);
+                if (match) {
+                    return {
+                        type: 'math',
+                        raw: match[0],
+                        text: match[0]
+                    };
+                }
+            },
+            renderer(token) {
+                return token.text; 
+            }
+        };
+
+        marked.use({ extensions: [mathExtension] });
         marked.use({ renderer });
         marked.setOptions({ breaks: false, gfm: true });
 
@@ -1728,8 +1764,6 @@
                         }
 
                         // Build expected URL prefix for files in the current folder
-                        // When scanning wiki/docs/, we expect links like /...path.../wiki/docs/file.md or /...path.../wiki/docs/folder/
-                        // When scanning wiki/docs/01_General/, we expect /...path.../wiki/docs/01_General/file.md
                         const baseDocsPath = '/wiki/docs/';
 
                         // Only process links that contain wiki/docs in their path
@@ -1746,8 +1780,6 @@
                         }
 
                         // Check if this is a direct child of our current folder
-                        // If we're scanning root (path=''), afterDocs should be like 'file.md' or 'folder/'
-                        // If we're scanning '01_General', afterDocs should start with '01_General/' and next segment is the child
                         const expectedPrefix = path ? `${path}/` : '';
                         if (path && !afterDocs.startsWith(expectedPrefix)) {
                             debugLog(`[AcidWiki] ⏭️ Skipped (not in current path "${path}"): afterDocs="${afterDocs}"`);
@@ -1843,8 +1875,7 @@
             }
         }
 
-        /** Convertit une URL virtuelle ?page=README_ik5745.md en nom réel README.md pour la recherche.
-         *  Au rechargement (F5), le suffixe est toujours retiré si le format correspond, pour éviter "Page Not Found". */
+        /** Convertit une URL virtuelle ?page=README_ik5745.md en nom réel README.md pour la recherche. */
         function pageParamToRealForRoot(pageParam) {
             if (!pageParam || !pageParam.endsWith('.md')) return pageParam;
             const m = pageParam.match(/^(.+)_([a-z0-9]+)\.md$/);
@@ -1944,13 +1975,12 @@
                         .then(res => { if (!res.ok) return []; return res.json(); })
                         .then(data => {
                             if (!Array.isArray(data) || data.length === 0) return;
-                            // On concatène toutes les releases pour la recherche
                             const fullLog = data.map(r => `${r.tag_name} ${r.name || ''} ${r.body || ''}`).join(' ');
 
                             STATE.searchIndex.push({
-                                folder: 'SYSTEM', // Petit tag visuel
+                                folder: 'SYSTEM', 
                                 title: CONFIG.ui.changelogTitle,
-                                filename: 'CHANGELOG_SPECIAL_ID', // ID unique pour le clic
+                                filename: 'CHANGELOG_SPECIAL_ID', 
                                 content: fullLog.toLowerCase(),
                                 titleLower: CONFIG.ui.changelogTitle.toLowerCase(),
                                 isVirtual: true
@@ -2188,6 +2218,17 @@
 
                 const cleanHTML = DOMPurify.sanitize(marked.parse(text));
                 viewer.innerHTML = cleanHTML;
+
+                // --- AJOUT : RENDU DES ÉQUATIONS LATEX (KaTeX) ---
+                renderMathInElement(viewer, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false},
+                        {left: '\\(', right: '\\)', display: false},
+                        {left: '\\[', right: '\\]', display: true}
+                    ],
+                    throwOnError: false
+                });
 
                 // Update SEO Tags
                 const fullTitle = `${title} | ${CONFIG.projectName}`;
