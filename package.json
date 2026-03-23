@@ -1,6 +1,6 @@
 {
   "name": "obsidian-obsidget",
-  "version": "1.2.6",
+  "version": "1.2.7",
   "description": "Create, manage, and reuse interactive widgets from .ts/.tsx files in Obsidian.",
   "main": "main.js",
   "scripts": {

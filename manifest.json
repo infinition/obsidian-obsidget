@@ -1,1 +1,10 @@
-{"id":"obsidian-obsidget","name":"ObsidGet","version":"1.2.6","minAppVersion":"0.15.0","description":"Create, manage, and reuse interactive widgets from TypeScript/TSX files in Obsidian.","author":"Fabien Polly (Infinition)","authorUrl":"https://github.com/infinition/obsidian-obsidget","isDesktopOnly":false}
+{
+    "id": "obsidget",
+    "name": "ObsidGet",
+    "version": "1.2.7",
+    "minAppVersion": "0.15.0",
+    "description": "Create, manage, and reuse interactive widgets from TypeScript/TSX files.",
+    "author": "Fabien Polly (Infinition)",
+    "authorUrl": "https://github.com/infinition",
+    "isDesktopOnly": false
+}
