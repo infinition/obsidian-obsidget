@@ -1,6 +1,6 @@
 {
   "name": "obsidian-obsidget",
-  "version": "1.0.0",
+  "version": "1.2.6",
   "description": "Create, manage, and reuse interactive widgets from .ts/.tsx files in Obsidian.",
   "main": "main.js",
   "scripts": {
@@ -8,7 +8,7 @@
     "build": "esbuild main.ts --bundle --external:obsidian --outfile=main.js --format=cjs"
   },
   "keywords": [],
-  "author": "infinition",
+  "author": "Fabien Polly (Infinition)",
   "license": "MIT",
   "devDependencies": {
     "builtin-modules": "^5.0.0",
