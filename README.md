@@ -1,3 +1,6 @@
+<img width="256" height="254" alt="image-removebg-preview" src="https://github.com/user-attachments/assets/d48889f4-9e99-4379-8b1b-82b8dad6cd0e" />
+
+
 # ObsidGet for Obsidian
 
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white) [![Release](https://img.shields.io/github/v/release/infinition/obsidian-obsidget?style=flat)](https://github.com/infinition/obsidian-obsidget/releases) [![Obsidian Plugin](https://img.shields.io/badge/Obsidian-Plugin-7C3AED?style=flat&logo=obsidian&logoColor=white)](https://obsidian.md/plugins?id=obsidget) [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-ffdd00?style=flat&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/infinition)
