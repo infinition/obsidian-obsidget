@@ -1,4 +1,6 @@
-<img width="256" height="254" alt="image-removebg-preview" src="https://github.com/user-attachments/assets/d48889f4-9e99-4379-8b1b-82b8dad6cd0e" />
+<p align="center">
+  <img src=".github/obsidian-obsidget.png" alt="obsidian-obsidget icon" width="256" height="254" />
+</p>
 
 
 # ObsidGet for Obsidian
